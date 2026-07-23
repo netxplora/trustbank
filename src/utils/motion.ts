@@ -22,9 +22,9 @@ export const DURATIONS = {
  */
 export const EASINGS = {
   // Smooth, natural feel (similar to Apple/Material Design standard curves)
-  easeOut: [0.25, 1, 0.5, 1],
-  easeInOut: [0.4, 0, 0.2, 1],
-  easeIn: [0.4, 0, 1, 1],
+  easeOut: [0.25, 1, 0.5, 1] as const,
+  easeInOut: [0.4, 0, 0.2, 1] as const,
+  easeIn: [0.4, 0, 1, 1] as const,
   // Bouncy feel for specific interactions like modals or drawers
   spring: { type: "spring", stiffness: 300, damping: 30 },
 };
