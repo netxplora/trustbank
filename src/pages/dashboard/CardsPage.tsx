@@ -386,8 +386,8 @@ const CardsPage = () => {
     return () => { supabase.removeChannel(channel); };
   }, [user?.id]);
 
-  const virtualCards = cards.filter(c => c.card_type === 'virtual');
-  const physicalCards = cards.filter(c => c.card_type !== 'virtual');
+  const virtualCards = cards.filter(c => !c.is_physical);
+  const physicalCards = cards.filter(c => c.is_physical);
   const displayedCards = cardCategory === "physical" ? physicalCards : virtualCards;
 
   const fetchFee = async () => {
@@ -412,8 +412,8 @@ const CardsPage = () => {
       setCards(prev => {
         // Only auto-switch on initial load if physical is empty
         if (prev.length === 0 && loadedCards.length > 0) {
-          const hasPhysical = loadedCards.some(c => c.card_type !== 'virtual');
-          const hasVirtual = loadedCards.some(c => c.card_type === 'virtual');
+          const hasPhysical = loadedCards.some(c => c.is_physical);
+          const hasVirtual = loadedCards.some(c => !c.is_physical);
           if (!hasPhysical && hasVirtual) {
             setCardCategory("virtual");
           }
