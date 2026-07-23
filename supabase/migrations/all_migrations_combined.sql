@@ -1649,4 +1649,45 @@ USING (
  A N A L Y Z E   p u b l i c . t r a n s a c t i o n s ;  
  A N A L Y Z E   p u b l i c . c a r d s ;  
  A N A L Y Z E   p u b l i c . c m s _ s i t e _ s e t t i n g s ;  
+ - -   = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  
+ - -   P h a s e   1 4 :   F i x   C a r d s   C o n s t r a i n t   a n d   R L S   R e a d   P o l i c i e s  
+ - -   = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  
+  
+ - -   1 .   D r o p   t h e   r e s t r i c t i v e   c o n s t r a i n t   t h a t   w a s   b l o c k i n g   p r e m i u m   &   i n f i n i t e   c a r d   i n s e r t s  
+ A L T E R   T A B L E   p u b l i c . c a r d s   D R O P   C O N S T R A I N T   I F   E X I S T S   c a r d s _ c a r d _ t y p e _ c h e c k ;  
+  
+ - -   2 .   R e - a d d   t h e   c o n s t r a i n t   w i t h   t h e   n e w l y   s u p p o r t e d   t i e r   n a m e s  
+ A L T E R   T A B L E   p u b l i c . c a r d s   A D D   C O N S T R A I N T   c a r d s _ c a r d _ t y p e _ c h e c k    
+ C H E C K   ( c a r d _ t y p e   I N   ( ' v i r t u a l ' ,   ' p h y s i c a l ' ,   ' d e b i t ' ,   ' p r e m i u m ' ,   ' i n f i n i t e ' ,   ' d i g i t a l ' ) ) ;  
+  
+ - -   3 .   A l l o w   u s e r s   t o   v i e w   t h e i r   o w n   c a r d s  
+ D O   $ $  
+ B E G I N  
+         I F   N O T   E X I S T S   (  
+                 S E L E C T   1   F R O M   p g _ p o l i c i e s    
+                 W H E R E   t a b l e n a m e   =   ' c a r d s '   A N D   p o l i c y n a m e   =   ' U s e r s   c a n   v i e w   t h e i r   o w n   c a r d s '  
+         )   T H E N  
+                 C R E A T E   P O L I C Y   " U s e r s   c a n   v i e w   t h e i r   o w n   c a r d s "    
+                 O N   p u b l i c . c a r d s    
+                 F O R   S E L E C T    
+                 T O   a u t h e n t i c a t e d    
+                 U S I N G   ( a u t h . u i d ( )   =   u s e r _ i d ) ;  
+         E N D   I F ;  
+ E N D   $ $ ;  
+  
+ - -   4 .   A l l o w   u s e r s   t o   u p d a t e   t h e i r   o w n   c a r d s   ( e . g .   f r e e z i n g / u n f r e e z i n g )  
+ D O   $ $  
+ B E G I N  
+         I F   N O T   E X I S T S   (  
+                 S E L E C T   1   F R O M   p g _ p o l i c i e s    
+                 W H E R E   t a b l e n a m e   =   ' c a r d s '   A N D   p o l i c y n a m e   =   ' U s e r s   c a n   u p d a t e   t h e i r   o w n   c a r d s '  
+         )   T H E N  
+                 C R E A T E   P O L I C Y   " U s e r s   c a n   u p d a t e   t h e i r   o w n   c a r d s "    
+                 O N   p u b l i c . c a r d s    
+                 F O R   U P D A T E    
+                 T O   a u t h e n t i c a t e d    
+                 U S I N G   ( a u t h . u i d ( )   =   u s e r _ i d )  
+                 W I T H   C H E C K   ( a u t h . u i d ( )   =   u s e r _ i d ) ;  
+         E N D   I F ;  
+ E N D   $ $ ;  
  
