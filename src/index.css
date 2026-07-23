@@ -115,11 +115,11 @@
   
   /* Shared Motion / Animations */
   .hover-lift {
-    @apply transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg;
+    @apply transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-lg will-change-transform;
   }
 
   .card-tilt {
-    @apply transition-all duration-300 ease-out hover:rotate-1 hover:scale-[1.01];
+    @apply transition-all duration-200 ease-out hover:rotate-1 hover:scale-[1.01] will-change-transform;
   }
 
   .marquee-content {

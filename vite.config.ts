@@ -61,10 +61,10 @@ export default defineConfig(({ mode }) => ({
             if (id.includes('@supabase')) return 'vendor-supabase';
             if (id.includes('framer-motion')) return 'vendor-framer';
             if (id.includes('react-router')) return 'vendor-router';
+            if (id.includes('react-dom') || id.includes('react/') || id.includes('react@')) return 'vendor-react';
             
-            const parts = id.split('node_modules/');
-            const name = parts[parts.length - 1].split('/')[0];
-            return `vendor-${name}`;
+            // Group all other node_modules into a generic vendor chunk to avoid hundreds of tiny files
+            return 'vendor';
           }
         }
       }

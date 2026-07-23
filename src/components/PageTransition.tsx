@@ -1,12 +1,13 @@
 import { motion, HTMLMotionProps } from "framer-motion";
+import { slideUp } from "@/utils/motion";
 
 export function PageTransition({ children, className = "", ...props }: HTMLMotionProps<"div">) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -8 }}
-      transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+      variants={slideUp}
+      initial="hidden"
+      animate="visible"
+      exit="exit"
       className={className}
       {...props}
     >

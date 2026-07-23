@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense, lazy } from "react";
 import { 
   Building2, ArrowRightLeft, CreditCard, ShieldCheck, Lock, 
   ArrowUpRight, ArrowDownLeft, Eye, EyeOff, TrendingUp, 
@@ -12,9 +12,11 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import { StaggerContainer, StaggerItem, FadeIn, SlideUp } from "@/components/public/Motion";
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { getUserCryptoWallets, getLiveCryptoRates, UserCryptoWallet, CryptoAsset } from "@/services/digitalCurrencyService";
 import { getGrantPrograms, GrantProgram } from "@/services/grantsService";
+import { OptimizedImage } from "@/components/ui/OptimizedImage";
+
+const BalanceChart = lazy(() => import("@/components/dashboard/BalanceChart"));
 
 interface AccountData {
   id: string;
@@ -82,7 +84,7 @@ export default function CustomerDashboardHome() {
     if (!user?.id) return;
     const { data } = await supabase
       .from('transactions')
-      .select('*')
+      .select('id, type, amount, description, reference, status, created_at')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
       .limit(2);
@@ -99,7 +101,7 @@ export default function CustomerDashboardHome() {
     try {
       const { data } = await supabase
         .from("accounts")
-        .select("*")
+        .select("id, account_number, account_type, balance, ledger_balance, status, currency")
         .eq("user_id", user?.id || "")
         .eq("status", "active");
 
@@ -361,7 +363,7 @@ export default function CustomerDashboardHome() {
                     <div>
                       {program.image_url && (
                         <div className="h-20 sm:h-28 w-full overflow-hidden relative">
-                          <img 
+                          <OptimizedImage 
                             src={program.image_url} 
                             alt={program.title} 
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
@@ -417,23 +419,9 @@ export default function CustomerDashboardHome() {
           </CardHeader>
           <CardContent className="p-4 pt-0">
             <div className="h-48 sm:h-56 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chartData}>
-                  <defs>
-                    <linearGradient id="colorBalance" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <XAxis dataKey="day" stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} />
-                  <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} tickFormatter={(val) => `$${val / 1000}k`} />
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: "hsl(var(--background))", borderColor: "hsl(var(--border))", borderRadius: "8px", fontSize: "12px" }}
-                    formatter={(val: any) => [`$${Number(val).toLocaleString()}`, "Balance"]}
-                  />
-                  <Area type="monotone" dataKey="balance" stroke="hsl(var(--primary))" strokeWidth={2.5} fillOpacity={1} fill="url(#colorBalance)" />
-                </AreaChart>
-              </ResponsiveContainer>
+              <Suspense fallback={<div className="w-full h-full bg-muted/20 animate-pulse rounded-lg" />}>
+                <BalanceChart data={chartData} />
+              </Suspense>
             </div>
           </CardContent>
         </Card>

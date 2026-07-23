@@ -92,8 +92,8 @@ const ServerErrorPage = lazy(() => import("./pages/ServerErrorPage"));
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      // Default to 0 stale time for safety (sensitive financial data)
-      staleTime: 0,
+      // Default to 30 seconds stale time to prevent redundant fetches on rapid navigation
+      staleTime: 1000 * 30,
       // Keep unused data in memory for 5 minutes before garbage collection
       gcTime: 1000 * 60 * 5, 
       refetchOnWindowFocus: true,
