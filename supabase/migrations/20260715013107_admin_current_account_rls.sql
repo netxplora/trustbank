@@ -1,0 +1,2 @@
+CREATE POLICY "Admins can view current account applications" ON public.current_account_applications FOR SELECT USING (public.is_admin(auth.uid()));
+CREATE POLICY "Admins can update current account applications" ON public.current_account_applications FOR UPDATE USING (public.is_admin(auth.uid()));

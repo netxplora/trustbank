@@ -1,0 +1,156 @@
+
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --primary: 217 91% 60%;
+    --secondary: 360 92% 71%;
+    --accent: 158 64% 52%;
+    --success: 158 64% 52%;
+    --warning: 43 96% 56%;
+    --error: 0 84% 60%;
+    --info: 217 91% 60%;
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
+    --card: 210 20% 98%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    --surface: 210 20% 98%;
+    --surface-hover: 210 40% 96%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 217 91% 60%;
+
+    --radius: 1rem;
+
+    --sidebar-background: 222 47% 11%;
+    --sidebar-foreground: 210 20% 98%;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 215 28% 17%;
+    --sidebar-accent-foreground: 210 20% 98%;
+    --sidebar-border: 215 28% 17%;
+    --sidebar-ring: 217 91% 60%;
+
+    --hero-gradient: linear-gradient(135deg, hsl(217, 91%, 60%) 0%, hsl(217, 80%, 40%) 100%);
+    --gold: 40 60% 50%;
+    --gold-light: 40 70% 94%;
+
+    /* New Phase 6 Premium Theme Tokens */
+    --gradient-hero: linear-gradient(135deg, hsl(350, 65%, 38%) 0%, hsl(350, 70%, 20%) 100%);
+    --gradient-card: linear-gradient(135deg, hsl(0, 0%, 100%) 0%, hsl(220, 14%, 97%) 100%);
+    --shadow-elevated: 0 10px 30px -10px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.02);
+    --shadow-card-hover: 0 20px 40px -15px rgba(180, 20, 40, 0.12), 0 1px 5px rgba(180, 20, 40, 0.04);
+  }
+
+  .dark {
+    --primary: 223 100% 50%;
+    --secondary: 219 79% 13%;
+    --accent: 157 80% 43%;
+    --success: 157 80% 43%;
+    --warning: 38 92% 50%;
+    --error: 0 84% 60%;
+    --info: 217 91% 60%;
+    --background: 220 49% 8%;
+    --foreground: 210 40% 98%;
+    --card: 221 39% 11%;
+    --card-foreground: 210 40% 98%;
+    --popover: 221 39% 11%;
+    --popover-foreground: 210 40% 98%;
+    --surface: 221 39% 11%;
+    --surface-hover: 217 33% 17%;
+    --muted: 215 19% 35%;
+    --muted-foreground: 215 20% 65%;
+    --border: 215 25% 27%;
+    --input: 215 25% 27%;
+    --ring: 223 100% 50%;
+
+    --sidebar-background: 221 39% 11%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 223 100% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 217 33% 17%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 215 25% 27%;
+    --sidebar-ring: 223 100% 50%;
+
+    /* Dark Mode Premium Theme Tokens */
+    --gradient-hero: linear-gradient(135deg, hsl(220, 20% ,8%) 0%, hsl(350, 70%, 25%) 100%);
+    --gradient-card: linear-gradient(135deg, hsl(220, 20%, 12%) 0%, hsl(220, 20%, 10%) 100%);
+    --shadow-elevated: 0 10px 30px -10px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-card-hover: 0 20px 40px -15px rgba(0, 0, 0, 0.4), 0 1px 5px rgba(0, 0, 0, 0.2);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  /* Shared Motion / Animations */
+  .hover-lift {
+    @apply transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg;
+  }
+
+  .card-tilt {
+    @apply transition-all duration-300 ease-out hover:rotate-1 hover:scale-[1.01];
+  }
+
+  .marquee-content {
+    @apply flex gap-12 whitespace-nowrap animate-marquee;
+  }
+
+  .counter-fade {
+    @apply transition-all duration-700 ease-out;
+  }
+
+  /* Hide scrollbar but keep scrolling */
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Custom minimal scrollbar */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/20 rounded-full;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/40;
+  }
+}
+
+
+.mirror-horizontal { transform: scaleX(-1); }
+
+.perspective-1000 { perspective: 1000px; }
+.preserve-3d { transform-style: preserve-3d; }
+.backface-hidden { backface-visibility: hidden; }
+.rotate-y-180 { transform: rotateY(180deg); }

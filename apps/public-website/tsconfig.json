@@ -1,0 +1,31 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      "@trustbank/shared-ui/*": [
+        "../../packages/shared-ui/src/*"
+      ],
+      "@trustbank/shared-utils/*": [
+        "../../packages/shared-utils/src/*"
+      ],
+      "@trustbank/shared-hooks/*": [
+        "../../packages/shared-hooks/src/*"
+      ],
+      "@trustbank/shared-types/*": [
+        "../../packages/shared-types/src/*"
+      ]
+    }
+  },
+  "include": [
+    "src"
+  ],
+  "references": [
+    {
+      "path": "./tsconfig.node.json"
+    }
+  ]
+}

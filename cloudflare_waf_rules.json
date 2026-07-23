@@ -1,0 +1,33 @@
+{
+  "description": "TrustBank Initial Production WAF & Rate Limiting Rules",
+  "rules": [
+    {
+      "action": "block",
+      "action_parameters": {
+        "response": {
+          "status_code": 429,
+          "content": "Too many requests. Please try again later.",
+          "content_type": "text/plain"
+        }
+      },
+      "description": "Rate limit authentication endpoints",
+      "expression": "(http.request.uri.path eq \"/login\" or http.request.uri.path eq \"/register\")",
+      "ratelimit": {
+        "characteristics": ["ip.src"],
+        "period": 60,
+        "requests_per_period": 5,
+        "mitigation_timeout": 300
+      }
+    },
+    {
+      "action": "managed_challenge",
+      "description": "Challenge known bots and suspicious IPs",
+      "expression": "(cf.client.bot or cf.threat_score > 15)"
+    },
+    {
+      "action": "block",
+      "description": "Block SQLi and XSS attempts on forms",
+      "expression": "(http.request.method == \"POST\" and (cf.waf.score.sqli < 20 or cf.waf.score.xss < 20))"
+    }
+  ]
+}
