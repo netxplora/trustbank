@@ -386,8 +386,15 @@ const CardsPage = () => {
     return () => { supabase.removeChannel(channel); };
   }, [user?.id]);
 
-  const virtualCards = cards.filter(c => !c.is_physical);
-  const physicalCards = cards.filter(c => c.is_physical);
+  // Robust check for legacy cards where is_physical might be false by default
+  const isCardPhysical = (c: Card) => {
+    if (c.is_physical) return true;
+    // Fallback for legacy DB rows
+    return c.card_type === 'physical' || c.card_type === 'debit' || c.card_type === 'premium' || c.card_type === 'infinite';
+  };
+
+  const virtualCards = cards.filter(c => !isCardPhysical(c));
+  const physicalCards = cards.filter(c => isCardPhysical(c));
   const displayedCards = cardCategory === "physical" ? physicalCards : virtualCards;
 
   const fetchFee = async () => {
@@ -541,8 +548,8 @@ const CardsPage = () => {
     const deliveryAddress = isVirtual ? null : (formEl.elements.namedItem("deliveryAddress") as HTMLInputElement)?.value;
     const holderName = profile?.display_name?.toUpperCase() || "CARD HOLDER";
 
-    const virtualCount = cards.filter(c => !c.is_physical).length;
-    const physicalCount = cards.filter(c => c.is_physical).length;
+    const virtualCount = cards.filter(c => !isCardPhysical(c)).length;
+    const physicalCount = cards.filter(c => isCardPhysical(c)).length;
 
     if (isVirtual && virtualCount >= 1) {
       toast({ title: "Limit Exceeded", description: "You can only have 1 active virtual card.", variant: "destructive" });

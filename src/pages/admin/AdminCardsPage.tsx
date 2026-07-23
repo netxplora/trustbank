@@ -58,7 +58,7 @@ const AdminCardsPage = () => {
       const enriched = cardsData.map(c => ({
         id: c.id,
         customer: c.cardholder_name || profileMap.get(c.user_id) || 'Unknown User',
-        type: c.is_physical ? 'Physical Card' : c.card_type === 'digital' ? 'Digital Card' : 'Virtual Card',
+        type: (c.is_physical === true || (c.card_type !== 'virtual' && c.card_type !== 'digital')) ? 'Physical Card' : c.card_type === 'digital' ? 'Digital Card' : 'Virtual Card',
         account: `****${c.card_number?.slice(-4) || '0000'}`,
         status: c.status === 'active' && c.is_frozen ? 'Frozen' : c.status === 'active' ? 'Active' : (c.request_status === 'pending' || c.status === 'pending') ? 'Pending' : c.request_status === 'rejected' ? 'Rejected' : 'Inactive',
         date: new Date(c.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
