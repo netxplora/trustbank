@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
+import { useBrand } from "@/contexts/BrandContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import { StaggerContainer, StaggerItem, FadeIn, SlideUp } from "@/components/public/Motion";
@@ -50,6 +51,7 @@ const chartData = [
 
 export default function CustomerDashboardHome() {
   const { profile, user } = useAuth();
+  const { design } = useBrand();
   const [showBalances, setShowBalances] = useState(true);
   const [accounts, setAccounts] = useState<AccountData[]>([]);
   const [wallets, setWallets] = useState<UserCryptoWallet[]>([]);
@@ -185,41 +187,26 @@ export default function CustomerDashboardHome() {
     <div className="space-y-4 font-sans max-w-6xl mx-auto px-1 sm:px-4 py-2">
       {/* 1. Redesigned Premier Private Wealth Member Card with Embedded Balances */}
       <SlideUp>
-        <div className="rounded-2xl bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white border border-slate-800 shadow-xl p-4 sm:p-5 relative overflow-hidden space-y-4">
+        <div 
+          className="rounded-2xl shadow-xl p-4 sm:p-5 relative overflow-hidden space-y-4"
+          style={{ backgroundColor: design?.colors?.portfolio_bg || '#1DCF9F' }}
+        >
           <div className="absolute right-0 top-0 w-80 h-80 bg-primary/15 rounded-full blur-3xl pointer-events-none" />
 
-          {/* Member Card Header Row */}
-          <div className="relative z-10 flex flex-wrap items-center justify-between gap-2.5 border-b border-white/10 pb-3">
-            <div className="flex items-center gap-2">
-              <Badge className="bg-amber-400/15 text-amber-300 border-amber-400/30 text-[10px] font-bold tracking-wider uppercase px-2 py-0.5">
-                <Shield className="h-3 w-3 mr-1 text-amber-400" /> {relationshipStatus}
-              </Badge>
-              <Badge className="bg-emerald-500/15 text-emerald-300 border-emerald-500/30 text-[10px] font-bold px-2 py-0.5">
-                <ShieldCheck className="h-3 w-3 mr-1" /> {kycTier}
-              </Badge>
-            </div>
-          </div>
-
-          {/* User Name & Combined Net Worth */}
-          <div className="relative z-10 flex flex-col sm:flex-row sm:items-end justify-between gap-3">
-            <div>
-              <p className="text-secondary-std text-slate-400 font-normal uppercase tracking-wider">Welcome back</p>
-              <h1 className="text-page-title font-bold tracking-tight text-white">
-                {displayName}
-              </h1>
-            </div>
-            <div className="sm:text-right bg-white/5 border border-white/10 rounded-xl p-2.5 sm:px-4 sm:py-2">
+          {/* Combined Net Worth */}
+          <div className="relative z-10 flex justify-end pt-1">
+            <div className="sm:text-right bg-card text-card-foreground shadow-sm rounded-xl p-2.5 sm:px-4 sm:py-2 w-full sm:w-auto">
               <div className="flex items-center justify-between sm:justify-end gap-2">
-                <p className="text-caption-std text-slate-400 font-medium uppercase tracking-wider">Total Combined Portfolio</p>
+                <p className="text-caption-std text-muted-foreground font-medium uppercase tracking-wider">Total Combined Portfolio</p>
                 <button 
                   onClick={() => setShowBalances(!showBalances)} 
-                  className="text-slate-400 hover:text-white transition-colors p-0.5"
+                  className="text-muted-foreground hover:text-foreground transition-colors p-0.5"
                   title={showBalances ? "Hide Balances" : "Show Balances"}
                 >
                   {showBalances ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                 </button>
               </div>
-              <p className="text-balance-lg font-bold text-emerald-400 leading-[46px] mt-0.5">
+              <p className="text-balance-lg font-bold text-primary leading-[46px] mt-0.5">
                 {showBalances ? `$${totalCombinedBalance.toLocaleString(undefined, { minimumFractionDigits: 2 })}` : "••••••••"}
               </p>
             </div>
@@ -228,57 +215,57 @@ export default function CustomerDashboardHome() {
           {/* Embedded Account Balances Grid - Single Row on Mobile View */}
           <div className="relative z-10 grid grid-cols-3 gap-1.5 sm:gap-2.5 pt-1">
             {/* Savings Balance */}
-            <div className="bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl p-2 sm:p-3 transition-colors space-y-1 min-w-0">
-              <div className="flex items-center justify-between text-slate-300">
+            <div className="bg-card text-card-foreground hover:bg-surface shadow-sm rounded-xl p-2 sm:p-3 transition-colors space-y-1 min-w-0">
+              <div className="flex items-center justify-between text-muted-foreground">
                 <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider flex items-center gap-0.5 sm:gap-1 truncate">
-                  <Building2 className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-primary shrink-0" /> <span className="truncate">Savings</span>
+                  <Building2 className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-primary shrink-0" /> <span className="truncate text-foreground">Savings</span>
                 </span>
-                <span className="hidden sm:inline-block text-[10px] font-mono text-slate-400">
+                <span className="hidden sm:inline-block text-[10px] font-mono">
                   {savingsAccount?.account_number || "—"}
                 </span>
               </div>
-              <p className="font-poppins text-xs sm:text-lg font-bold text-white leading-tight truncate">
+              <p className="font-poppins text-xs sm:text-lg font-bold text-foreground leading-tight truncate">
                 {showBalances ? `$${savingsBal.toLocaleString(undefined, { minimumFractionDigits: 0 })}` : "••••"}
               </p>
-              <div className="flex justify-between items-center text-[8px] sm:text-[10px] text-slate-400 pt-1 border-t border-white/10">
+              <div className="flex justify-between items-center text-[8px] sm:text-[10px] text-muted-foreground pt-1 border-t border-border/50">
                 <span className="truncate">Ledger: {showBalances ? `$${(savingsAccount?.ledger_balance || savingsBal).toLocaleString(undefined, { minimumFractionDigits: 0 })}` : "••"}</span>
                 <Link to="/dashboard/deposit" className="text-primary hover:underline font-bold shrink-0 ml-1">Top Up</Link>
               </div>
             </div>
 
             {/* Current Balance */}
-            <div className="bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl p-2 sm:p-3 transition-colors space-y-1 min-w-0">
-              <div className="flex items-center justify-between text-slate-300">
+            <div className="bg-card text-card-foreground hover:bg-surface shadow-sm rounded-xl p-2 sm:p-3 transition-colors space-y-1 min-w-0">
+              <div className="flex items-center justify-between text-muted-foreground">
                 <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider flex items-center gap-0.5 sm:gap-1 truncate">
-                  <CreditCard className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-emerald-400 shrink-0" /> <span className="truncate">Current</span>
+                  <CreditCard className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-secondary shrink-0" /> <span className="truncate text-foreground">Current</span>
                 </span>
-                <span className="hidden sm:inline-block text-[10px] font-mono text-slate-400">
+                <span className="hidden sm:inline-block text-[10px] font-mono">
                   {currentAccount?.account_number || "—"}
                 </span>
               </div>
-              <p className="font-poppins text-xs sm:text-lg font-bold text-white leading-tight truncate">
+              <p className="font-poppins text-xs sm:text-lg font-bold text-foreground leading-tight truncate">
                 {showBalances ? `$${currentBal.toLocaleString(undefined, { minimumFractionDigits: 0 })}` : "••••"}
               </p>
-              <div className="flex justify-between items-center text-[8px] sm:text-[10px] text-slate-400 pt-1 border-t border-white/10">
+              <div className="flex justify-between items-center text-[8px] sm:text-[10px] text-muted-foreground pt-1 border-t border-border/50">
                 <span className="truncate">Ledger: {showBalances ? `$${(currentAccount?.ledger_balance || currentBal).toLocaleString(undefined, { minimumFractionDigits: 0 })}` : "••"}</span>
-                <Link to="/dashboard/transfers" className="text-emerald-400 hover:underline font-bold shrink-0 ml-1">Pay</Link>
+                <Link to="/dashboard/transfers" className="text-secondary hover:underline font-bold shrink-0 ml-1">Pay</Link>
               </div>
             </div>
 
             {/* Digital Currency Balance */}
-            <div className="bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl p-2 sm:p-3 transition-colors space-y-1 min-w-0">
-              <div className="flex items-center justify-between text-slate-300">
+            <div className="bg-card text-card-foreground hover:bg-surface shadow-sm rounded-xl p-2 sm:p-3 transition-colors space-y-1 min-w-0">
+              <div className="flex items-center justify-between text-muted-foreground">
                 <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider flex items-center gap-0.5 sm:gap-1 truncate">
-                  <Bitcoin className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-amber-400 shrink-0" /> <span className="truncate">Crypto</span>
+                  <Bitcoin className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-accent shrink-0" /> <span className="truncate text-foreground">Crypto</span>
                 </span>
-                <span className="hidden sm:inline-block text-[10px] font-mono text-slate-400">Multi</span>
+                <span className="hidden sm:inline-block text-[10px] font-mono">Multi</span>
               </div>
-              <p className="font-poppins text-xs sm:text-lg font-bold text-white leading-tight truncate">
+              <p className="font-poppins text-xs sm:text-lg font-bold text-foreground leading-tight truncate">
                 {showBalances ? `$${totalCryptoValue.toLocaleString(undefined, { minimumFractionDigits: 0 })}` : "••••"}
               </p>
-              <div className="flex justify-between items-center text-[8px] sm:text-[10px] text-slate-400 pt-1 border-t border-white/10">
+              <div className="flex justify-between items-center text-[8px] sm:text-[10px] text-muted-foreground pt-1 border-t border-border/50">
                 <span className="truncate">{walletSummary}</span>
-                <Link to="/dashboard/digital-currency" className="text-amber-400 hover:underline font-bold shrink-0 ml-1">Trade</Link>
+                <Link to="/dashboard/digital-currency" className="text-accent hover:underline font-bold shrink-0 ml-1">Trade</Link>
               </div>
             </div>
           </div>
@@ -287,45 +274,45 @@ export default function CustomerDashboardHome() {
 
       {/* RECENT TRANSACTIONS (Beneath card) */}
       <SlideUp delay={0.05}>
-        <div className="px-2 space-y-3">
+        <div className="px-2 space-y-2">
           <div className="flex items-center justify-between">
-            <h2 className="text-section-title font-semibold tracking-tight text-foreground flex items-center gap-2">
-              <ArrowRightLeft className="h-5 w-5 text-primary" /> Recent Transactions
+            <h2 className="font-poppins text-sm font-bold tracking-tight text-foreground flex items-center gap-1.5">
+              <ArrowRightLeft className="h-4 w-4 text-primary" /> Recent Transactions
             </h2>
-            <Link to="/dashboard/transactions" className="text-secondary-std font-semibold text-primary hover:underline flex items-center">
-              View All <ChevronRight className="h-4 w-4 ml-0.5" />
+            <Link to="/dashboard/transactions" className="text-xs font-bold text-primary hover:underline flex items-center gap-0.5">
+              View All <ChevronRight className="h-3 w-3" />
             </Link>
           </div>
           {recentTransactions.length > 0 ? (
-            <div className="space-y-3">
+            <div className="space-y-2">
               {recentTransactions.map((tx) => (
-                <div key={tx.id} className="flex items-center justify-between group py-1 border-b border-border/40 last:border-0">
-                  <div className="flex items-center gap-3">
-                    <div className={`h-10 w-10 rounded-full flex items-center justify-center shrink-0 ${
+                <div key={tx.id} className="flex items-center justify-between group py-1.5 border-b border-border/40 last:border-0">
+                  <div className="flex items-center gap-2.5">
+                    <div className={`h-8 w-8 rounded-full flex items-center justify-center shrink-0 ${
                       tx.type === 'credit' || tx.type === 'deposit' 
                         ? 'bg-emerald-500/10 text-emerald-500' 
                         : 'bg-rose-500/10 text-rose-500'
                     }`}>
-                      {tx.type === 'credit' || tx.type === 'deposit' ? <ArrowDownLeft className="h-5 w-5" /> : <ArrowUpRight className="h-5 w-5" />}
+                      {tx.type === 'credit' || tx.type === 'deposit' ? <ArrowDownLeft className="h-3.5 w-3.5" /> : <ArrowUpRight className="h-3.5 w-3.5" />}
                     </div>
                     <div>
-                      <p className="text-body-std font-medium text-foreground group-hover:text-primary transition-colors">{tx.description || tx.type}</p>
-                      <p className="text-secondary-std text-muted-foreground mt-0.5">{new Date(tx.created_at).toLocaleDateString()} • Ref: {tx.reference}</p>
+                      <p className="text-xs font-bold text-foreground group-hover:text-primary transition-colors">{tx.description || tx.type}</p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5 leading-tight">{new Date(tx.created_at).toLocaleDateString()} • Ref: {tx.reference}</p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className={`text-tx-amount font-semibold ${
+                    <p className={`text-xs font-bold font-mono ${
                       tx.type === 'credit' || tx.type === 'deposit' ? 'text-emerald-500' : 'text-foreground'
                     }`}>
                       {tx.type === 'credit' || tx.type === 'deposit' ? '+' : '-'}${Math.abs(tx.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                     </p>
-                    <Badge variant="outline" className="text-badge-std font-medium uppercase mt-0.5">{tx.status}</Badge>
+                    <Badge variant="outline" className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0 mt-0.5 h-4">{tx.status}</Badge>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-secondary-std text-muted-foreground">No recent transactions found.</p>
+            <p className="text-[11px] text-muted-foreground">No recent transactions found.</p>
           )}
         </div>
       </SlideUp>

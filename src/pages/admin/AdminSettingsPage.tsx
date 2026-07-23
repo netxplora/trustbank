@@ -248,6 +248,7 @@ const AdminSettingsPage = () => {
                     { key: "surface", label: "Surface/Modal" },
                     { key: "border", label: "Borders" },
                     { key: "muted", label: "Muted Background" },
+                    { key: "portfolio_bg", label: "Portfolio Background" },
                   ].map((color) => (
                     <div key={`light-${color.key}`} className="flex flex-col gap-1.5">
                       <label className="text-[10px] font-bold uppercase text-muted-foreground">{color.label}</label>
@@ -287,6 +288,7 @@ const AdminSettingsPage = () => {
                     { key: "surface", label: "Surface/Modal" },
                     { key: "border", label: "Borders" },
                     { key: "muted", label: "Muted Background" },
+                    { key: "portfolio_bg", label: "Portfolio Background" },
                   ].map((color) => (
                     <div key={`dark-${color.key}`} className="flex flex-col gap-1.5">
                       <label className="text-[10px] font-bold uppercase text-slate-400">{color.label}</label>

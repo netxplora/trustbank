@@ -31,6 +31,7 @@ interface DesignSystem {
     muted_foreground: string;
     border: string;
     input: string;
+    portfolio_bg?: string;
   };
   dark_mode_colors?: {
     primary: string;
@@ -52,6 +53,7 @@ interface DesignSystem {
     muted_foreground: string;
     border: string;
     input: string;
+    portfolio_bg?: string;
   };
   typography: {
     heading_font: string;
@@ -117,7 +119,8 @@ const defaultDesign: DesignSystem = {
     muted: "#F3F4F6",
     muted_foreground: "#6B7280",
     border: "#E5E7EB",
-    input: "#E5E7EB"
+    input: "#E5E7EB",
+    portfolio_bg: "#1DCF9F"
   },
   dark_mode_colors: {
     primary: "#3B82F6",
@@ -138,7 +141,8 @@ const defaultDesign: DesignSystem = {
     muted: "#475569",
     muted_foreground: "#94A3B8",
     border: "#334155",
-    input: "#334155"
+    input: "#334155",
+    portfolio_bg: "#1DCF9F"
   },
   typography: {
     heading_font: "Figtree",

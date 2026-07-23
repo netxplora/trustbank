@@ -410,13 +410,20 @@ const CardsPage = () => {
 
   const fetchCards = async () => {
     if (!user) {
+      console.warn("[Cards] No user session, skipping fetch");
       setLoading(false);
       return;
     }
     try {
-      const { data, error } = await supabase.from("cards").select("*").eq("user_id", user.id);
-      if (error) console.error("Error fetching cards:", error.message);
+      console.log("[Cards] Fetching cards for user:", user.id);
+      const { data, error, status, statusText } = await supabase.from("cards").select("*").eq("user_id", user.id);
+      
+      if (error) {
+        console.error("[Cards] Supabase error:", error.message, "| Code:", error.code, "| Status:", status, statusText);
+      }
+      
       const loadedCards = (data as Card[]) || [];
+      console.log("[Cards] Loaded", loadedCards.length, "cards:", loadedCards.map(c => ({ id: c.id, type: c.card_type, is_physical: c.is_physical, status: c.status })));
 
       setCards(prev => {
         // Only auto-switch on initial load if physical is empty
@@ -430,7 +437,7 @@ const CardsPage = () => {
         return loadedCards;
       });
     } catch (err) {
-      console.error("Cards fetch exception:", err);
+      console.error("[Cards] Fetch exception:", err);
     } finally {
       setLoading(false);
     }
@@ -662,10 +669,10 @@ const CardsPage = () => {
   const kycTier = profile?.kyc_tier || 0;
   if (kycTier < 2) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 max-w-6xl mx-auto px-1 sm:px-4 py-2 font-sans">
         <div>
-          <h1 className="text-2xl font-bold font-poppins text-foreground mb-1">Card Management</h1>
-          <p className="text-sm text-muted-foreground">Provision and secure your debit and virtual cards</p>
+          <h1 className="text-xl sm:text-2xl font-bold font-poppins text-foreground tracking-tight">Card Management</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1">Provision and secure your debit and virtual cards</p>
         </div>
         <div className="bg-card rounded-xl border p-8 text-center shadow-sm font-sans max-w-2xl mx-auto mt-10">
           <Lock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -678,14 +685,14 @@ const CardsPage = () => {
   }
 
   return (
-    <div className="space-y-4 max-w-6xl mx-auto px-1 sm:px-4 py-2 font-sans">
+    <div className="space-y-6 max-w-6xl mx-auto px-1 sm:px-4 py-2 font-sans">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-lg sm:text-xl font-bold font-poppins text-foreground mb-0.5">Card Management</h1>
-          <p className="text-xs text-muted-foreground">Provision and secure your debit and virtual cards</p>
+          <h1 className="text-xl sm:text-2xl font-bold font-poppins text-foreground tracking-tight">Card Management</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1">Provision and secure your debit and virtual cards</p>
         </div>
-        <Button size="sm" onClick={() => setShowRequest(!showRequest)} className="font-bold text-xs h-8 rounded-lg">
-          <Plus className="h-3.5 w-3.5 mr-1" /> Provision Card
+        <Button size="sm" onClick={() => setShowRequest(!showRequest)} className="font-bold text-xs h-9 rounded-lg px-4">
+          <Plus className="h-4 w-4 mr-1.5" /> Provision Card
         </Button>
       </div>
 
@@ -770,7 +777,7 @@ const CardsPage = () => {
         </FadeIn>
       )}
 
-      {cards.some(c => c.is_physical && c.request_status === 'pending') && (
+      {cards.some(c => isCardPhysical(c) && c.request_status === 'pending') && (
         <FadeIn>
           <div className="bg-slate-900 border border-slate-800 p-3 rounded-xl flex items-center justify-between shadow-sm">
             <div className="flex items-center gap-3">
@@ -790,10 +797,10 @@ const CardsPage = () => {
       )}
 
       {displayedCards.length === 0 ? (
-        <div className="bg-card rounded-xl border border-border/60 p-8 text-center shadow-sm max-w-lg mx-auto my-4">
-          <CreditCard className="h-8 w-8 text-muted-foreground/60 mx-auto mb-2" />
-          <p className="text-xs font-bold text-foreground">No {cardCategory} cards found</p>
-          <p className="text-[11px] text-muted-foreground mt-1 mb-4 leading-normal">
+        <div className="bg-slate-900 rounded-xl border border-slate-700 p-8 text-center shadow-lg max-w-lg mx-auto my-4">
+          <CreditCard className="h-8 w-8 text-slate-400 mx-auto mb-2" />
+          <p className="text-xs font-bold text-white">No {cardCategory} cards found</p>
+          <p className="text-[11px] text-slate-400 mt-1 mb-4 leading-normal">
             {cardCategory === "physical"
               ? "Provision a premium physical card or Infinite Metal card to be delivered directly to your address."
               : "Provision an instant virtual debit card for zero fees and immediate digital purchasing."}

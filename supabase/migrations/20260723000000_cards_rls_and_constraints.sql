@@ -10,32 +10,18 @@ ALTER TABLE public.cards ADD CONSTRAINT cards_card_type_check
 CHECK (card_type IN ('virtual', 'physical', 'debit', 'premium', 'infinite', 'digital'));
 
 -- 3. Allow users to view their own cards
-DO $$
-BEGIN
-    IF NOT EXISTS (
-        SELECT 1 FROM pg_policies 
-        WHERE tablename = 'cards' AND policyname = 'Users can view their own cards'
-    ) THEN
-        CREATE POLICY "Users can view their own cards" 
-        ON public.cards 
-        FOR SELECT 
-        TO authenticated 
-        USING (auth.uid() = user_id);
-    END IF;
-END $$;
+DROP POLICY IF EXISTS "Users can view their own cards" ON public.cards;
+CREATE POLICY "Users can view their own cards" 
+ON public.cards 
+FOR SELECT 
+TO authenticated 
+USING (auth.uid() = user_id);
 
 -- 4. Allow users to update their own cards (e.g. freezing/unfreezing)
-DO $$
-BEGIN
-    IF NOT EXISTS (
-        SELECT 1 FROM pg_policies 
-        WHERE tablename = 'cards' AND policyname = 'Users can update their own cards'
-    ) THEN
-        CREATE POLICY "Users can update their own cards" 
-        ON public.cards 
-        FOR UPDATE 
-        TO authenticated 
-        USING (auth.uid() = user_id)
-        WITH CHECK (auth.uid() = user_id);
-    END IF;
-END $$;
+DROP POLICY IF EXISTS "Users can update their own cards" ON public.cards;
+CREATE POLICY "Users can update their own cards" 
+ON public.cards 
+FOR UPDATE 
+TO authenticated 
+USING (auth.uid() = user_id)
+WITH CHECK (auth.uid() = user_id);
