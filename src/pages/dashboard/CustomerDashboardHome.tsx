@@ -65,12 +65,33 @@ export default function CustomerDashboardHome() {
     if (user?.id) fetchRecentTransactions();
 
     const channel = supabase
-      .channel("dashboard-home-grants-sync")
+      .channel("dashboard-home-sync")
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "grant_programs" },
         () => {
           fetchGrantPrograms();
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "accounts", filter: `user_id=eq.${user?.id}` },
+        () => {
+          fetchUserAccounts();
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "crypto_wallets", filter: `user_id=eq.${user?.id}` },
+        () => {
+          fetchCryptoData();
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "transactions", filter: `user_id=eq.${user?.id}` },
+        () => {
+          fetchRecentTransactions();
         }
       )
       .subscribe();
