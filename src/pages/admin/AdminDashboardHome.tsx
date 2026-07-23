@@ -99,7 +99,7 @@ const AdminDashboardHome = () => {
       setLoanDistribution([]);
     }
 
-    const { data: recentTx } = await supabase.from("transactions").select("id, type, amount, description, reference, created_at").order("created_at", { ascending: false }).limit(5);
+    const { data: recentTx } = await supabase.from("transactions").select("*").order("created_at", { ascending: false }).limit(5);
     setRecentActivity(recentTx || []);
 
     const { data: monthlyTx } = await supabase.from("transactions").select("amount, created_at, type").gte("created_at", thirtyDaysAgo.toISOString());
