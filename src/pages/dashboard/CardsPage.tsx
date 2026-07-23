@@ -203,7 +203,7 @@ const InfiniteMetalCard = ({ card, onViewDetails, showNumber, setShowNumber, isF
 const ATMCard = ({ card, onViewDetails }: { card: Card; onViewDetails: () => void }) => {
   const [showNumber, setShowNumber] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
-  const { identity } = useAuth();
+  const { identity } = useBrand();
   
   const last4 = card.card_number ? card.card_number.slice(-4) : '••••';
   const isVisa = card.card_brand?.toLowerCase() === 'visa';
