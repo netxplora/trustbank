@@ -615,21 +615,33 @@ const CardsPage = () => {
       request_status: isVirtual ? null : "pending"
     }).select().single();
 
-    if (error) { toast({ title: "Database Error", description: error.message, variant: "destructive" }); return; }
+    if (error) {
+      console.error("[Card Provisioning] Database Insert Error:", error);
+      toast({ title: "Database Error", description: error.message || "Failed to save card to database.", variant: "destructive" });
+      return;
+    }
 
     // Optimistic UI update for immediate sync
     if (newCard) {
-      setCards(prev => [...prev, newCard as Card]);
+      setCards(prev => {
+        // Prevent duplicates just in case
+        if (prev.some(c => c.id === newCard.id)) return prev;
+        return [...prev, newCard as Card];
+      });
       setCardCategory(isVirtual ? "virtual" : "physical");
     }
 
     // Log audit trail for new card
-    await supabase.from("audit_logs").insert({
+    const { error: auditError } = await supabase.from("audit_logs").insert({
       user_id: user.id,
       action: "card_provisioned",
       entity_type: "cards",
       details: { provider_ref: provisionResult.providerCardId, type: isVirtual ? "virtual" : "debit", is_physical: !isVirtual }
     });
+    
+    if (auditError) {
+      console.warn("[Card Provisioning] Audit log failed to write:", auditError);
+    }
 
     toast({ title: isVirtual ? "Provisioning Complete" : "Card Requested", description: isVirtual ? provisionResult.message : "Your physical card request has been submitted and is pending approval." });
     setShowRequest(false);

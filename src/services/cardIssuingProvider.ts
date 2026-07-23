@@ -19,19 +19,20 @@ export interface CardProvisionResult {
  * Simulates a request to a Card Issuing provider (e.g., Stripe Issuing, Marqeta)
  */
 export async function provisionCard(request: CardProvisionRequest): Promise<CardProvisionResult> {
-  // Simulate network latency for API call (2.0 seconds for card generation)
-  await new Promise(resolve => setTimeout(resolve, 2000));
+  // Validate network connectivity before attempting to provision
+  if (typeof window !== "undefined" && !window.navigator.onLine) {
+    return {
+      success: false,
+      message: "Network connection lost. Please check your internet connection and try again."
+    };
+  }
+
+  // Simulate network latency for API call (1.5 seconds for card generation)
+  await new Promise(resolve => setTimeout(resolve, 1500));
 
   try {
-    // In a real implementation, you would use fetch() to call the provider's API.
-    // Example:
-    // const response = await fetch("https://api.stripe.com/v1/issuing/cards", { ... });
-    // const stripeCard = await response.json();
-    
     // Generate mock PCI-compliant data for the frontend display
     // Note: In production, real PANs should not be fully stored/displayed directly
-    // unless you are using a provider's secure iFrame/Elements. 
-    // This mock returns data to simulate the provider's successful response.
     const num = Array.from({ length: 4 }, () => String(Math.floor(1000 + Math.random() * 9000))).join("");
     const cvv = String(Math.floor(100 + Math.random() * 900));
     
@@ -53,9 +54,10 @@ export async function provisionCard(request: CardProvisionRequest): Promise<Card
       message: "Card successfully provisioned by issuing partner."
     };
   } catch (error: any) {
+    console.error("[Card Issuing Provider] Error:", error);
     return {
       success: false,
-      message: error.message || "Failed to provision card with issuing provider."
+      message: error.message || "Failed to provision card with issuing provider due to an internal error."
     };
   }
 }
