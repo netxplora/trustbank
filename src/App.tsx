@@ -44,7 +44,9 @@ const ProfilePage = lazy(() => import("./pages/dashboard/ProfilePage"));
 const SecurityPage = lazy(() => import("./pages/dashboard/SecurityPage"));
 const DigitalCurrencyPage = lazy(() => import("./pages/dashboard/DigitalCurrencyPage"));
 const TaxRefundPage = lazy(() => import("./pages/dashboard/TaxRefundPage"));
+const TaxRefundWizard = lazy(() => import("./pages/dashboard/TaxRefundWizard"));
 const GrantsPage = lazy(() => import("./pages/dashboard/GrantsPage"));
+const GrantApplicationWizard = lazy(() => import("./pages/dashboard/GrantApplicationWizard"));
 const TransactionsPage = lazy(() => import("./pages/dashboard/TransactionsPage"));
 
 const AdminDigitalCurrencyPage = lazy(() => import("./pages/admin/AdminDigitalCurrencyPage"));
@@ -153,7 +155,9 @@ const App = () => (
                     <Route path="payments" element={<PaymentsPage />} />
                     <Route path="loans" element={<CustomerLoansPage />} />
                     <Route path="tax-refund" element={<TaxRefundPage />} />
+                    <Route path="tax-refund/apply" element={<TaxRefundWizard />} />
                     <Route path="grants" element={<GrantsPage />} />
+                    <Route path="grants/apply" element={<GrantApplicationWizard />} />
                     <Route path="cards" element={<CardsPage />} />
                     <Route path="beneficiaries" element={<BeneficiariesPage />} />
                     <Route path="kyc" element={<KYCPage />} />

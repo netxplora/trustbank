@@ -21,13 +21,17 @@ export interface GrantApplication {
   project_title: string;
   requested_amount: number;
   proposal_summary: string;
-  status: 'submitted' | 'under_review' | 'approved' | 'rejected' | 'awarded';
+  business_name?: string;
+  business_type?: string;
+  industry?: string;
+  year_started?: number;
+  status: 'draft' | 'submitted' | 'under_review' | 'info_required' | 'approved' | 'rejected' | 'processed' | 'closed';
   documents: { name: string; url: string; uploaded_at: string }[];
   admin_feedback?: string;
   created_at?: string;
   updated_at?: string;
   grant_program?: GrantProgram;
-  profiles?: { display_name?: string; email?: string };
+  profiles?: { display_name?: string; email?: string; first_name?: string; last_name?: string };
 }
 
 export const DEFAULT_GRANT_PROGRAM_IMAGES: Record<string, string> = {
@@ -189,6 +193,10 @@ export async function getUserGrantApplications(userId: string): Promise<GrantApp
       project_title: item.project_title,
       requested_amount: parseFloat(item.requested_amount),
       proposal_summary: item.proposal_summary,
+      business_name: item.business_name,
+      business_type: item.business_type,
+      industry: item.industry,
+      year_started: item.year_started,
       status: item.status,
       documents: item.documents || [],
       admin_feedback: item.admin_feedback,
@@ -240,6 +248,10 @@ export async function getAllGrantApplications(): Promise<GrantApplication[]> {
       project_title: item.project_title,
       requested_amount: parseFloat(item.requested_amount),
       proposal_summary: item.proposal_summary,
+      business_name: item.business_name,
+      business_type: item.business_type,
+      industry: item.industry,
+      year_started: item.year_started,
       status: item.status,
       documents: item.documents || [],
       admin_feedback: item.admin_feedback,
@@ -255,7 +267,7 @@ export async function getAllGrantApplications(): Promise<GrantApplication[]> {
 }
 
 export async function submitGrantApplication(
-  app: Omit<GrantApplication, "id" | "application_number" | "status" | "created_at">
+  app: Omit<GrantApplication, "id" | "application_number" | "created_at">
 ): Promise<boolean> {
   try {
     // Ensure grant program exists in DB before inserting application (prevents FK error)
@@ -293,8 +305,12 @@ export async function submitGrantApplication(
       project_title: app.project_title,
       requested_amount: app.requested_amount,
       proposal_summary: app.proposal_summary,
+      business_name: app.business_name,
+      business_type: app.business_type,
+      industry: app.industry,
+      year_started: app.year_started,
       documents: app.documents,
-      status: "submitted",
+      status: app.status || "submitted",
     });
 
     if (error) throw error;
@@ -324,8 +340,9 @@ export async function updateGrantApplicationStatus(
     }
 
     const previousStatus = existingApp.status;
-    const isNowAwardedOrApproved = newStatus === "approved" || newStatus === "awarded";
-    const wasAlreadyAwardedOrApproved = previousStatus === "approved" || previousStatus === "awarded";
+    // Processed means the funds are going to be transferred
+    const isNowProcessed = newStatus === "processed";
+    const wasAlreadyProcessed = previousStatus === "processed" || previousStatus === "awarded";
 
     // 2. Perform database update for application status & feedback
     const updatePayload: Record<string, unknown> = {
@@ -343,8 +360,8 @@ export async function updateGrantApplicationStatus(
 
     if (updateErr) throw updateErr;
 
-    // 3. If transitioning to approved/awarded for the first time, credit user's savings account & notify
-    if (isNowAwardedOrApproved && !wasAlreadyAwardedOrApproved && existingApp.user_id) {
+    // 3. If transitioning to processed for the first time, credit user's savings account & notify
+    if (isNowProcessed && !wasAlreadyProcessed && existingApp.user_id) {
       const grantAmount = parseFloat(existingApp.requested_amount);
 
       // Find user's savings account

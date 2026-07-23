@@ -136,10 +136,7 @@ export default function CustomerDashboardLayout() {
               <Menu className="h-5 w-5" />
             </button>
             <div className="flex items-center gap-2">
-              <div className="h-6 w-6 rounded-md bg-primary/10 flex items-center justify-center border border-primary/20">
-                <img src={logo} alt="TrustBank" className="h-3.5 w-3.5" />
-              </div>
-              <span className="font-poppins font-bold text-xs sm:text-sm text-foreground">TrustBank</span>
+              <span className="font-poppins font-bold text-sm sm:text-base text-foreground">Hi, {displayName}</span>
             </div>
           </div>
           <div className="hidden lg:flex items-center gap-3">

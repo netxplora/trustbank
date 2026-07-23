@@ -17,7 +17,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 
 const STATUS_OPTIONS: TaxRefundApplication["status"][] = [
-  "submitted", "under_review", "action_required", "approved", "disbursed", "rejected"
+  "draft", "submitted", "under_review", "info_required", "approved", "rejected", "processing", "completed", "closed", "action_required", "disbursed"
 ];
 
 const statusColor = (status: string) => {
@@ -121,8 +121,8 @@ export default function AdminTaxRefundsPage() {
   // Stats
   const totalApps = applications.length;
   const pendingApps = applications.filter(a => a.status === "submitted" || a.status === "under_review").length;
-  const approvedApps = applications.filter(a => a.status === "approved" || a.status === "disbursed").length;
-  const totalRefundValue = applications.reduce((sum, a) => sum + a.estimated_refund_amount, 0);
+  const approvedApps = applications.filter(a => a.status === "approved" || a.status === "disbursed" || a.status === "completed").length;
+  const totalRefundValue = applications.reduce((sum, a) => sum + (a.requested_amount || a.estimated_refund_amount || 0), 0);
 
   return (
     <div className="space-y-4 max-w-6xl mx-auto px-1 sm:px-4 py-2 font-sans">
@@ -227,7 +227,7 @@ export default function AdminTaxRefundsPage() {
                     </div>
                     <div className="text-right shrink-0">
                       <p className="font-poppins font-bold text-lg text-primary">
-                        ${app.estimated_refund_amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                        ${(app.requested_amount || app.estimated_refund_amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                       </p>
                       <p className="text-[10px] text-muted-foreground">
                         {app.created_at ? new Date(app.created_at).toLocaleDateString() : ""}
@@ -284,12 +284,24 @@ export default function AdminTaxRefundsPage() {
                   <p className="font-semibold text-foreground">{selectedApp.profiles?.email || "—"}</p>
                 </div>
                 <div>
+                  <p className="text-xs text-muted-foreground font-medium">Program</p>
+                  <p className="font-semibold text-foreground">{selectedApp.tax_refund_program || "Standard"}</p>
+                </div>
+                <div>
                   <p className="text-xs text-muted-foreground font-medium">Filing Status</p>
                   <p className="font-semibold text-foreground">{selectedApp.filing_status}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground font-medium">Estimated Refund</p>
-                  <p className="font-bold text-primary">${selectedApp.estimated_refund_amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                  <p className="text-xs text-muted-foreground font-medium">Requested Amount</p>
+                  <p className="font-bold text-primary">${(selectedApp.requested_amount || selectedApp.estimated_refund_amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground font-medium">Reason</p>
+                  <p className="font-semibold text-foreground">{selectedApp.refund_reason || "—"}</p>
+                </div>
+                <div className="col-span-2">
+                  <p className="text-xs text-muted-foreground font-medium">Claim Description</p>
+                  <p className="text-foreground text-xs">{selectedApp.claim_description || "—"}</p>
                 </div>
               </div>
 

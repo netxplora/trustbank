@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Award, Plus, CheckCircle2, Calendar, DollarSign, FileText, ArrowUpRight, Activity, Zap, FileSpreadsheet, Search, Filter, HelpCircle, ShieldCheck, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,14 +35,7 @@ export default function GrantsPage() {
   const [applications, setApplications] = useState<GrantApplication[]>([]);
   const [, setLoading] = useState(true);
   const [selectedProgram, setSelectedProgram] = useState<GrantProgram | null>(null);
-  const [dialogOpen, setDialogOpen] = useState(false);
   const [eligibilityModalOpen, setEligibilityModalOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Application Form
-  const [projectTitle, setProjectTitle] = useState("");
-  const [requestedAmount, setRequestedAmount] = useState("");
-  const [proposalSummary, setProposalSummary] = useState("");
 
   useEffect(() => {
     loadData();
@@ -86,52 +80,20 @@ export default function GrantsPage() {
     setApplications(appList);
   };
 
+  const navigate = useNavigate();
+
   const handleApplyClick = (program: GrantProgram) => {
-    const alreadyApplied = applications.some(app => app.grant_program_id === program.id);
+    const alreadyApplied = applications.some(app => app.grant_program_id === program.id && app.status !== 'closed' && app.status !== 'rejected');
     if (alreadyApplied) {
       toast({ 
         title: "Application Exists", 
-        description: "You have already submitted an application for this specific grant program.", 
+        description: "You have an active application for this specific grant program.", 
         variant: "destructive" 
       });
       return;
     }
 
-    setSelectedProgram(program);
-    setRequestedAmount(program.funding_amount.toString());
-    setDialogOpen(true);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedProgram) return;
-
-    const amt = parseFloat(requestedAmount);
-    if (!amt || amt <= 0) {
-      toast({ title: "Invalid Amount", description: "Please enter a valid requested grant amount.", variant: "destructive" });
-      return;
-    }
-
-    setIsSubmitting(true);
-    const success = await submitGrantApplication({
-      grant_program_id: selectedProgram.id,
-      user_id: user?.id,
-      project_title: projectTitle,
-      requested_amount: amt,
-      proposal_summary: proposalSummary,
-      documents: [{ name: "Project_Proposal.pdf", url: "#", uploaded_at: new Date().toISOString().split("T")[0] }],
-    });
-
-    setIsSubmitting(false);
-    if (success) {
-      toast({ title: "Grant Application Submitted", description: "Your proposal has been successfully queued for review." });
-      setDialogOpen(false);
-      setProjectTitle("");
-      setProposalSummary("");
-      loadData();
-    } else {
-      toast({ title: "Submission Error", description: "Failed to submit grant application.", variant: "destructive" });
-    }
+    navigate('/dashboard/grants/apply', { state: { programId: program.id } });
   };
 
   const scrollToSection = (id: string) => {
@@ -438,70 +400,6 @@ export default function GrantsPage() {
           </CardContent>
         </Card>
       </div>
-
-      {/* 6. Application Submission Modal */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:max-w-[500px] rounded-2xl p-0 overflow-hidden border-border/60">
-          <div className="bg-slate-900 text-white px-5 py-4 border-b border-border/20">
-            <DialogTitle className="font-poppins text-base font-bold flex items-center gap-2">
-              <Award className="h-4 w-4 text-primary-foreground" /> Grant Application Form
-            </DialogTitle>
-            <DialogDescription className="text-slate-300 text-xs mt-0.5 truncate">
-              {selectedProgram?.title}
-            </DialogDescription>
-          </div>
-
-          <form onSubmit={handleSubmit} className="p-4 sm:p-5 space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Project Title</label>
-                <Input
-                  type="text"
-                  placeholder="e.g. Clean Energy Upgrade"
-                  value={projectTitle}
-                  onChange={(e) => setProjectTitle(e.target.value)}
-                  className="h-9 text-xs rounded-lg font-medium"
-                  required
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Requested Funding ($)</label>
-                <Input
-                  type="number"
-                  placeholder="0.00"
-                  value={requestedAmount}
-                  onChange={(e) => setRequestedAmount(e.target.value)}
-                  className="h-9 text-xs rounded-lg font-poppins font-bold text-primary"
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-                <FileSpreadsheet className="h-3.5 w-3.5 text-primary" /> Proposal Executive Summary
-              </label>
-              <Textarea
-                placeholder="Outline project goals, budget allocation, and expected outcome..."
-                value={proposalSummary}
-                onChange={(e) => setProposalSummary(e.target.value)}
-                className="rounded-lg min-h-[90px] text-xs resize-none"
-                required
-              />
-            </div>
-
-            <DialogFooter className="pt-2 flex-row gap-2 justify-end">
-              <Button type="button" size="sm" variant="ghost" onClick={() => setDialogOpen(false)} className="rounded-lg font-semibold text-xs h-8">
-                Cancel
-              </Button>
-              <Button type="submit" size="sm" disabled={isSubmitting} className="rounded-lg font-bold text-xs h-8 px-5 shadow-sm">
-                {isSubmitting ? "Submitting..." : "Submit Application"}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
 
       {/* 7. Criteria & Guidelines Info Modal */}
       <Dialog open={eligibilityModalOpen} onOpenChange={setEligibilityModalOpen}>

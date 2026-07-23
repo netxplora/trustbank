@@ -24,7 +24,14 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 
 const APP_STATUS_OPTIONS: GrantApplication["status"][] = [
-  "submitted", "under_review", "approved", "rejected", "awarded"
+  "draft",
+  "submitted",
+  "under_review",
+  "info_required",
+  "approved",
+  "rejected",
+  "processed",
+  "closed"
 ];
 
 const statusColor = (status: string) => {
@@ -633,6 +640,18 @@ export default function AdminGrantsPage() {
                 <div className="space-y-1">
                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Requested Amount</p>
                   <p className="font-poppins font-bold text-primary text-xl">${selectedApp.requested_amount.toLocaleString()}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Business Name</p>
+                  <p className="font-semibold text-foreground text-sm">{selectedApp.business_name || "N/A"}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Industry / Sector</p>
+                  <p className="font-semibold text-foreground text-sm">{selectedApp.industry || "N/A"}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Business Type</p>
+                  <p className="font-semibold text-foreground text-sm">{selectedApp.business_type || "N/A"} ({selectedApp.year_started || "N/A"})</p>
                 </div>
                 <div className="space-y-1">
                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Applicant</p>

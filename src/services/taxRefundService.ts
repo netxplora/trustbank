@@ -4,10 +4,14 @@ export interface TaxRefundApplication {
   id?: string;
   user_id?: string;
   application_number: string;
+  tax_refund_program?: string;
   tax_year: number;
   filing_status: string;
   estimated_refund_amount: number;
-  status: 'submitted' | 'under_review' | 'action_required' | 'approved' | 'disbursed' | 'rejected';
+  requested_amount?: number;
+  refund_reason?: string;
+  claim_description?: string;
+  status: 'draft' | 'submitted' | 'under_review' | 'info_required' | 'approved' | 'rejected' | 'processing' | 'completed' | 'closed' | 'action_required' | 'disbursed';
   documents: { name: string; url: string; uploaded_at: string }[];
   user_notes?: string;
   admin_notes?: string;
@@ -34,9 +38,13 @@ export async function getUserTaxRefundApplications(userId: string): Promise<TaxR
       id: item.id,
       user_id: item.user_id,
       application_number: item.application_number,
+      tax_refund_program: item.tax_refund_program,
       tax_year: item.tax_year,
       filing_status: item.filing_status,
-      estimated_refund_amount: parseFloat(item.estimated_refund_amount),
+      estimated_refund_amount: parseFloat(item.estimated_refund_amount || 0),
+      requested_amount: item.requested_amount ? parseFloat(item.requested_amount) : undefined,
+      refund_reason: item.refund_reason,
+      claim_description: item.claim_description,
       status: item.status,
       documents: item.documents || [],
       user_notes: item.user_notes,
@@ -83,9 +91,13 @@ export async function getAllTaxRefundApplications(): Promise<TaxRefundApplicatio
       id: item.id,
       user_id: item.user_id,
       application_number: item.application_number,
+      tax_refund_program: item.tax_refund_program,
       tax_year: item.tax_year,
       filing_status: item.filing_status,
-      estimated_refund_amount: parseFloat(item.estimated_refund_amount),
+      estimated_refund_amount: parseFloat(item.estimated_refund_amount || 0),
+      requested_amount: item.requested_amount ? parseFloat(item.requested_amount) : undefined,
+      refund_reason: item.refund_reason,
+      claim_description: item.claim_description,
       status: item.status,
       documents: item.documents || [],
       user_notes: item.user_notes,
@@ -101,19 +113,23 @@ export async function getAllTaxRefundApplications(): Promise<TaxRefundApplicatio
 }
 
 export async function submitTaxRefundApplication(
-  app: Omit<TaxRefundApplication, "id" | "application_number" | "status" | "created_at">
+  app: Omit<TaxRefundApplication, "id" | "application_number" | "created_at">
 ): Promise<boolean> {
   try {
     const appNumber = `TR-${Date.now().toString(36).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
     const { error } = await supabase.from("tax_refund_applications").insert({
       user_id: app.user_id,
       application_number: appNumber,
+      tax_refund_program: app.tax_refund_program,
       tax_year: app.tax_year,
-      filing_status: app.filing_status,
-      estimated_refund_amount: app.estimated_refund_amount,
+      filing_status: app.filing_status || 'Single',
+      estimated_refund_amount: app.estimated_refund_amount || app.requested_amount || 0,
+      requested_amount: app.requested_amount,
+      refund_reason: app.refund_reason,
+      claim_description: app.claim_description,
       documents: app.documents,
       user_notes: app.user_notes,
-      status: "submitted",
+      status: app.status || "submitted",
     });
 
     if (error) throw error;
