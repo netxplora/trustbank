@@ -188,25 +188,25 @@ export default function CustomerDashboardHome() {
       {/* 1. Redesigned Premier Private Wealth Member Card with Embedded Balances */}
       <SlideUp>
         <div 
-          className="rounded-2xl shadow-xl p-4 sm:p-5 relative overflow-hidden space-y-4 text-white"
+          className="rounded-2xl shadow-xl p-4 sm:p-5 relative overflow-hidden space-y-4 text-foreground"
           style={{ backgroundColor: design?.colors?.portfolio_bg || '#1DCF9F' }}
         >
-          <div className="absolute right-0 top-0 w-80 h-80 bg-white/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute right-0 top-0 w-80 h-80 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
 
           {/* Combined Net Worth */}
           <div className="relative z-10 flex justify-end pt-1">
             <div className="sm:text-right w-full sm:w-auto">
-              <div className="flex items-center justify-between sm:justify-end gap-2 text-white/80">
+              <div className="flex items-center justify-between sm:justify-end gap-2 text-muted-foreground">
                 <p className="text-caption-std font-medium uppercase tracking-wider">Total Combined Portfolio</p>
                 <button 
                   onClick={() => setShowBalances(!showBalances)} 
-                  className="hover:text-white transition-colors p-0.5"
+                  className="hover:text-foreground transition-colors p-0.5"
                   title={showBalances ? "Hide Balances" : "Show Balances"}
                 >
                   {showBalances ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                 </button>
               </div>
-              <p className="text-balance-lg font-bold text-white leading-[46px] mt-0.5">
+              <p className="text-balance-lg font-bold text-foreground leading-[46px] mt-0.5">
                 {showBalances ? `$${totalCombinedBalance.toLocaleString(undefined, { minimumFractionDigits: 2 })}` : "••••••••"}
               </p>
             </div>
@@ -216,56 +216,56 @@ export default function CustomerDashboardHome() {
           <div className="relative z-10 grid grid-cols-3 gap-1.5 sm:gap-2.5 pt-1">
             {/* Savings Balance */}
             <div className="space-y-1 min-w-0">
-              <div className="flex items-center justify-between text-white/80">
+              <div className="flex items-center justify-between text-muted-foreground">
                 <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider flex items-center gap-0.5 sm:gap-1 truncate">
-                  <Building2 className="h-2.5 w-2.5 sm:h-3 sm:w-3 shrink-0" /> <span className="truncate">Savings</span>
+                  <Building2 className="h-2.5 w-2.5 sm:h-3 sm:w-3 shrink-0 text-primary" /> <span className="truncate text-foreground">Savings</span>
                 </span>
                 <span className="hidden sm:inline-block text-[10px] font-mono">
                   {savingsAccount?.account_number || "—"}
                 </span>
               </div>
-              <p className="font-poppins text-xs sm:text-lg font-bold leading-tight truncate">
+              <p className="font-poppins text-xs sm:text-lg font-bold leading-tight truncate text-foreground">
                 {showBalances ? `$${savingsBal.toLocaleString(undefined, { minimumFractionDigits: 0 })}` : "••••"}
               </p>
-              <div className="flex justify-between items-center text-[8px] sm:text-[10px] text-white/80 pt-1 border-t border-white/20">
+              <div className="flex justify-between items-center text-[8px] sm:text-[10px] text-muted-foreground pt-1 border-t border-border/50">
                 <span className="truncate">Ledger: {showBalances ? `$${(savingsAccount?.ledger_balance || savingsBal).toLocaleString(undefined, { minimumFractionDigits: 0 })}` : "••"}</span>
-                <Link to="/dashboard/deposit" className="hover:underline font-bold shrink-0 ml-1">Top Up</Link>
+                <Link to="/dashboard/deposit" className="text-primary hover:underline font-bold shrink-0 ml-1">Top Up</Link>
               </div>
             </div>
 
             {/* Current Balance */}
             <div className="space-y-1 min-w-0">
-              <div className="flex items-center justify-between text-white/80">
+              <div className="flex items-center justify-between text-muted-foreground">
                 <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider flex items-center gap-0.5 sm:gap-1 truncate">
-                  <CreditCard className="h-2.5 w-2.5 sm:h-3 sm:w-3 shrink-0" /> <span className="truncate">Current</span>
+                  <CreditCard className="h-2.5 w-2.5 sm:h-3 sm:w-3 shrink-0 text-secondary" /> <span className="truncate text-foreground">Current</span>
                 </span>
                 <span className="hidden sm:inline-block text-[10px] font-mono">
                   {currentAccount?.account_number || "—"}
                 </span>
               </div>
-              <p className="font-poppins text-xs sm:text-lg font-bold leading-tight truncate">
+              <p className="font-poppins text-xs sm:text-lg font-bold leading-tight truncate text-foreground">
                 {showBalances ? `$${currentBal.toLocaleString(undefined, { minimumFractionDigits: 0 })}` : "••••"}
               </p>
-              <div className="flex justify-between items-center text-[8px] sm:text-[10px] text-white/80 pt-1 border-t border-white/20">
+              <div className="flex justify-between items-center text-[8px] sm:text-[10px] text-muted-foreground pt-1 border-t border-border/50">
                 <span className="truncate">Ledger: {showBalances ? `$${(currentAccount?.ledger_balance || currentBal).toLocaleString(undefined, { minimumFractionDigits: 0 })}` : "••"}</span>
-                <Link to="/dashboard/transfers" className="hover:underline font-bold shrink-0 ml-1">Pay</Link>
+                <Link to="/dashboard/transfers" className="text-secondary hover:underline font-bold shrink-0 ml-1">Pay</Link>
               </div>
             </div>
 
             {/* Digital Currency Balance */}
             <div className="space-y-1 min-w-0">
-              <div className="flex items-center justify-between text-white/80">
+              <div className="flex items-center justify-between text-muted-foreground">
                 <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider flex items-center gap-0.5 sm:gap-1 truncate">
-                  <Bitcoin className="h-2.5 w-2.5 sm:h-3 sm:w-3 shrink-0" /> <span className="truncate">Crypto</span>
+                  <Bitcoin className="h-2.5 w-2.5 sm:h-3 sm:w-3 shrink-0 text-accent" /> <span className="truncate text-foreground">Crypto</span>
                 </span>
                 <span className="hidden sm:inline-block text-[10px] font-mono">Multi</span>
               </div>
-              <p className="font-poppins text-xs sm:text-lg font-bold leading-tight truncate">
+              <p className="font-poppins text-xs sm:text-lg font-bold leading-tight truncate text-foreground">
                 {showBalances ? `$${totalCryptoValue.toLocaleString(undefined, { minimumFractionDigits: 0 })}` : "••••"}
               </p>
-              <div className="flex justify-between items-center text-[8px] sm:text-[10px] text-white/80 pt-1 border-t border-white/20">
+              <div className="flex justify-between items-center text-[8px] sm:text-[10px] text-muted-foreground pt-1 border-t border-border/50">
                 <span className="truncate">{walletSummary}</span>
-                <Link to="/dashboard/digital-currency" className="hover:underline font-bold shrink-0 ml-1">Trade</Link>
+                <Link to="/dashboard/digital-currency" className="text-accent hover:underline font-bold shrink-0 ml-1">Trade</Link>
               </div>
             </div>
           </div>
