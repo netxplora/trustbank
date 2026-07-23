@@ -201,11 +201,13 @@ const InfiniteMetalCard = ({ card, onViewDetails, showNumber, setShowNumber, isF
 };
 
 const ATMCard = ({ card, onViewDetails }: { card: Card; onViewDetails: () => void }) => {
-  const { identity } = useBrand();
   const [showNumber, setShowNumber] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
-  const isVisa = card.card_brand === "Visa";
-  const last4 = (card.card_number || "").slice(-4);
+  const { identity } = useAuth();
+  
+  const last4 = card.card_number ? card.card_number.slice(-4) : '••••';
+  const isVisa = card.card_brand?.toLowerCase() === 'visa';
+  const isPhysical = card.is_physical === true || (card.card_type !== 'virtual' && card.card_type !== 'digital');
 
   // Render luxurious Infinite Metal design
   if (card.card_type === 'infinite') {
@@ -217,12 +219,12 @@ const ATMCard = ({ card, onViewDetails }: { card: Card; onViewDetails: () => voi
       <div className={`relative w-full h-full duration-700 preserve-3d shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] rounded-xl ${isFlipped ? 'rotate-y-180' : ''}`}>
 
         {/* Front of Card */}
-        <div className={`absolute inset-0 backface-hidden rounded-xl overflow-hidden flex flex-col justify-between p-3.5 sm:p-6 pt-3 sm:pt-5 pb-3 sm:pb-5 text-white ${card.is_physical ? 'bg-[#111] border-neutral-700/50' : 'bg-[#01142a] border-blue-900/40'
+        <div className={`absolute inset-0 backface-hidden rounded-xl overflow-hidden flex flex-col justify-between p-3.5 sm:p-6 pt-3 sm:pt-5 pb-3 sm:pb-5 text-white ${isPhysical ? 'bg-[#111] border-neutral-700/50' : 'bg-[#01142a] border-blue-900/40'
           } ${isFlipped ? 'pointer-events-none' : ''}`}>
           {/* Earth/Network Abstract SVG Background */}
           <div className="absolute inset-0 z-0 overflow-hidden opacity-80 pointer-events-none">
             <div className="absolute right-[-30%] top-[-20%] w-[90%] h-[140%] opacity-40">
-              <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" className={`w-full h-full mix-blend-screen ${card.is_physical ? 'text-neutral-400' : 'text-cyan-400'
+              <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" className={`w-full h-full mix-blend-screen ${isPhysical ? 'text-neutral-400' : 'text-cyan-400'
                 }`}>
                 <circle cx="100" cy="100" r="90" fill="none" stroke="currentColor" strokeWidth="0.5" className="opacity-50" />
                 <path d="M 10 100 Q 100 0 190 100 Q 100 200 10 100" fill="none" stroke="currentColor" strokeWidth="1" className="opacity-60" />
@@ -236,15 +238,15 @@ const ATMCard = ({ card, onViewDetails }: { card: Card; onViewDetails: () => voi
               </svg>
             </div>
             {/* Glowing waves */}
-            <div className={`absolute left-[-20%] top-[40%] -translate-y-1/2 w-[140%] h-[80px] blur-xl transform -rotate-12 mix-blend-screen ${card.is_physical ? 'bg-gradient-to-r from-white/0 via-white/20 to-neutral-500/0' : 'bg-gradient-to-r from-cyan-500/0 via-cyan-400/30 to-blue-500/0'
+            <div className={`absolute left-[-20%] top-[40%] -translate-y-1/2 w-[140%] h-[80px] blur-xl transform -rotate-12 mix-blend-screen ${isPhysical ? 'bg-gradient-to-r from-white/0 via-white/20 to-neutral-500/0' : 'bg-gradient-to-r from-cyan-500/0 via-cyan-400/30 to-blue-500/0'
               }`}></div>
-            <div className={`absolute left-[-10%] top-[45%] -translate-y-[40%] w-[120%] h-[40px] blur-md transform -rotate-6 mix-blend-screen ${card.is_physical ? 'bg-gradient-to-r from-neutral-600/0 via-white/30 to-neutral-600/0' : 'bg-gradient-to-r from-blue-600/0 via-cyan-300/40 to-blue-600/0'
+            <div className={`absolute left-[-10%] top-[45%] -translate-y-[40%] w-[120%] h-[40px] blur-md transform -rotate-6 mix-blend-screen ${isPhysical ? 'bg-gradient-to-r from-neutral-600/0 via-white/30 to-neutral-600/0' : 'bg-gradient-to-r from-blue-600/0 via-cyan-300/40 to-blue-600/0'
               }`}></div>
-            <div className={`absolute left-[20%] top-[50%] w-[100%] h-[20px] blur-sm transform -rotate-[8deg] mix-blend-screen ${card.is_physical ? 'bg-gradient-to-r from-white/0 via-white/30 to-transparent' : 'bg-gradient-to-r from-cyan-300/0 via-cyan-200/50 to-transparent'
+            <div className={`absolute left-[20%] top-[50%] w-[100%] h-[20px] blur-sm transform -rotate-[8deg] mix-blend-screen ${isPhysical ? 'bg-gradient-to-r from-white/0 via-white/30 to-transparent' : 'bg-gradient-to-r from-cyan-300/0 via-cyan-200/50 to-transparent'
               }`}></div>
             {/* Dark vignette */}
-            <div className={`absolute inset-0 bg-gradient-to-t via-transparent ${card.is_physical ? 'from-[#111] to-[#111]/80' : 'from-[#01142a] to-[#01142a]/80'}`}></div>
-            <div className={`absolute inset-0 bg-gradient-to-r via-transparent ${card.is_physical ? 'from-[#111] to-[#111]/40' : 'from-[#01142a] to-[#01142a]/40'}`}></div>
+            <div className={`absolute inset-0 bg-gradient-to-t via-transparent ${isPhysical ? 'from-[#111] to-[#111]/80' : 'from-[#01142a] to-[#01142a]/80'}`}></div>
+            <div className={`absolute inset-0 bg-gradient-to-r via-transparent ${isPhysical ? 'from-[#111] to-[#111]/40' : 'from-[#01142a] to-[#01142a]/40'}`}></div>
           </div>
 
           {card.is_frozen && (
@@ -349,7 +351,7 @@ const ATMCard = ({ card, onViewDetails }: { card: Card; onViewDetails: () => voi
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-white/30"></span>
               <p className="text-[9px] font-mono tracking-widest uppercase">
-                {card.is_physical ? "PREMIUM PHYSICAL" : "VIRTUAL CARD"}
+                {isPhysical ? "PREMIUM PHYSICAL" : "VIRTUAL CARD"}
               </p>
             </div>
             <Button size="sm" variant="outline" className="h-7 text-[10px] px-3 bg-transparent border-white/20 hover:bg-white/10 hover:text-white uppercase tracking-widest font-bold rounded-full relative z-50 pointer-events-auto" onClick={(e) => { e.stopPropagation(); e.preventDefault(); onViewDetails(); }}>
@@ -419,8 +421,8 @@ const CardsPage = () => {
       setCards(prev => {
         // Only auto-switch on initial load if physical is empty
         if (prev.length === 0 && loadedCards.length > 0) {
-          const hasPhysical = loadedCards.some(c => c.is_physical);
-          const hasVirtual = loadedCards.some(c => !c.is_physical);
+          const hasPhysical = loadedCards.some(c => isCardPhysical(c));
+          const hasVirtual = loadedCards.some(c => !isCardPhysical(c));
           if (!hasPhysical && hasVirtual) {
             setCardCategory("virtual");
           }
