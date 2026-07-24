@@ -30,6 +30,8 @@ interface Profile {
   annual_income_range?: string | null;
   source_of_funds?: string | null;
   tax_id?: string | null;
+  gov_id_type?: string | null;
+  gov_id_number?: string | null;
   preferred_language?: string | null;
   preferred_currency?: string | null;
   loan_limit?: number;

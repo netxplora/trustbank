@@ -188,84 +188,102 @@ export default function CustomerDashboardHome() {
       {/* 1. Redesigned Premier Private Wealth Member Card with Embedded Balances */}
       <SlideUp>
         <div 
-          className="rounded-2xl shadow-xl p-4 sm:p-5 relative overflow-hidden space-y-4 text-foreground"
-          style={{ backgroundColor: design?.colors?.portfolio_bg || '#1DCF9F' }}
+          className="rounded-2xl sm:rounded-3xl shadow-2xl p-5 sm:p-6 relative overflow-hidden space-y-5 text-foreground border border-white/20 transition-all duration-300"
+          style={{ 
+            backgroundColor: design?.colors?.portfolio_bg || '#1DCF9F',
+            backgroundImage: 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(0,0,0,0.1) 100%)'
+          }}
         >
-          <div className="absolute right-0 top-0 w-80 h-80 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
+          {/* Subtle Ambient Decorative Glows */}
+          <div className="absolute -right-10 -top-10 w-72 h-72 bg-white/15 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -left-10 -bottom-10 w-60 h-60 bg-black/15 rounded-full blur-2xl pointer-events-none" />
+          <div className="absolute right-1/3 bottom-0 w-40 h-40 bg-white/10 rounded-full blur-xl pointer-events-none" />
 
-          {/* Combined Net Worth */}
-          <div className="relative z-10 flex justify-end pt-1">
-            <div className="sm:text-right w-full sm:w-auto">
-              <div className="flex items-center justify-between sm:justify-end gap-2 text-muted-foreground">
-                <p className="text-caption-std font-medium uppercase tracking-wider">Total Combined Portfolio</p>
+          {/* Top Row: Portfolio Header & Total Balance */}
+          <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <div className="h-7 w-7 rounded-lg bg-black/10 dark:bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20">
+                <ShieldCheck className="h-4 w-4 text-foreground" />
+              </div>
+              <div>
+                <span className="text-[10px] font-bold tracking-widest uppercase text-foreground/80 block">Premier Private Wealth</span>
+                <span className="text-xs font-semibold text-foreground/90">Portfolio Overview</span>
+              </div>
+            </div>
+
+            <div className="sm:text-right">
+              <div className="flex items-center gap-2 text-foreground/80 sm:justify-end">
+                <p className="text-[10px] sm:text-xs font-bold uppercase tracking-wider">Total Combined Portfolio</p>
                 <button 
                   onClick={() => setShowBalances(!showBalances)} 
-                  className="hover:text-foreground transition-colors p-0.5"
+                  className="hover:text-foreground transition-colors p-1 bg-black/10 dark:bg-white/10 rounded-md backdrop-blur-sm border border-white/10"
                   title={showBalances ? "Hide Balances" : "Show Balances"}
                 >
                   {showBalances ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                 </button>
               </div>
-              <p className="text-balance-lg font-bold text-foreground leading-[46px] mt-0.5">
+              <p className="text-2xl sm:text-3xl font-black text-foreground font-poppins tracking-tight mt-0.5 drop-shadow-sm">
                 {showBalances ? `$${totalCombinedBalance.toLocaleString(undefined, { minimumFractionDigits: 2 })}` : "••••••••"}
               </p>
             </div>
           </div>
 
-          {/* Embedded Account Balances Grid - Single Row on Mobile View */}
-          <div className="relative z-10 grid grid-cols-3 gap-1.5 sm:gap-2.5 pt-1">
+          {/* Embedded Account Balances Grid - Single Row on All Screens (Mobile First Portability) */}
+          <div className="relative z-10 grid grid-cols-3 gap-1.5 sm:gap-3 pt-1">
             {/* Savings Balance */}
-            <div className="space-y-1 min-w-0">
-              <div className="flex items-center justify-between text-muted-foreground">
-                <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider flex items-center gap-0.5 sm:gap-1 truncate">
-                  <Building2 className="h-2.5 w-2.5 sm:h-3 sm:w-3 shrink-0 text-primary" /> <span className="truncate text-foreground">Savings</span>
+            <div className="bg-black/10 dark:bg-black/20 backdrop-blur-md rounded-lg sm:rounded-xl p-2 sm:p-3.5 border border-white/20 hover:border-white/40 transition-all shadow-inner space-y-1 min-w-0">
+              <div className="flex items-center justify-between text-foreground/80">
+                <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 truncate">
+                  <Building2 className="h-3 w-3 shrink-0 text-foreground" /> <span className="truncate font-semibold text-foreground">Savings</span>
                 </span>
-                <span className="hidden sm:inline-block text-[10px] font-mono">
+                <span className="hidden md:inline-block text-[9px] font-mono opacity-75">
                   {savingsAccount?.account_number || "—"}
                 </span>
               </div>
               <p className="font-poppins text-xs sm:text-lg font-bold leading-tight truncate text-foreground">
                 {showBalances ? `$${savingsBal.toLocaleString(undefined, { minimumFractionDigits: 0 })}` : "••••"}
               </p>
-              <div className="flex justify-between items-center text-[8px] sm:text-[10px] text-muted-foreground pt-1 border-t border-border/50">
-                <span className="truncate">Ledger: {showBalances ? `$${(savingsAccount?.ledger_balance || savingsBal).toLocaleString(undefined, { minimumFractionDigits: 0 })}` : "••"}</span>
-                <Link to="/dashboard/deposit" className="text-primary hover:underline font-bold shrink-0 ml-1">Top Up</Link>
+              <div className="flex justify-between items-center text-[8px] sm:text-[10px] text-foreground/80 pt-1 border-t border-white/15">
+                <span className="truncate opacity-75 hidden sm:inline">Ledger: {showBalances ? `$${(savingsAccount?.ledger_balance || savingsBal).toLocaleString(undefined, { minimumFractionDigits: 0 })}` : "••"}</span>
+                <span className="truncate opacity-75 sm:hidden">{showBalances ? `$${(savingsAccount?.ledger_balance || savingsBal).toLocaleString(undefined, { minimumFractionDigits: 0 })}` : "••"}</span>
+                <Link to="/dashboard/deposit" className="text-foreground hover:underline font-bold shrink-0 ml-0.5 bg-white/15 hover:bg-white/25 px-1.5 py-0.5 rounded text-[8px] sm:text-[9px] transition-colors">Top Up</Link>
               </div>
             </div>
 
             {/* Current Balance */}
-            <div className="space-y-1 min-w-0">
-              <div className="flex items-center justify-between text-muted-foreground">
-                <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider flex items-center gap-0.5 sm:gap-1 truncate">
-                  <CreditCard className="h-2.5 w-2.5 sm:h-3 sm:w-3 shrink-0 text-secondary" /> <span className="truncate text-foreground">Current</span>
+            <div className="bg-black/10 dark:bg-black/20 backdrop-blur-md rounded-lg sm:rounded-xl p-2 sm:p-3.5 border border-white/20 hover:border-white/40 transition-all shadow-inner space-y-1 min-w-0">
+              <div className="flex items-center justify-between text-foreground/80">
+                <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 truncate">
+                  <CreditCard className="h-3 w-3 shrink-0 text-foreground" /> <span className="truncate font-semibold text-foreground">Current</span>
                 </span>
-                <span className="hidden sm:inline-block text-[10px] font-mono">
+                <span className="hidden md:inline-block text-[9px] font-mono opacity-75">
                   {currentAccount?.account_number || "—"}
                 </span>
               </div>
               <p className="font-poppins text-xs sm:text-lg font-bold leading-tight truncate text-foreground">
                 {showBalances ? `$${currentBal.toLocaleString(undefined, { minimumFractionDigits: 0 })}` : "••••"}
               </p>
-              <div className="flex justify-between items-center text-[8px] sm:text-[10px] text-muted-foreground pt-1 border-t border-border/50">
-                <span className="truncate">Ledger: {showBalances ? `$${(currentAccount?.ledger_balance || currentBal).toLocaleString(undefined, { minimumFractionDigits: 0 })}` : "••"}</span>
-                <Link to="/dashboard/transfers" className="text-secondary hover:underline font-bold shrink-0 ml-1">Pay</Link>
+              <div className="flex justify-between items-center text-[8px] sm:text-[10px] text-foreground/80 pt-1 border-t border-white/15">
+                <span className="truncate opacity-75 hidden sm:inline">Ledger: {showBalances ? `$${(currentAccount?.ledger_balance || currentBal).toLocaleString(undefined, { minimumFractionDigits: 0 })}` : "••"}</span>
+                <span className="truncate opacity-75 sm:hidden">{showBalances ? `$${(currentAccount?.ledger_balance || currentBal).toLocaleString(undefined, { minimumFractionDigits: 0 })}` : "••"}</span>
+                <Link to="/dashboard/transfers" className="text-foreground hover:underline font-bold shrink-0 ml-0.5 bg-white/15 hover:bg-white/25 px-1.5 py-0.5 rounded text-[8px] sm:text-[9px] transition-colors">Pay</Link>
               </div>
             </div>
 
             {/* Digital Currency Balance */}
-            <div className="space-y-1 min-w-0">
-              <div className="flex items-center justify-between text-muted-foreground">
-                <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider flex items-center gap-0.5 sm:gap-1 truncate">
-                  <Bitcoin className="h-2.5 w-2.5 sm:h-3 sm:w-3 shrink-0 text-accent" /> <span className="truncate text-foreground">Crypto</span>
+            <div className="bg-black/10 dark:bg-black/20 backdrop-blur-md rounded-lg sm:rounded-xl p-2 sm:p-3.5 border border-white/20 hover:border-white/40 transition-all shadow-inner space-y-1 min-w-0">
+              <div className="flex items-center justify-between text-foreground/80">
+                <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 truncate">
+                  <Bitcoin className="h-3 w-3 shrink-0 text-foreground" /> <span className="truncate font-semibold text-foreground">Crypto</span>
                 </span>
-                <span className="hidden sm:inline-block text-[10px] font-mono">Multi</span>
+                <span className="hidden md:inline-block text-[9px] font-mono opacity-75">Multi</span>
               </div>
               <p className="font-poppins text-xs sm:text-lg font-bold leading-tight truncate text-foreground">
                 {showBalances ? `$${totalCryptoValue.toLocaleString(undefined, { minimumFractionDigits: 0 })}` : "••••"}
               </p>
-              <div className="flex justify-between items-center text-[8px] sm:text-[10px] text-muted-foreground pt-1 border-t border-border/50">
-                <span className="truncate">{walletSummary}</span>
-                <Link to="/dashboard/digital-currency" className="text-accent hover:underline font-bold shrink-0 ml-1">Trade</Link>
+              <div className="flex justify-between items-center text-[8px] sm:text-[10px] text-foreground/80 pt-1 border-t border-white/15">
+                <span className="truncate opacity-75 font-mono">{showBalances ? (wallets.find(w => w.balance > 0)?.asset_symbol || "Crypto") : "••"}</span>
+                <Link to="/dashboard/digital-currency" className="text-foreground hover:underline font-bold shrink-0 ml-0.5 bg-white/15 hover:bg-white/25 px-1.5 py-0.5 rounded text-[8px] sm:text-[9px] transition-colors">Trade</Link>
               </div>
             </div>
           </div>

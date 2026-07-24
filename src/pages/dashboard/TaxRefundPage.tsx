@@ -61,11 +61,11 @@ export default function TaxRefundPage() {
   };
 
   return (
-    <div className="space-y-6 sm:space-y-8 pb-12">
+    <div className="max-w-3xl mx-auto space-y-6 sm:space-y-8 pb-12">
       <FadeIn>
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Tax Refund Applications</h1>
-          <p className="text-sm sm:text-base text-muted-foreground mt-1">
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">Tax Refund Applications</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1">
             Apply for your annual tax return seamlessly or track the status of your existing claims.
           </p>
         </div>
@@ -74,12 +74,12 @@ export default function TaxRefundPage() {
       <SlideUp>
         <Card className="bg-card border border-border shadow-sm overflow-hidden">
           <div className="flex flex-col md:flex-row md:items-center">
-            <div className="p-6 md:w-2/3">
-              <h2 className="text-xl font-bold text-foreground mb-2 flex items-center gap-2">
-                <FileSpreadsheet className="h-5 w-5 text-primary" />
+            <div className="p-5 md:w-2/3">
+              <h2 className="text-lg font-bold text-foreground mb-2 flex items-center gap-2">
+                <FileSpreadsheet className="h-4 w-4 text-primary" />
                 Submit a New Tax Refund
               </h2>
-              <p className="text-sm text-muted-foreground mb-4 leading-relaxed max-w-xl">
+              <p className="text-xs text-muted-foreground mb-4 leading-relaxed max-w-xl">
                 Ready to file for your tax refund? Our fast, secure, and mobile-friendly wizard auto-populates your verified profile information to save you time. Track your application status directly from this dashboard.
               </p>
               <Button onClick={() => navigate("/dashboard/tax-refund/apply")} className="w-full sm:w-auto font-semibold gap-2 shadow-sm">
@@ -97,7 +97,7 @@ export default function TaxRefundPage() {
       </SlideUp>
 
       <div className="space-y-4">
-        <h3 className="text-lg font-bold text-foreground">Your Applications</h3>
+        <h3 className="text-base font-bold text-foreground">Your Applications</h3>
         
         {loading ? (
           <div className="text-center py-12 text-muted-foreground animate-pulse">Loading applications...</div>

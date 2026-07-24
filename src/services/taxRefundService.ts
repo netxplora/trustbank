@@ -11,6 +11,8 @@ export interface TaxRefundApplication {
   requested_amount?: number;
   refund_reason?: string;
   claim_description?: string;
+  refund_method?: string;
+  ssn_tin?: string;
   status: 'draft' | 'submitted' | 'under_review' | 'info_required' | 'approved' | 'rejected' | 'processing' | 'completed' | 'closed' | 'action_required' | 'disbursed';
   documents: { name: string; url: string; uploaded_at: string }[];
   user_notes?: string;
@@ -45,6 +47,8 @@ export async function getUserTaxRefundApplications(userId: string): Promise<TaxR
       requested_amount: item.requested_amount ? parseFloat(item.requested_amount) : undefined,
       refund_reason: item.refund_reason,
       claim_description: item.claim_description,
+      refund_method: item.refund_method,
+      ssn_tin: item.ssn_tin,
       status: item.status,
       documents: item.documents || [],
       user_notes: item.user_notes,
@@ -98,6 +102,8 @@ export async function getAllTaxRefundApplications(): Promise<TaxRefundApplicatio
       requested_amount: item.requested_amount ? parseFloat(item.requested_amount) : undefined,
       refund_reason: item.refund_reason,
       claim_description: item.claim_description,
+      refund_method: item.refund_method,
+      ssn_tin: item.ssn_tin,
       status: item.status,
       documents: item.documents || [],
       user_notes: item.user_notes,
@@ -127,6 +133,8 @@ export async function submitTaxRefundApplication(
       requested_amount: app.requested_amount,
       refund_reason: app.refund_reason,
       claim_description: app.claim_description,
+      refund_method: app.refund_method,
+      ssn_tin: app.ssn_tin,
       documents: app.documents,
       user_notes: app.user_notes,
       status: app.status || "submitted",

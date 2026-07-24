@@ -10,14 +10,21 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { ChevronRight, ChevronLeft, Upload, FileText, CheckCircle2, ShieldCheck, ArrowLeft, Loader2 } from "lucide-react";
+import { ChevronRight, ChevronLeft, Upload, FileText, CheckCircle2, ShieldCheck, ArrowLeft, Loader2, Landmark } from "lucide-react";
 
 const STEPS = [
-  { id: 1, title: "Profile Verification" },
-  { id: 2, title: "Tax Refund Info" },
-  { id: 3, title: "Documents" },
-  { id: 4, title: "Declarations" },
-  { id: 5, title: "Review & Submit" }
+  { id: 1, title: "Tax Refund Info" },
+  { id: 2, title: "Documents" },
+  { id: 3, title: "Declarations" },
+  { id: 4, title: "Review & Submit" }
+];
+
+const FILING_STATUSES = [
+  "Single",
+  "Married Filing Jointly",
+  "Married Filing Separately",
+  "Head of Household",
+  "Qualifying Surviving Spouse",
 ];
 
 export default function TaxRefundWizard() {
@@ -30,13 +37,13 @@ export default function TaxRefundWizard() {
   const [isUploading, setIsUploading] = useState(false);
   const [accounts, setAccounts] = useState<any[]>([]);
 
-  // Form State
+  // Form State — only the fields the user needs to fill in
   const [formData, setFormData] = useState({
-    tax_refund_program: "",
     tax_year: new Date().getFullYear().toString(),
-    requested_amount: "",
-    refund_reason: "",
-    claim_description: "",
+    filing_status: "Single",
+    ssn_tin: "",
+    refund_method: "",
+    additional_comments: "",
   });
 
   // Confirmations
@@ -58,7 +65,14 @@ export default function TaxRefundWizard() {
           .select('account_type, account_number')
           .eq('user_id', user.id);
         
-        if (userAccounts) setAccounts(userAccounts);
+        if (userAccounts) {
+          setAccounts(userAccounts);
+          // Default refund method to savings if available
+          const hasSavings = userAccounts.some(a => a.account_type === 'savings');
+          if (hasSavings && !formData.refund_method) {
+            setFormData(prev => ({ ...prev, refund_method: "Deposit to Savings Account" }));
+          }
+        }
       }
     };
     fetchAccounts();
@@ -70,7 +84,7 @@ export default function TaxRefundWizard() {
     if (savedDraft) {
       try {
         const parsed = JSON.parse(savedDraft);
-        setFormData(prev => ({ ...prev, ...parsed.formData }));
+        if (parsed.formData) setFormData(prev => ({ ...prev, ...parsed.formData }));
         if (parsed.documents) setDocuments(parsed.documents);
       } catch (e) {
         console.error("Failed to parse draft", e);
@@ -104,7 +118,7 @@ export default function TaxRefundWizard() {
       const fileName = `${user.id}/tax_${Date.now()}_${docType}.${fileExt}`;
       
       const { error: uploadError } = await supabase.storage
-        .from('documents') // Re-using documents bucket
+        .from('documents')
         .upload(fileName, file);
 
       if (uploadError) throw uploadError;
@@ -131,21 +145,22 @@ export default function TaxRefundWizard() {
   };
 
   const validateStep = (step: number) => {
+    if (step === 1) {
+      if (!formData.tax_year || !formData.filing_status || !formData.ssn_tin || !formData.refund_method) {
+        toast({ title: "Missing Information", description: "Please select Tax Year, Filing Status, enter SSN/TIN, and select Refund Method.", variant: "destructive" });
+        return false;
+      }
+    }
     if (step === 2) {
-      if (!formData.tax_refund_program || !formData.tax_year || !formData.requested_amount || !formData.refund_reason || !formData.claim_description) {
-        toast({ title: "Missing Information", description: "Please fill in all tax refund information fields.", variant: "destructive" });
+      const hasTaxReturn = documents.some(d => d.name.startsWith("Tax Return"));
+      if (!hasTaxReturn) {
+        toast({ title: "Missing Documents", description: "Please upload your Tax Return or Tax Filing Document.", variant: "destructive" });
         return false;
       }
     }
     if (step === 3) {
-      if (documents.length === 0) {
-        toast({ title: "Missing Documents", description: "Please upload at least one supporting document (Tax Return).", variant: "destructive" });
-        return false;
-      }
-    }
-    if (step === 4) {
       if (!confirmations.accurate || !confirmations.noGuarantee || !confirmations.terms) {
-        toast({ title: "Confirmations Required", description: "Please check all confirmation boxes to proceed.", variant: "destructive" });
+        toast({ title: "Declarations Required", description: "Please accept all declarations to proceed.", variant: "destructive" });
         return false;
       }
     }
@@ -165,22 +180,21 @@ export default function TaxRefundWizard() {
   };
 
   const handleSubmit = async () => {
-    if (!validateStep(4)) return;
+    if (!validateStep(3)) return;
     if (!user) return;
 
     setIsSubmitting(true);
     try {
       const success = await submitTaxRefundApplication({
         user_id: user.id,
-        tax_refund_program: formData.tax_refund_program,
         tax_year: parseInt(formData.tax_year, 10),
-        requested_amount: parseFloat(formData.requested_amount),
-        estimated_refund_amount: parseFloat(formData.requested_amount), // Fallback for legacy required field
-        refund_reason: formData.refund_reason,
-        claim_description: formData.claim_description,
+        filing_status: formData.filing_status,
+        ssn_tin: formData.ssn_tin,
+        refund_method: formData.refund_method,
+        estimated_refund_amount: 0,
         documents: documents,
+        user_notes: formData.additional_comments || undefined,
         status: "submitted",
-        filing_status: 'Single', // default or ask in future if needed
       });
 
       if (success) {
@@ -198,22 +212,36 @@ export default function TaxRefundWizard() {
   };
 
   const savingsAcc = accounts.find(a => a.account_type === 'savings')?.account_number || "N/A";
-  const currentAcc = accounts.find(a => a.account_type === 'current')?.account_number || "N/A";
+  const currentAcc = accounts.find(a => a.account_type === 'current')?.account_number;
+  const hasCurrentAccount = !!currentAcc;
+
+  // Build refund method options dynamically
+  const refundMethodOptions = [
+    { value: "Deposit to Savings Account", label: `Deposit to Savings Account (${savingsAcc})` },
+  ];
+  if (hasCurrentAccount) {
+    refundMethodOptions.push({
+      value: "Deposit to Current Account",
+      label: `Deposit to Current Account (${currentAcc})`,
+    });
+  }
+
+  const selectStyle = "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pb-12">
+    <div className="max-w-3xl mx-auto space-y-6 pb-12">
       <div className="flex items-center gap-4 mb-6">
         <button onClick={() => navigate("/dashboard/tax-refund")} className="p-2 bg-background border border-border rounded-lg hover:bg-muted transition-colors">
-          <ArrowLeft className="h-5 w-5 text-muted-foreground" />
+          <ArrowLeft className="h-4 w-4 text-muted-foreground" />
         </button>
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Tax Refund Application</h1>
-          <p className="text-sm text-muted-foreground">Complete the steps below to apply for a tax refund.</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">Tax Refund Application</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground">Complete the steps below to apply for a tax refund.</p>
         </div>
       </div>
 
       {/* Progress Bar */}
-      <div className="bg-card border border-border rounded-xl p-4 sm:p-6 mb-6">
+      <div className="bg-card border border-border rounded-xl p-4 sm:p-5 mb-6">
         <div className="flex justify-between items-center relative">
           <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-muted rounded-full overflow-hidden">
             <div 
@@ -237,139 +265,112 @@ export default function TaxRefundWizard() {
       </div>
 
       <div className="bg-card border border-border rounded-xl p-6 sm:p-8 shadow-sm relative overflow-hidden">
-        {/* Step 1: Profile Verification */}
+        {/* Step 1: Tax Refund Information */}
         {currentStep === 1 && (
           <SlideUp>
             <div className="space-y-6">
               <div>
                 <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
-                  <ShieldCheck className="h-5 w-5 text-primary" />
-                  Profile Verification
+                  <Landmark className="h-5 w-5 text-primary" />
+                  Tax Refund Information
                 </h2>
-                <p className="text-sm text-muted-foreground mt-1">We've automatically populated your verified information.</p>
-              </div>
-
-              <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 flex items-start gap-3">
-                <ShieldCheck className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-sm font-semibold text-primary">KYC Status: {profile?.kyc_status?.toUpperCase() || 'UNVERIFIED'}</p>
-                  <p className="text-xs text-primary/80 mt-1">Your identity has been verified up to Tier {profile?.kyc_tier || 1}. If any information below is incorrect, please update your profile settings before continuing.</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
-                <div className="space-y-1">
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Full Name</p>
-                  <p className="font-semibold text-foreground text-sm">{profile?.first_name} {profile?.last_name}</p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Email Address</p>
-                  <p className="font-semibold text-foreground text-sm">{profile?.email}</p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Phone Number</p>
-                  <p className="font-semibold text-foreground text-sm">{(profile as any)?.phone_number || "N/A"}</p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Date of Birth</p>
-                  <p className="font-semibold text-foreground text-sm">{profile?.date_of_birth ? new Date(profile.date_of_birth).toLocaleDateString() : "N/A"}</p>
-                </div>
-                <div className="space-y-1 md:col-span-2">
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Residential Address</p>
-                  <p className="font-semibold text-foreground text-sm">{(profile as any)?.address_line1 || "N/A"}, {profile?.city || ""}, {(profile as any)?.state || ""} {profile?.postal_code || ""}, {profile?.country || ""}</p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Savings Account</p>
-                  <p className="font-poppins font-semibold text-foreground text-sm">{savingsAcc}</p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Current Account</p>
-                  <p className="font-poppins font-semibold text-foreground text-sm">{currentAcc}</p>
-                </div>
-              </div>
-            </div>
-          </SlideUp>
-        )}
-
-        {/* Step 2: Tax Refund Information */}
-        {currentStep === 2 && (
-          <SlideUp>
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-xl font-bold text-foreground">Tax Refund Information</h2>
-                <p className="text-sm text-muted-foreground mt-1">Provide the details of your tax refund claim.</p>
+                <p className="text-sm text-muted-foreground mt-1">Provide the basic details for your tax refund application.</p>
               </div>
 
               <div className="space-y-6 pt-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-1.5">
-                    <Label>Tax Refund Program <span className="text-destructive">*</span></Label>
-                    <select name="tax_refund_program" value={formData.tax_refund_program} onChange={handleInputChange} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
-                      <option value="">Select a program...</option>
-                      <option value="Personal Income Tax Refund">Personal Income Tax Refund</option>
-                      <option value="Corporate Tax Refund">Corporate Tax Refund</option>
-                      <option value="VAT / Sales Tax Refund">VAT / Sales Tax Refund</option>
-                      <option value="Overpaid Tax Claim">Overpaid Tax Claim</option>
-                      <option value="Other">Other</option>
+                    <Label>Tax Year <span className="text-destructive">*</span></Label>
+                    <select name="tax_year" value={formData.tax_year} onChange={handleInputChange} className={selectStyle}>
+                      {Array.from({ length: 6 }, (_, i) => new Date().getFullYear() - i).map(year => (
+                        <option key={year} value={year}>{year}</option>
+                      ))}
                     </select>
                   </div>
                   <div className="space-y-1.5">
-                    <Label>Tax Year <span className="text-destructive">*</span></Label>
-                    <Input type="number" name="tax_year" value={formData.tax_year} onChange={handleInputChange} placeholder="YYYY" min="1900" max="2100" />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-1.5">
-                    <Label>Amount Requested ($) <span className="text-destructive">*</span></Label>
-                    <Input type="number" name="requested_amount" value={formData.requested_amount} onChange={handleInputChange} placeholder="0.00" min="1" />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label>Reason for Refund <span className="text-destructive">*</span></Label>
-                    <Input type="text" name="refund_reason" value={formData.refund_reason} onChange={handleInputChange} placeholder="E.g., Overpayment, Error in assessment" maxLength={200} />
+                    <Label>Filing Status <span className="text-destructive">*</span></Label>
+                    <select name="filing_status" value={formData.filing_status} onChange={handleInputChange} className={selectStyle}>
+                      {FILING_STATUSES.map(s => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label>Brief Description of the Claim <span className="text-destructive">*</span></Label>
-                  <Textarea name="claim_description" value={formData.claim_description} onChange={handleInputChange} placeholder="Describe the details surrounding this refund claim..." className="min-h-[120px] resize-y" maxLength={1500} />
-                  <p className="text-xs text-muted-foreground text-right">{formData.claim_description.length} / 1500 characters</p>
+                  <Label>SSN / TIN (Social Security / Tax Identification Number) <span className="text-destructive">*</span></Label>
+                  <Input 
+                    type="text" 
+                    name="ssn_tin" 
+                    value={formData.ssn_tin} 
+                    onChange={handleInputChange} 
+                    placeholder="e.g. XXX-XX-XXXX or Tax ID" 
+                    className="h-10"
+                  />
+                  <p className="text-xs text-muted-foreground">Used for official verification with tax authorities.</p>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label>Refund Method <span className="text-destructive">*</span></Label>
+                  <select name="refund_method" value={formData.refund_method} onChange={handleInputChange} className={selectStyle}>
+                    <option value="">Select refund method...</option>
+                    {refundMethodOptions.map(opt => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-muted-foreground">Your refund will be deposited into this account once approved.</p>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label>Additional Comments <span className="text-muted-foreground text-xs">(Optional)</span></Label>
+                  <Textarea 
+                    name="additional_comments" 
+                    value={formData.additional_comments} 
+                    onChange={handleInputChange} 
+                    placeholder="Any additional information you'd like to share..." 
+                    className="min-h-[100px] resize-y" 
+                    maxLength={1000} 
+                  />
+                  <p className="text-xs text-muted-foreground text-right">{formData.additional_comments.length} / 1000 characters</p>
                 </div>
               </div>
             </div>
           </SlideUp>
         )}
 
-        {/* Step 3: Supporting Documents */}
-        {currentStep === 3 && (
+        {/* Step 2: Supporting Documents */}
+        {currentStep === 2 && (
           <SlideUp>
             <div className="space-y-6">
               <div>
-                <h2 className="text-xl font-bold text-foreground">Supporting Documents</h2>
+                <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+                  <FileText className="h-5 w-5 text-primary" />
+                  Supporting Documents
+                </h2>
                 <p className="text-sm text-muted-foreground mt-1">Upload the required documentation for your tax refund.</p>
               </div>
 
               <div className="space-y-6 pt-4">
                 
                 {/* Upload Buttons */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="relative border-2 border-dashed border-border rounded-xl p-6 text-center hover:bg-muted/50 transition-colors cursor-pointer group">
                     <input type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={(e) => handleFileUpload(e, 'Tax Return')} disabled={isUploading} accept=".pdf,.jpg,.jpeg,.png" />
                     <Upload className="h-6 w-6 text-muted-foreground mx-auto mb-2 group-hover:text-primary transition-colors" />
-                    <p className="text-sm font-semibold">Tax Return Filing *</p>
-                    <p className="text-xs text-muted-foreground mt-1">Official tax return doc</p>
+                    <p className="text-sm font-semibold">Tax Return / Filing *</p>
+                    <p className="text-xs text-muted-foreground mt-1">Required document</p>
                   </div>
                   <div className="relative border-2 border-dashed border-border rounded-xl p-6 text-center hover:bg-muted/50 transition-colors cursor-pointer group">
-                    <input type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={(e) => handleFileUpload(e, 'Payment Receipt')} disabled={isUploading} accept=".pdf,.jpg,.jpeg,.png" />
+                    <input type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={(e) => handleFileUpload(e, 'Supporting Doc')} disabled={isUploading} accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" />
                     <Upload className="h-6 w-6 text-muted-foreground mx-auto mb-2 group-hover:text-primary transition-colors" />
-                    <p className="text-sm font-semibold">Tax Payment Receipt</p>
-                    <p className="text-xs text-muted-foreground mt-1">Proof of payment (optional)</p>
+                    <p className="text-sm font-semibold">Supporting Documents</p>
+                    <p className="text-xs text-muted-foreground mt-1">Optional</p>
                   </div>
                   <div className="relative border-2 border-dashed border-border rounded-xl p-6 text-center hover:bg-muted/50 transition-colors cursor-pointer group">
-                    <input type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={(e) => handleFileUpload(e, 'Supporting Doc')} disabled={isUploading} accept=".pdf,.doc,.docx" />
+                    <input type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={(e) => handleFileUpload(e, 'IRS Notice')} disabled={isUploading} accept=".pdf,.jpg,.jpeg,.png" />
                     <Upload className="h-6 w-6 text-muted-foreground mx-auto mb-2 group-hover:text-primary transition-colors" />
-                    <p className="text-sm font-semibold">Other Documents</p>
-                    <p className="text-xs text-muted-foreground mt-1">Additional proof (optional)</p>
+                    <p className="text-sm font-semibold">IRS Notice / Correspondence</p>
+                    <p className="text-xs text-muted-foreground mt-1">If applicable</p>
                   </div>
                 </div>
 
@@ -404,8 +405,8 @@ export default function TaxRefundWizard() {
           </SlideUp>
         )}
 
-        {/* Step 4: Declarations */}
-        {currentStep === 4 && (
+        {/* Step 3: Declarations */}
+        {currentStep === 3 && (
           <SlideUp>
             <div className="space-y-6">
               <div>
@@ -422,7 +423,7 @@ export default function TaxRefundWizard() {
                   />
                   <div className="grid gap-1.5 leading-none">
                     <label htmlFor="accurate" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer">
-                      I confirm that all information provided is true and accurate.
+                      I confirm that the information provided is accurate.
                     </label>
                     <p className="text-xs text-muted-foreground">Any false claims may lead to rejection and potential account restrictions.</p>
                   </div>
@@ -436,9 +437,9 @@ export default function TaxRefundWizard() {
                   />
                   <div className="grid gap-1.5 leading-none">
                     <label htmlFor="noGuarantee" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer">
-                      I understand that submitting this application does not guarantee approval.
+                      I understand that my application will be reviewed before any decision is made.
                     </label>
-                    <p className="text-xs text-muted-foreground">All claims are subject to thorough review by our tax administration team.</p>
+                    <p className="text-xs text-muted-foreground">All claims are subject to review by our tax administration team.</p>
                   </div>
                 </div>
 
@@ -459,8 +460,8 @@ export default function TaxRefundWizard() {
           </SlideUp>
         )}
 
-        {/* Step 5: Review & Submit */}
-        {currentStep === 5 && (
+        {/* Step 4: Review & Submit */}
+        {currentStep === 4 && (
           <SlideUp>
             <div className="space-y-6">
               <div>
@@ -469,40 +470,69 @@ export default function TaxRefundWizard() {
               </div>
 
               <div className="space-y-6 pt-4">
-                
+
+                {/* Profile Summary */}
                 <div className="bg-muted/30 rounded-xl p-5 border border-border space-y-4">
-                  <div className="flex justify-between items-center pb-2 border-b border-border">
-                    <h3 className="font-bold text-foreground">Tax Refund Details</h3>
-                    <Button variant="link" size="sm" onClick={() => setCurrentStep(2)} className="h-auto p-0">Edit</Button>
+                  <div className="pb-2 border-b border-border">
+                    <h3 className="font-bold text-foreground">Applicant Information</h3>
                   </div>
                   <div className="grid grid-cols-2 gap-y-4 gap-x-6">
                     <div className="space-y-1">
-                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Program</p>
-                      <p className="font-semibold text-foreground text-sm">{formData.tax_refund_program}</p>
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Full Name</p>
+                      <p className="font-semibold text-foreground text-sm">{profile?.first_name} {profile?.last_name}</p>
                     </div>
+                    <div className="space-y-1">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Email</p>
+                      <p className="font-semibold text-foreground text-sm">{profile?.email}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Customer ID</p>
+                      <p className="font-poppins font-semibold text-foreground text-sm">{profile?.account_number || "N/A"}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">KYC Status</p>
+                      <p className="font-semibold text-foreground text-sm">{profile?.kyc_status?.toUpperCase() || "UNVERIFIED"}</p>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Tax Refund Details */}
+                <div className="bg-muted/30 rounded-xl p-5 border border-border space-y-4">
+                  <div className="flex justify-between items-center pb-2 border-b border-border">
+                    <h3 className="font-bold text-foreground">Tax Refund Details</h3>
+                    <Button variant="link" size="sm" onClick={() => setCurrentStep(1)} className="h-auto p-0">Edit</Button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-y-4 gap-x-6">
                     <div className="space-y-1">
                       <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Tax Year</p>
                       <p className="font-semibold text-foreground text-sm">{formData.tax_year}</p>
                     </div>
                     <div className="space-y-1">
-                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Amount Requested</p>
-                      <p className="font-poppins font-bold text-primary text-sm">${parseFloat(formData.requested_amount || '0').toLocaleString()}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Reason</p>
-                      <p className="font-semibold text-foreground text-sm">{formData.refund_reason}</p>
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Filing Status</p>
+                      <p className="font-semibold text-foreground text-sm">{formData.filing_status}</p>
                     </div>
                     <div className="space-y-1 col-span-2">
-                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Claim Description</p>
-                      <p className="text-foreground text-sm text-muted-foreground">{formData.claim_description}</p>
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">SSN / TIN</p>
+                      <p className="font-semibold text-foreground text-sm">{formData.ssn_tin}</p>
                     </div>
+                    <div className="space-y-1 col-span-2">
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Refund Method</p>
+                      <p className="font-semibold text-foreground text-sm">{formData.refund_method}</p>
+                    </div>
+                    {formData.additional_comments && (
+                      <div className="space-y-1 col-span-2">
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Additional Comments</p>
+                        <p className="text-foreground text-sm">{formData.additional_comments}</p>
+                      </div>
+                    )}
                   </div>
                 </div>
 
+                {/* Uploaded Documents */}
                 <div className="bg-muted/30 rounded-xl p-5 border border-border space-y-4">
                   <div className="flex justify-between items-center pb-2 border-b border-border">
                     <h3 className="font-bold text-foreground">Uploaded Documents</h3>
-                    <Button variant="link" size="sm" onClick={() => setCurrentStep(3)} className="h-auto p-0">Edit</Button>
+                    <Button variant="link" size="sm" onClick={() => setCurrentStep(2)} className="h-auto p-0">Edit</Button>
                   </div>
                   <div className="space-y-2">
                     {documents.map((doc, idx) => (
@@ -511,6 +541,17 @@ export default function TaxRefundWizard() {
                         <span className="font-medium text-foreground">{doc.name}</span>
                       </div>
                     ))}
+                  </div>
+                </div>
+
+                {/* Declaration Summary */}
+                <div className="bg-muted/30 rounded-xl p-5 border border-border space-y-3">
+                  <div className="pb-2 border-b border-border">
+                    <h3 className="font-bold text-foreground">Declarations</h3>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <CheckCircle2 className="h-4 w-4 text-primary" />
+                    <span className="text-foreground">All declarations accepted</span>
                   </div>
                 </div>
 

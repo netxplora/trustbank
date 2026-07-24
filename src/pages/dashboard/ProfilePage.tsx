@@ -29,6 +29,7 @@ const ProfilePage = () => {
     dateOfBirth: "", gender: "", nationality: "",
     mailingAddress: "", city: "", stateProvince: "", postalCode: "", country: "",
     occupation: "", employerName: "", annualIncomeRange: "", sourceOfFunds: "", taxId: "",
+    govIdType: "", govIdNumber: "",
     preferredLanguage: "en", preferredCurrency: "USD"
   });
 
@@ -52,6 +53,8 @@ const ProfilePage = () => {
         annualIncomeRange: profile.annual_income_range || "",
         sourceOfFunds: profile.source_of_funds || "",
         taxId: profile.tax_id || "",
+        govIdType: profile.gov_id_type || "",
+        govIdNumber: profile.gov_id_number || "",
         preferredLanguage: profile.preferred_language || "en",
         preferredCurrency: profile.preferred_currency || "USD",
       });
@@ -181,6 +184,8 @@ const ProfilePage = () => {
       annual_income_range: form.annualIncomeRange,
       source_of_funds: form.sourceOfFunds,
       tax_id: form.taxId,
+      gov_id_type: form.govIdType,
+      gov_id_number: form.govIdNumber,
       preferred_language: form.preferredLanguage,
       preferred_currency: form.preferredCurrency,
     }).eq("user_id", user.id);
@@ -337,6 +342,35 @@ const ProfilePage = () => {
                     <Input className="h-8 text-xs rounded-lg" value={form.nationality} onChange={(e) => setForm(p => ({ ...p, nationality: e.target.value }))} placeholder="e.g. American, British, Canadian" />
                   </div>
                 </div>
+
+                <div className="pt-3 border-t border-border/40 mt-3">
+                  <h3 className="text-sm font-semibold font-poppins mb-2 flex items-center gap-1.5"><ShieldCheck className="w-4 h-4 text-primary" /> Government-Issued Identification (KYC)</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Government ID Type</Label>
+                      <select 
+                        className="flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary"
+                        value={form.govIdType} 
+                        onChange={(e) => setForm(p => ({ ...p, govIdType: e.target.value }))}
+                      >
+                        <option value="">Select ID Type...</option>
+                        <option value="Passport">Passport</option>
+                        <option value="Driver's License">Driver's License</option>
+                        <option value="Tax ID / SSN">Tax ID / SSN</option>
+                        <option value="Other Government ID">Other Government ID</option>
+                      </select>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Government ID Number</Label>
+                      <Input 
+                        className="h-8 text-xs rounded-lg" 
+                        value={form.govIdNumber} 
+                        onChange={(e) => setForm(p => ({ ...p, govIdNumber: e.target.value }))} 
+                        placeholder="e.g. A12345678 or License No." 
+                      />
+                    </div>
+                  </div>
+                </div>
               </TabsContent>
 
               <TabsContent value="address" className="mt-0 space-y-4">
@@ -407,10 +441,6 @@ const ProfilePage = () => {
                         <option value="Inheritance">Inheritance</option>
                         <option value="Other">Other</option>
                       </select>
-                    </div>
-                    <div className="space-y-1 md:col-span-2">
-                      <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Tax ID / SSN</Label>
-                      <Input className="h-8 text-xs rounded-lg" value={form.taxId} onChange={(e) => setForm(p => ({ ...p, taxId: e.target.value }))} type="password" placeholder="•••-••-••••" />
                     </div>
                   </div>
                 </div>

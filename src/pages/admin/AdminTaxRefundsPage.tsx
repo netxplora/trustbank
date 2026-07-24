@@ -264,50 +264,50 @@ export default function AdminTaxRefundsPage() {
 
       {/* Detail / Update Dialog */}
       <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
-        <DialogContent className="sm:max-w-[520px] rounded-2xl">
-          <DialogHeader>
-            <DialogTitle className="font-poppins text-xl">Review Application</DialogTitle>
-            <DialogDescription>
+        <DialogContent className="w-[95vw] max-w-lg max-h-[85vh] overflow-y-auto rounded-2xl p-4 sm:p-6">
+          <DialogHeader className="pb-2 border-b border-border/60">
+            <DialogTitle className="font-poppins text-base sm:text-lg font-bold">Review Application</DialogTitle>
+            <DialogDescription className="text-xs">
               {selectedApp?.application_number} — Tax Year {selectedApp?.tax_year}
             </DialogDescription>
           </DialogHeader>
 
           {selectedApp && (
-            <div className="space-y-4 py-2">
-              <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="space-y-4 py-2 text-xs sm:text-sm">
+              <div className="grid grid-cols-2 gap-3 bg-muted/20 p-3 rounded-xl border border-border/40">
                 <div>
-                  <p className="text-xs text-muted-foreground font-medium">Applicant</p>
-                  <p className="font-semibold text-foreground">{selectedApp.profiles?.display_name || "Unknown"}</p>
+                  <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Applicant</p>
+                  <p className="font-semibold text-foreground truncate">{selectedApp.profiles?.display_name || "Unknown"}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground font-medium">Email</p>
-                  <p className="font-semibold text-foreground">{selectedApp.profiles?.email || "—"}</p>
+                  <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Email</p>
+                  <p className="font-semibold text-foreground truncate">{selectedApp.profiles?.email || "—"}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground font-medium">Program</p>
-                  <p className="font-semibold text-foreground">{selectedApp.tax_refund_program || "Standard"}</p>
+                  <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Tax Year</p>
+                  <p className="font-semibold text-foreground">{selectedApp.tax_year}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground font-medium">Filing Status</p>
+                  <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Filing Status</p>
                   <p className="font-semibold text-foreground">{selectedApp.filing_status}</p>
                 </div>
-                <div>
-                  <p className="text-xs text-muted-foreground font-medium">Requested Amount</p>
-                  <p className="font-bold text-primary">${(selectedApp.requested_amount || selectedApp.estimated_refund_amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground font-medium">Reason</p>
-                  <p className="font-semibold text-foreground">{selectedApp.refund_reason || "—"}</p>
-                </div>
-                <div className="col-span-2">
-                  <p className="text-xs text-muted-foreground font-medium">Claim Description</p>
-                  <p className="text-foreground text-xs">{selectedApp.claim_description || "—"}</p>
-                </div>
+                {selectedApp.ssn_tin && (
+                  <div className="col-span-2">
+                    <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">SSN / TIN</p>
+                    <p className="font-semibold text-foreground font-mono">{selectedApp.ssn_tin}</p>
+                  </div>
+                )}
+                {selectedApp.refund_method && (
+                  <div className="col-span-2">
+                    <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Refund Method</p>
+                    <p className="font-semibold text-foreground">{selectedApp.refund_method}</p>
+                  </div>
+                )}
               </div>
 
               {selectedApp.documents && selectedApp.documents.length > 0 && (
                 <div>
-                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Attached Documents</p>
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-2">Attached Documents</p>
                   <div className="flex flex-col gap-2">
                     {selectedApp.documents.map((doc, i) => (
                       <a 
@@ -317,24 +317,24 @@ export default function AdminTaxRefundsPage() {
                         rel="noopener noreferrer"
                         className="flex items-center gap-2 p-2 rounded-lg border border-border/50 bg-muted/30 hover:bg-muted/80 transition-colors group"
                       >
-                        <div className="h-8 w-8 rounded bg-primary/10 flex items-center justify-center text-primary shrink-0 group-hover:scale-105 transition-transform">
-                          <FileSpreadsheet className="h-4 w-4" />
+                        <div className="h-7 w-7 rounded bg-primary/10 flex items-center justify-center text-primary shrink-0 group-hover:scale-105 transition-transform">
+                          <FileSpreadsheet className="h-3.5 w-3.5" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-foreground truncate">{doc.name}</p>
-                          <p className="text-[10px] text-muted-foreground uppercase">{doc.uploaded_at || "Submitted"}</p>
+                          <p className="text-xs font-semibold text-foreground truncate">{doc.name}</p>
+                          <p className="text-[9px] text-muted-foreground uppercase">{doc.uploaded_at ? new Date(doc.uploaded_at).toLocaleDateString() : "Submitted"}</p>
                         </div>
-                        <Eye className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                        <Eye className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
                       </a>
                     ))}
                   </div>
                 </div>
               )}
 
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Update Status</label>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Update Status</label>
                 <select
-                  className="w-full h-11 rounded-xl border border-input bg-background px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full h-10 rounded-xl border border-input bg-background px-3 text-xs focus:outline-none focus:ring-2 focus:ring-primary"
                   value={newStatus}
                   onChange={(e) => setNewStatus(e.target.value as TaxRefundApplication["status"])}
                 >
@@ -344,8 +344,8 @@ export default function AdminTaxRefundsPage() {
                 </select>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Admin Notes</label>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Admin Notes</label>
                 <Textarea
                   placeholder="Add internal notes about this application..."
                   value={adminNotes}

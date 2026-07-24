@@ -13,11 +13,10 @@ import { Label } from "@/components/ui/label";
 import { ChevronRight, ChevronLeft, Upload, FileText, CheckCircle2, ShieldCheck, ArrowLeft, Loader2 } from "lucide-react";
 
 const STEPS = [
-  { id: 1, title: "Profile Verification" },
-  { id: 2, title: "Business Information" },
-  { id: 3, title: "Grant Request" },
-  { id: 4, title: "Supporting Documents" },
-  { id: 5, title: "Review & Submit" }
+  { id: 1, title: "Business Information" },
+  { id: 2, title: "Grant Request" },
+  { id: 3, title: "Supporting Documents" },
+  { id: 4, title: "Review & Submit" }
 ];
 
 export default function GrantApplicationWizard() {
@@ -68,6 +67,9 @@ export default function GrantApplicationWizard() {
         if (selectedProg) {
           setFormData(prev => ({ ...prev, requested_amount: selectedProg.funding_amount.toString() }));
         }
+      } else if (!localStorage.getItem("grant_application_draft")) {
+        toast({ title: "No Program Selected", description: "Please select a grant program to apply for.", variant: "destructive" });
+        navigate("/dashboard/grants");
       }
 
       if (user?.id) {
@@ -162,19 +164,19 @@ export default function GrantApplicationWizard() {
   };
 
   const validateStep = (step: number) => {
-    if (step === 2) {
+    if (step === 1) {
       if (!formData.business_name || !formData.business_type || !formData.industry || !formData.year_started) {
         toast({ title: "Missing Information", description: "Please fill in all business information fields.", variant: "destructive" });
         return false;
       }
     }
-    if (step === 3) {
+    if (step === 2) {
       if (!formData.grant_program_id || !formData.requested_amount || !formData.proposal_summary) {
         toast({ title: "Missing Information", description: "Please fill in all grant request fields.", variant: "destructive" });
         return false;
       }
     }
-    if (step === 5) {
+    if (step === 4) {
       if (!confirmations.accurate || !confirmations.eligibility || !confirmations.terms) {
         toast({ title: "Confirmations Required", description: "Please check all confirmation boxes to proceed.", variant: "destructive" });
         return false;
@@ -196,7 +198,7 @@ export default function GrantApplicationWizard() {
   };
 
   const handleSubmit = async () => {
-    if (!validateStep(5)) return;
+    if (!validateStep(4)) return;
     if (!user) return;
 
     setIsSubmitting(true);
@@ -275,68 +277,8 @@ export default function GrantApplicationWizard() {
       <SlideUp key={currentStep}>
         <div className="bg-card border border-border rounded-xl p-6 sm:p-8 shadow-sm">
           
-          {/* STEP 1: Profile Verification */}
+          {/* STEP 1: Business Information */}
           {currentStep === 1 && (
-            <div className="space-y-6">
-              <div className="flex items-center gap-3 border-b border-border pb-4">
-                <ShieldCheck className="h-6 w-6 text-primary" />
-                <div>
-                  <h2 className="text-xl font-bold text-foreground">Profile Verification</h2>
-                  <p className="text-sm text-muted-foreground">This information is synchronized from your verified profile.</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-1.5">
-                  <Label>Full Name</Label>
-                  <Input readOnly value={`${profile?.first_name || ""} ${profile?.last_name || ""}`.trim() || profile?.display_name || "N/A"} className="bg-muted/50 cursor-not-allowed text-muted-foreground" />
-                </div>
-                <div className="space-y-1.5">
-                  <Label>Customer ID</Label>
-                  <Input readOnly value={profile?.user_id || "N/A"} className="bg-muted/50 cursor-not-allowed text-muted-foreground font-mono text-xs" />
-                </div>
-                <div className="space-y-1.5">
-                  <Label>Email Address</Label>
-                  <Input readOnly value={profile?.email || "N/A"} className="bg-muted/50 cursor-not-allowed text-muted-foreground" />
-                </div>
-                <div className="space-y-1.5">
-                  <Label>Phone Number</Label>
-                  <Input readOnly value={profile?.phone || "N/A"} className="bg-muted/50 cursor-not-allowed text-muted-foreground" />
-                </div>
-                <div className="space-y-1.5">
-                  <Label>Date of Birth</Label>
-                  <Input readOnly value={profile?.date_of_birth ? new Date(profile.date_of_birth).toLocaleDateString() : "N/A"} className="bg-muted/50 cursor-not-allowed text-muted-foreground" />
-                </div>
-                <div className="space-y-1.5">
-                  <Label>Residential Address</Label>
-                  <Input readOnly value={profile?.address || "N/A"} className="bg-muted/50 cursor-not-allowed text-muted-foreground" />
-                </div>
-                <div className="space-y-1.5">
-                  <Label>State/Province & Country</Label>
-                  <Input readOnly value={`${profile?.state_province || ""}, ${profile?.country || ""}`.trim() || "N/A"} className="bg-muted/50 cursor-not-allowed text-muted-foreground" />
-                </div>
-                <div className="space-y-1.5">
-                  <Label>KYC Verification</Label>
-                  <Input readOnly value={`Tier ${profile?.kyc_tier || 1} - ${profile?.kyc_status || 'Pending'}`} className="bg-muted/50 cursor-not-allowed text-muted-foreground" />
-                </div>
-                <div className="space-y-1.5">
-                  <Label>Savings Account</Label>
-                  <Input readOnly value={savingsAcc} className="bg-muted/50 cursor-not-allowed text-muted-foreground font-mono" />
-                </div>
-                <div className="space-y-1.5">
-                  <Label>Current Account</Label>
-                  <Input readOnly value={currentAcc} className="bg-muted/50 cursor-not-allowed text-muted-foreground font-mono" />
-                </div>
-              </div>
-              <div className="bg-blue-500/10 border border-blue-500/20 text-blue-700 dark:text-blue-400 p-4 rounded-lg text-sm flex gap-3">
-                <ShieldCheck className="h-5 w-5 shrink-0" />
-                <p>If any of the above information is incorrect, please update it in your <a href="/dashboard/profile" className="font-bold underline hover:text-blue-600">Profile Settings</a> before proceeding with this application.</p>
-              </div>
-            </div>
-          )}
-
-          {/* STEP 2: Business Information */}
-          {currentStep === 2 && (
             <div className="space-y-6">
               <div className="border-b border-border pb-4">
                 <h2 className="text-xl font-bold text-foreground">Business Information</h2>
@@ -381,8 +323,8 @@ export default function GrantApplicationWizard() {
             </div>
           )}
 
-          {/* STEP 3: Grant Request */}
-          {currentStep === 3 && (
+          {/* STEP 2: Grant Request */}
+          {currentStep === 2 && (
             <div className="space-y-6">
               <div className="border-b border-border pb-4">
                 <h2 className="text-xl font-bold text-foreground">Grant Request Details</h2>
@@ -393,12 +335,7 @@ export default function GrantApplicationWizard() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-1.5">
                     <Label>Grant Program <span className="text-destructive">*</span></Label>
-                    <select name="grant_program_id" value={formData.grant_program_id} onChange={handleInputChange} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
-                      <option value="">Select a program...</option>
-                      {programs.map(p => (
-                        <option key={p.id} value={p.id}>{p.title}</option>
-                      ))}
-                    </select>
+                    <Input readOnly value={programs.find(p => p.id === formData.grant_program_id)?.title || "Selected Program"} className="bg-muted/50 cursor-not-allowed text-muted-foreground font-semibold" />
                   </div>
                   <div className="space-y-1.5">
                     <Label>Amount Requested ($) <span className="text-destructive">*</span></Label>
@@ -415,8 +352,8 @@ export default function GrantApplicationWizard() {
             </div>
           )}
 
-          {/* STEP 4: Documents */}
-          {currentStep === 4 && (
+          {/* STEP 3: Documents */}
+          {currentStep === 3 && (
             <div className="space-y-6">
               <div className="border-b border-border pb-4">
                 <h2 className="text-xl font-bold text-foreground">Supporting Documents</h2>
@@ -468,8 +405,8 @@ export default function GrantApplicationWizard() {
             </div>
           )}
 
-          {/* STEP 5: Review & Submit */}
-          {currentStep === 5 && (
+          {/* STEP 4: Review & Submit */}
+          {currentStep === 4 && (
             <div className="space-y-6">
               <div className="border-b border-border pb-4">
                 <h2 className="text-xl font-bold text-foreground">Review & Submit</h2>
