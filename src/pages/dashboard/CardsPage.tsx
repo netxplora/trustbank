@@ -30,7 +30,21 @@ interface Card {
   delivery_address?: string;
 }
 
-const InfiniteMetalCard = ({ card, onViewDetails, showNumber, setShowNumber, isFlipped, setIsFlipped }: { card: Card; onViewDetails: () => void; showNumber: boolean; setShowNumber: (v: boolean) => void; isFlipped: boolean; setIsFlipped: (v: boolean) => void }) => {
+const InfiniteMetalCard = ({ 
+  card, 
+  onViewDetails, 
+  showNumber, 
+  setShowNumber, 
+  isFlipped, 
+  setIsFlipped 
+}: { 
+  card: Card; 
+  onViewDetails: () => void; 
+  showNumber: boolean; 
+  setShowNumber: (v: boolean) => void; 
+  isFlipped: boolean; 
+  setIsFlipped: (v: boolean) => void 
+}) => {
   const { identity } = useBrand();
   const isVisa = card.card_brand === "Visa";
   const last4 = (card.card_number || "").slice(-4);
@@ -48,17 +62,14 @@ const InfiniteMetalCard = ({ card, onViewDetails, showNumber, setShowNumber, isF
           {/* Gold geometric pattern */}
           <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
             <svg viewBox="0 0 400 252" className="absolute inset-0 w-full h-full" preserveAspectRatio="xMidYMid slice">
-              {/* Decorative gold lines */}
               <line x1="0" y1="0" x2="400" y2="252" stroke="url(#goldGrad)" strokeWidth="0.3" opacity="0.3" />
               <line x1="400" y1="0" x2="0" y2="252" stroke="url(#goldGrad)" strokeWidth="0.3" opacity="0.2" />
               <line x1="200" y1="0" x2="200" y2="252" stroke="url(#goldGrad)" strokeWidth="0.2" opacity="0.15" />
               <line x1="0" y1="126" x2="400" y2="126" stroke="url(#goldGrad)" strokeWidth="0.2" opacity="0.15" />
-              {/* Corner accents */}
               <path d="M 0 0 L 60 0 L 0 40 Z" fill="url(#goldGrad)" opacity="0.06" />
               <path d="M 400 252 L 340 252 L 400 212 Z" fill="url(#goldGrad)" opacity="0.06" />
               <path d="M 400 0 L 340 0 L 400 40 Z" fill="url(#goldGrad)" opacity="0.04" />
               <path d="M 0 252 L 60 252 L 0 212 Z" fill="url(#goldGrad)" opacity="0.04" />
-              {/* Diamond pattern */}
               <rect x="170" y="96" width="60" height="60" fill="none" stroke="url(#goldGrad)" strokeWidth="0.4" opacity="0.12" transform="rotate(45, 200, 126)" />
               <rect x="180" y="106" width="40" height="40" fill="none" stroke="url(#goldGrad)" strokeWidth="0.3" opacity="0.08" transform="rotate(45, 200, 126)" />
               <defs>
@@ -71,15 +82,11 @@ const InfiniteMetalCard = ({ card, onViewDetails, showNumber, setShowNumber, isF
             </svg>
           </div>
 
-          {/* Gold edge line top */}
           <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-yellow-600/50 to-transparent z-10"></div>
-          {/* Gold edge line bottom */}
           <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-yellow-600/50 to-transparent z-10"></div>
 
-          {/* Holographic shimmer on hover */}
           <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-yellow-200/10 to-transparent translate-x-[-150%] group-hover:translate-x-[150%] transition-transform duration-1000 z-[5] pointer-events-none"></div>
 
-          {/* Vignette */}
           <div className="absolute inset-0 bg-gradient-to-t from-[#0d0b08] via-transparent to-[#1c1c1c]/60 z-[1]"></div>
           <div className="absolute inset-0 bg-gradient-to-r from-[#0d0b08]/60 via-transparent to-[#0d0b08]/40 z-[1]"></div>
 
@@ -209,7 +216,6 @@ const ATMCard = ({ card, onViewDetails }: { card: Card; onViewDetails: () => voi
   const isVisa = card.card_brand?.toLowerCase() === 'visa';
   const isPhysical = card.is_physical === true || (card.card_type !== 'virtual' && card.card_type !== 'digital');
 
-  // Render luxurious Infinite Metal design
   if (card.card_type === 'infinite') {
     return <InfiniteMetalCard card={card} onViewDetails={onViewDetails} showNumber={showNumber} setShowNumber={setShowNumber} isFlipped={isFlipped} setIsFlipped={setIsFlipped} />;
   }
@@ -218,10 +224,9 @@ const ATMCard = ({ card, onViewDetails }: { card: Card; onViewDetails: () => voi
     <div className="perspective-1000 w-full max-w-[400px] aspect-[1.586/1] cursor-pointer font-sans group mx-auto" onClick={() => setIsFlipped(!isFlipped)}>
       <div className={`relative w-full h-full duration-700 preserve-3d shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] rounded-xl ${isFlipped ? 'rotate-y-180' : ''}`}>
 
-        {/* Front of Card */}
+        {/* Front */}
         <div className={`absolute inset-0 backface-hidden rounded-xl overflow-hidden flex flex-col justify-between p-3.5 sm:p-6 pt-3 sm:pt-5 pb-3 sm:pb-5 text-white ${isPhysical ? 'bg-[#111] border-neutral-700/50' : 'bg-[#01142a] border-blue-900/40'
           } ${isFlipped ? 'pointer-events-none' : ''}`}>
-          {/* Earth/Network Abstract SVG Background */}
           <div className="absolute inset-0 z-0 overflow-hidden opacity-80 pointer-events-none">
             <div className="absolute right-[-30%] top-[-20%] w-[90%] h-[140%] opacity-40">
               <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" className={`w-full h-full mix-blend-screen ${isPhysical ? 'text-neutral-400' : 'text-cyan-400'
@@ -237,14 +242,12 @@ const ATMCard = ({ card, onViewDetails }: { card: Card; onViewDetails: () => voi
                 <circle cx="50" cy="150" r="1" fill="currentColor" className="opacity-80" />
               </svg>
             </div>
-            {/* Glowing waves */}
             <div className={`absolute left-[-20%] top-[40%] -translate-y-1/2 w-[140%] h-[80px] blur-xl transform -rotate-12 mix-blend-screen ${isPhysical ? 'bg-gradient-to-r from-white/0 via-white/20 to-neutral-500/0' : 'bg-gradient-to-r from-cyan-500/0 via-cyan-400/30 to-blue-500/0'
               }`}></div>
             <div className={`absolute left-[-10%] top-[45%] -translate-y-[40%] w-[120%] h-[40px] blur-md transform -rotate-6 mix-blend-screen ${isPhysical ? 'bg-gradient-to-r from-neutral-600/0 via-white/30 to-neutral-600/0' : 'bg-gradient-to-r from-blue-600/0 via-cyan-300/40 to-blue-600/0'
               }`}></div>
             <div className={`absolute left-[20%] top-[50%] w-[100%] h-[20px] blur-sm transform -rotate-[8deg] mix-blend-screen ${isPhysical ? 'bg-gradient-to-r from-white/0 via-white/30 to-transparent' : 'bg-gradient-to-r from-cyan-300/0 via-cyan-200/50 to-transparent'
               }`}></div>
-            {/* Dark vignette */}
             <div className={`absolute inset-0 bg-gradient-to-t via-transparent ${isPhysical ? 'from-[#111] to-[#111]/80' : 'from-[#01142a] to-[#01142a]/80'}`}></div>
             <div className={`absolute inset-0 bg-gradient-to-r via-transparent ${isPhysical ? 'from-[#111] to-[#111]/40' : 'from-[#01142a] to-[#01142a]/40'}`}></div>
           </div>
@@ -255,7 +258,7 @@ const ATMCard = ({ card, onViewDetails }: { card: Card; onViewDetails: () => voi
             </div>
           )}
 
-          {/* Top Row: Logo & Card Type */}
+          {/* Top Row */}
           <div className="relative z-10 flex justify-between items-start pt-0.5">
             <div className="flex items-center gap-1 sm:gap-2 drop-shadow-md">
               <img src={logo} alt="Logo" className="h-4 w-4 sm:h-6 sm:w-6 opacity-90 invert brightness-0" />
@@ -267,7 +270,7 @@ const ATMCard = ({ card, onViewDetails }: { card: Card; onViewDetails: () => voi
             </div>
           </div>
 
-          {/* Middle Row: Chip, Contactless & Number */}
+          {/* Middle Row */}
           <div className="relative z-10 flex flex-col gap-1.5 sm:gap-3 mt-1 sm:mt-2">
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="w-0 h-0 border-t-[4px] sm:border-t-[5px] border-t-transparent border-r-[5px] sm:border-r-[7px] border-r-white border-b-[4px] sm:border-b-[5px] border-b-transparent mr-0.5 opacity-90 drop-shadow-md" />
@@ -325,7 +328,7 @@ const ATMCard = ({ card, onViewDetails }: { card: Card; onViewDetails: () => voi
           </div>
         </div>
 
-        {/* Back of Card */}
+        {/* Back */}
         <div className={`absolute inset-0 backface-hidden rotate-y-180 rounded-xl overflow-hidden flex flex-col pt-6 pb-4 text-white ${isVisa ? "bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700/50" : "bg-gradient-to-br from-neutral-800 to-neutral-900 border border-neutral-700/50"
           } ${!isFlipped ? 'pointer-events-none' : ''}`}>
           <div className="w-full h-12 bg-gradient-to-b from-[#111] via-[#222] to-[#0a0a0a] mt-4 shadow-inner border-y border-black/50"></div>
@@ -344,7 +347,7 @@ const ATMCard = ({ card, onViewDetails }: { card: Card; onViewDetails: () => voi
               <span className="text-[8px] font-sans font-medium tracking-widest uppercase">{identity?.platform_name || "TrustBank"}</span>
             </div>
             <p className="text-[7.5px] text-white/50 text-center uppercase max-w-[90%] mx-auto leading-tight font-semibold tracking-widest">
-              This card is property of {identity?.platform_name || "TrustBank"}. If found, please return to the nearest branch or call 1-800-TRUST-BANK. Use of this card is subject to the cardholder agreement.
+              This card is property of {identity?.platform_name || "TrustBank"}. If found, please return to the nearest branch. Use of this card is subject to the cardholder agreement.
             </p>
           </div>
           <div className="px-6 flex justify-between items-center opacity-70 mt-auto border-t border-white/10 pt-3">
@@ -388,10 +391,8 @@ const CardsPage = () => {
     return () => { supabase.removeChannel(channel); };
   }, [user?.id]);
 
-  // Robust check for legacy cards where is_physical might be false by default
   const isCardPhysical = (c: Card) => {
     if (c.is_physical) return true;
-    // Fallback for legacy DB rows
     return c.card_type === 'physical' || c.card_type === 'debit' || c.card_type === 'premium' || c.card_type === 'infinite';
   };
 
@@ -404,29 +405,25 @@ const CardsPage = () => {
       const { data } = await supabase.from("cms_site_settings").select("value").eq("key", "physical_card_fee").single();
       if (data && data.value) setBaseFee(parseFloat(data.value));
     } catch {
-      // fallback base fee
+      // Fallback base fee
     }
   };
 
   const fetchCards = async () => {
     if (!user) {
-      console.warn("[Cards] No user session, skipping fetch");
       setLoading(false);
       return;
     }
     try {
-      console.log("[Cards] Fetching cards for user:", user.id);
-      const { data, error, status, statusText } = await supabase.from("cards").select("*").eq("user_id", user.id);
+      const { data, error } = await supabase.from("cards").select("*").eq("user_id", user.id);
       
       if (error) {
-        console.error("[Cards] Supabase error:", error.message, "| Code:", error.code, "| Status:", status, statusText);
+        console.error("[Cards] Supabase error:", error.message);
       }
       
       const loadedCards = (data as Card[]) || [];
-      console.log("[Cards] Loaded", loadedCards.length, "cards:", loadedCards.map(c => ({ id: c.id, type: c.card_type, is_physical: c.is_physical, status: c.status })));
 
       setCards(prev => {
-        // Only auto-switch on initial load if physical is empty
         if (prev.length === 0 && loadedCards.length > 0) {
           const hasPhysical = loadedCards.some(c => isCardPhysical(c));
           const hasVirtual = loadedCards.some(c => !isCardPhysical(c));
@@ -447,14 +444,13 @@ const CardsPage = () => {
     const card = cards.find(c => c.id === id);
     if (!card) return;
 
-    // Optimistic update
     setCards(prev => prev.map(c => c.id === id ? { ...c, is_frozen: !card.is_frozen } : c));
     if (selectedCard?.id === id) {
       setSelectedCard(prev => prev ? { ...prev, is_frozen: !card.is_frozen } : null);
     }
 
     await supabase.from("cards").update({ is_frozen: !card.is_frozen }).eq("id", id);
-    toast({ title: card.is_frozen ? "Card Security Restored" : "Card Frozen Successfully" });
+    toast({ title: card.is_frozen ? "Card Unfrozen" : "Card Frozen" });
     fetchCards();
   };
 
@@ -464,7 +460,6 @@ const CardsPage = () => {
 
     const newStatus = card.status === "inactive" ? "active" : "inactive";
 
-    // Optimistic update
     setCards(prev => prev.map(c => c.id === id ? { ...c, status: newStatus } : c));
     if (selectedCard?.id === id) {
       setSelectedCard(prev => prev ? { ...prev, status: newStatus } : null);
@@ -478,15 +473,14 @@ const CardsPage = () => {
   const updateLimit = async () => {
     if (!selectedCard || !newLimit) return;
     const val = parseInt(newLimit.replace(/,/g, ""));
-    if (isNaN(val) || val < 100) { toast({ title: "Invalid Limit Authorization", variant: "destructive" }); return; }
+    if (isNaN(val) || val < 100) { toast({ title: "Invalid Limit", variant: "destructive" }); return; }
 
-    // Optimistic update
     const cardId = selectedCard.id;
     setCards(prev => prev.map(c => c.id === cardId ? { ...c, spending_limit: val } : c));
     setSelectedCard(prev => prev ? { ...prev, spending_limit: val } : null);
 
     await supabase.from("cards").update({ spending_limit: val }).eq("id", cardId);
-    toast({ title: "Limit Authorization Updated", description: `New limit: $${val.toLocaleString()}` });
+    toast({ title: "Limit Updated", description: `New limit: $${val.toLocaleString()}` });
     setShowLimits(false);
     setNewLimit("");
     fetchCards();
@@ -496,7 +490,6 @@ const CardsPage = () => {
     const card = cards.find(c => c.id === id);
     if (!card) return;
 
-    // Optimistic update
     const newValue = !card[setting];
     setCards(prev => prev.map(c => c.id === id ? { ...c, [setting]: newValue } : c));
     if (selectedCard?.id === id) {
@@ -507,12 +500,11 @@ const CardsPage = () => {
       ? { online_enabled: newValue }
       : { international_enabled: newValue };
     await supabase.from("cards").update(updateData).eq("id", id);
-    toast({ title: "Security Policy Updated" });
+    toast({ title: "Card Setting Updated" });
     fetchCards();
   };
 
   const deleteCard = async (id: string) => {
-    // Optimistic update
     setCards(prev => prev.filter(c => c.id !== id));
     setShowDetails(false);
     setSelectedCard(null);
@@ -520,15 +512,14 @@ const CardsPage = () => {
     const { error } = await supabase.from("cards").delete().eq("id", id);
     if (error) {
       toast({ title: "Deletion Failed", description: error.message, variant: "destructive" });
-      fetchCards(); // Revert on failure
+      fetchCards();
       return;
     }
-    toast({ title: "Card Deleted", description: "Your card has been permanently removed." });
+    toast({ title: "Card Deleted", description: "Card has been removed." });
     fetchCards();
   };
 
   const replaceCard = async (id: string) => {
-    // Optimistic update
     setCards(prev => prev.filter(c => c.id !== id));
     setShowDetails(false);
     setSelectedCard(null);
@@ -536,10 +527,10 @@ const CardsPage = () => {
     const { error } = await supabase.from("cards").delete().eq("id", id);
     if (error) {
       toast({ title: "Operation Failed", description: error.message, variant: "destructive" });
-      fetchCards(); // Revert on failure
+      fetchCards();
       return;
     }
-    toast({ title: "Card Invalidated", description: "Your old card has been removed. Please provision a replacement." });
+    toast({ title: "Card Replaced", description: "Old card removed. You may provision a replacement." });
     setShowRequest(true);
     fetchCards();
   };
@@ -561,47 +552,42 @@ const CardsPage = () => {
     const physicalCount = cards.filter(c => isCardPhysical(c)).length;
 
     if (isVirtual && virtualCount >= 1) {
-      toast({ title: "Limit Exceeded", description: "You can only have 1 active virtual card.", variant: "destructive" });
+      toast({ title: "Limit Reached", description: "You already have an active virtual card.", variant: "destructive" });
       return;
     }
 
     if (!isVirtual && physicalCount >= 1) {
-      toast({ title: "Limit Exceeded", description: "You can only have 1 active physical card.", variant: "destructive" });
+      toast({ title: "Limit Reached", description: "You already have an active physical card.", variant: "destructive" });
       return;
     }
 
     if (!isVirtual && !deliveryAddress) {
-      toast({ title: "Validation Error", description: "Delivery address is required for physical cards.", variant: "destructive" });
+      toast({ title: "Validation Error", description: "Delivery address is required for physical card.", variant: "destructive" });
       return;
     }
 
-    // Handle physical card fee deduction
     let primaryAccountId = null;
-    let newBalance = 0;
     if (!isVirtual) {
       const { data: accounts } = await supabase.from("accounts").select("id, balance").eq("user_id", user.id).in("account_type", ["checking", "savings"]).order("balance", { ascending: false }).limit(1);
 
       if (!accounts || accounts.length === 0 || accounts[0].balance < currentFee) {
-        toast({ title: "Insufficient Funds", description: `You need at least $${currentFee.toFixed(2)} to request this physical card.`, variant: "destructive" });
+        toast({ title: "Insufficient Balance", description: `Minimum $${currentFee.toFixed(2)} required for physical card request.`, variant: "destructive" });
         return;
       }
       primaryAccountId = accounts[0].id;
-      newBalance = accounts[0].balance - currentFee;
     }
 
-    // 1. Simulate call to Card Issuing API
     const provisionResult = await provisionCard({
       userId: user.id,
-      cardType: isVirtual ? "virtual" : "debit",
+      cardType: isVirtual ? "virtual" : (isInfinite ? "infinite" : "debit"),
       cardholderName: holderName
     });
 
     if (!provisionResult.success) {
-      toast({ title: "Authorization Failed", description: provisionResult.message, variant: "destructive" });
+      toast({ title: "Provisioning Failed", description: provisionResult.message, variant: "destructive" });
       return;
     }
 
-    // 2. Deduct fee if physical
     if (!isVirtual && primaryAccountId) {
       const { error: rpcError } = await (supabase.rpc as any)("process_card_fee", {
         p_user_id: user.id,
@@ -615,7 +601,6 @@ const CardsPage = () => {
       }
     }
 
-    // 3. Save provisioned details to our DB
     const { data: newCard, error } = await supabase.from("cards").insert({
       user_id: user.id,
       card_type: type,
@@ -623,7 +608,7 @@ const CardsPage = () => {
       expiry_date: provisionResult.expiryDate,
       cvv: provisionResult.cvv,
       cardholder_name: holderName,
-      card_brand: provisionResult.cardBrand,
+      card_brand: provisionResult.cardBrand || "Visa",
       status: isVirtual ? provisionResult.status : "inactive",
       is_frozen: false,
       is_physical: !isVirtual,
@@ -632,34 +617,30 @@ const CardsPage = () => {
     }).select().single();
 
     if (error) {
-      console.error("[Card Provisioning] Database Insert Error:", error);
-      toast({ title: "Database Error", description: error.message || "Failed to save card to database.", variant: "destructive" });
+      console.error("[Card Provisioning] Database Error:", error);
+      toast({ title: "Database Error", description: error.message, variant: "destructive" });
       return;
     }
 
-    // Optimistic UI update for immediate sync
     if (newCard) {
       setCards(prev => {
-        // Prevent duplicates just in case
         if (prev.some(c => c.id === newCard.id)) return prev;
         return [...prev, newCard as Card];
       });
       setCardCategory(isVirtual ? "virtual" : "physical");
     }
 
-    // Log audit trail for new card
-    const { error: auditError } = await supabase.from("audit_logs").insert({
+    await supabase.from("audit_logs").insert({
       user_id: user.id,
       action: "card_provisioned",
       entity_type: "cards",
       details: { provider_ref: provisionResult.providerCardId, type: isVirtual ? "virtual" : "debit", is_physical: !isVirtual }
     });
-    
-    if (auditError) {
-      console.warn("[Card Provisioning] Audit log failed to write:", auditError);
-    }
 
-    toast({ title: isVirtual ? "Provisioning Complete" : "Card Requested", description: isVirtual ? provisionResult.message : "Your physical card request has been submitted and is pending approval." });
+    toast({ 
+      title: isVirtual ? "Card Provisioned" : "Request Submitted", 
+      description: isVirtual ? provisionResult.message : "Physical card request submitted and pending review." 
+    });
     setShowRequest(false);
     fetchCards();
   };
@@ -672,12 +653,12 @@ const CardsPage = () => {
       <div className="space-y-6 max-w-6xl mx-auto px-1 sm:px-4 py-2 font-sans">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold font-poppins text-foreground tracking-tight">Card Management</h1>
-          <p className="text-xs sm:text-sm text-muted-foreground mt-1">Provision and secure your debit and virtual cards</p>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1">Provision and manage your debit and virtual cards</p>
         </div>
         <div className="bg-card rounded-xl border p-8 text-center shadow-sm font-sans max-w-2xl mx-auto mt-10">
           <Lock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h2 className="text-xl font-bold font-poppins mb-2">Feature Locked</h2>
-          <p className="text-muted-foreground mb-6">You need to complete KYC Tier 2 (Standard Verification) to provision physical and virtual cards. Please submit your identity documents to access this feature.</p>
+          <h2 className="text-xl font-bold font-poppins mb-2">Verification Required</h2>
+          <p className="text-muted-foreground mb-6">Complete KYC Tier 2 (Standard Verification) to access physical and virtual card issuing features.</p>
           <Button onClick={() => window.location.href = "/dashboard/kyc"}>Upgrade KYC Tier</Button>
         </div>
       </div>
@@ -689,7 +670,7 @@ const CardsPage = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold font-poppins text-foreground tracking-tight">Card Management</h1>
-          <p className="text-xs sm:text-sm text-muted-foreground mt-1">Provision and secure your debit and virtual cards</p>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1">Provision and manage your debit and virtual cards</p>
         </div>
         <Button size="sm" onClick={() => setShowRequest(!showRequest)} className="font-bold text-xs h-9 rounded-lg px-4">
           <Plus className="h-4 w-4 mr-1.5" /> Provision Card
@@ -761,7 +742,7 @@ const CardsPage = () => {
                     <div className="bg-warning/10 border border-warning/20 text-warning p-2.5 rounded-lg text-xs flex items-start gap-2">
                       <DollarSign className="h-4 w-4 shrink-0 mt-0.5" />
                       <p>
-                        <strong>Provisioning Fee:</strong> A fee of <strong>${(selectedType === "infinite" ? baseFee * 5 : baseFee).toFixed(2)}</strong> will be deducted from your primary account balance upon approval.
+                        <strong>Card Provisioning Fee:</strong> A fee of <strong>${(selectedType === "infinite" ? baseFee * 5 : baseFee).toFixed(2)}</strong> will be deducted from your checking or savings account balance.
                       </p>
                     </div>
                   </div>
@@ -785,10 +766,10 @@ const CardsPage = () => {
                 <Truck className="h-4 w-4 text-primary" />
               </div>
               <div>
-                <h4 className="font-bold text-xs text-white">Physical Card Requested</h4>
+                <h4 className="font-bold text-xs text-white">Physical Card Order Processing</h4>
                 <p className="text-[11px] text-slate-300 mt-0.5 max-w-2xl leading-tight">
-                  Your physical card request has been received and is being processed.
-                  You will be notified with tracking details once your card has been shipped.
+                  Your physical card request is being reviewed by banking operations.
+                  You will receive shipping and tracking status once approved.
                 </p>
               </div>
             </div>
@@ -799,11 +780,11 @@ const CardsPage = () => {
       {displayedCards.length === 0 ? (
         <div className="bg-slate-900 rounded-xl border border-slate-700 p-8 text-center shadow-lg max-w-lg mx-auto my-4">
           <CreditCard className="h-8 w-8 text-slate-400 mx-auto mb-2" />
-          <p className="text-xs font-bold text-white">No {cardCategory} cards found</p>
+          <p className="text-xs font-bold text-white">No {cardCategory} cards active</p>
           <p className="text-[11px] text-slate-400 mt-1 mb-4 leading-normal">
             {cardCategory === "physical"
-              ? "Provision a premium physical card or Infinite Metal card to be delivered directly to your address."
-              : "Provision an instant virtual debit card for zero fees and immediate digital purchasing."}
+              ? "Provision a physical debit or metal card for direct delivery."
+              : "Provision a digital virtual card for instant payment processing."}
           </p>
           <Button size="sm" className="h-8 text-xs font-bold rounded-lg px-4" onClick={() => { setSelectedType(cardCategory === "virtual" ? "virtual" : "premium"); setShowRequest(true); }}>
             <Plus className="h-3.5 w-3.5 mr-1" /> Provision {cardCategory === "virtual" ? "Virtual" : "Physical"} Card
@@ -839,8 +820,8 @@ const CardsPage = () => {
       <Dialog open={showDetails} onOpenChange={setShowDetails}>
         <DialogContent className="max-w-md font-sans">
           <DialogHeader>
-            <DialogTitle className="font-poppins font-bold">Card Details</DialogTitle>
-            <DialogDescription>Review and manage card settings</DialogDescription>
+            <DialogTitle className="font-poppins font-bold">Card Parameters</DialogTitle>
+            <DialogDescription>Review and manage security controls</DialogDescription>
           </DialogHeader>
           {selectedCard && (
             <FadeIn>
@@ -860,7 +841,7 @@ const CardsPage = () => {
                     </div>
                   </div>
                   <div className="bg-muted/10 border rounded-lg p-3">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Expiration</p>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Expiration Date</p>
                     <p className="font-mono font-bold text-foreground">{selectedCard.expiry_date}</p>
                   </div>
                   <div className="bg-muted/10 border rounded-lg p-3">
@@ -868,19 +849,19 @@ const CardsPage = () => {
                     <p className={`text-xs font-bold uppercase tracking-wider ${selectedCard.status === "active" ? "text-success" : "text-destructive"}`}>{selectedCard.status}</p>
                   </div>
                   <div className="bg-muted/10 border rounded-lg p-3">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Spending Limit</p>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Daily Limit</p>
                     <p className="font-mono font-bold text-foreground">${(selectedCard.spending_limit || 0).toLocaleString()}</p>
                   </div>
                   <div className="bg-muted/10 border rounded-lg p-3">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Class</p>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Card Type</p>
                     <p className="font-bold text-xs uppercase tracking-wider text-foreground">{selectedCard.card_type}</p>
                   </div>
                 </div>
                 <div className="space-y-3 pt-2">
-                  <h3 className="text-sm font-bold font-poppins text-foreground">Card Settings</h3>
+                  <h3 className="text-sm font-bold font-poppins text-foreground">Security Controls</h3>
                   {[
-                    { key: "online_enabled" as const, label: "Online Transactions", value: selectedCard.online_enabled },
-                    { key: "international_enabled" as const, label: "International Transactions", value: selectedCard.international_enabled },
+                    { key: "online_enabled" as const, label: "Online Payments", value: selectedCard.online_enabled },
+                    { key: "international_enabled" as const, label: "International Payments", value: selectedCard.international_enabled },
                   ].map(({ key, label, value }) => (
                     <div key={key} className="flex items-center justify-between p-3.5 bg-muted/10 border rounded-lg">
                       <span className="text-xs font-bold text-foreground">{label}</span>
@@ -905,7 +886,7 @@ const CardsPage = () => {
       <Dialog open={showLimits} onOpenChange={setShowLimits}>
         <DialogContent className="max-w-sm font-sans">
           <DialogHeader>
-            <DialogTitle className="font-poppins font-bold">Change Spending Limit</DialogTitle>
+            <DialogTitle className="font-poppins font-bold">Update Daily Limit</DialogTitle>
             <DialogDescription>Card ending in {(selectedCard?.card_number || "").slice(-4)}</DialogDescription>
           </DialogHeader>
           {selectedCard && (
@@ -916,8 +897,8 @@ const CardsPage = () => {
                   <p className="text-2xl font-mono font-bold text-foreground">${(selectedCard.spending_limit || 0).toLocaleString()}</p>
                 </div>
                 <div>
-                  <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground block mb-2">New Limit ($)</Label>
-                  <Input type="text" placeholder="e.g. 5,000" value={newLimit} onChange={(e) => setNewLimit(e.target.value)} className="font-mono font-bold" />
+                  <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground block mb-2">New Authorized Limit ($)</Label>
+                  <Input type="text" placeholder="e.g. 5000" value={newLimit} onChange={(e) => setNewLimit(e.target.value)} className="font-mono font-bold" />
                 </div>
                 <div className="flex gap-3 pt-2">
                   <Button className="flex-1 font-bold" onClick={updateLimit}>Save Changes</Button>

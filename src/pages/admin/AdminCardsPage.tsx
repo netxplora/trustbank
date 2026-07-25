@@ -46,20 +46,20 @@ const AdminCardsPage = () => {
       const { data: cardsData, error: cardsError } = await supabase.from('cards').select('*').order('created_at', { ascending: false });
       if (cardsError) throw cardsError;
 
-      const userIds = [...new Set(cardsData.map(c => c.user_id))];
+      const userIds = [...new Set((cardsData || []).map(c => c.user_id))];
       
-      let profileMap = new Map();
+      const profileMap = new Map();
       if (userIds.length > 0) {
         const { data: profilesData, error: profilesError } = await supabase.from('profiles').select('*').in('user_id', userIds);
         if (profilesError) throw profilesError;
-        profilesData.forEach(p => profileMap.set(p.user_id, p.display_name || p.first_name || 'Unknown'));
+        (profilesData || []).forEach(p => profileMap.set(p.user_id, p.display_name || `${p.first_name || ''} ${p.last_name || ''}`.trim() || 'Customer'));
       }
 
-      const enriched = cardsData.map(c => ({
+      const enriched = (cardsData || []).map(c => ({
         id: c.id,
-        customer: c.cardholder_name || profileMap.get(c.user_id) || 'Unknown User',
+        customer: c.cardholder_name || profileMap.get(c.user_id) || 'Customer',
         type: (c.is_physical === true || (c.card_type !== 'virtual' && c.card_type !== 'digital')) ? 'Physical Card' : c.card_type === 'digital' ? 'Digital Card' : 'Virtual Card',
-        account: `****${c.card_number?.slice(-4) || '0000'}`,
+        account: `****${c.card_number?.replace(/\s/g, '').slice(-4) || '0000'}`,
         status: c.status === 'active' && c.is_frozen ? 'Frozen' : c.status === 'active' ? 'Active' : (c.request_status === 'pending' || c.status === 'pending') ? 'Pending' : c.request_status === 'rejected' ? 'Rejected' : 'Inactive',
         date: new Date(c.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
         is_physical: c.is_physical || false,
@@ -84,9 +84,8 @@ const AdminCardsPage = () => {
     try {
       const card = cards.find(c => c.id === id);
       const isApproving = newStatus === 'active';
-      const isRejecting = newStatus === 'rejected';
 
-      let updateData: any = freeze ? { is_frozen: newStatus === "frozen" } : { status: newStatus };
+      const updateData: any = freeze ? { is_frozen: newStatus === "frozen" } : { status: newStatus };
       
       if (!freeze && card?.is_physical && card?.request_status === 'pending') {
         updateData.request_status = isApproving ? 'approved' : 'rejected';
@@ -114,7 +113,7 @@ const AdminCardsPage = () => {
   };
 
   const deleteCard = async (id: string) => {
-    if (!confirm("Are you sure you want to permanently delete this card?")) return;
+    if (!confirm("Are you sure you want to permanently delete this card record?")) return;
     try {
       const { error } = await supabase.from('cards').delete().eq('id', id);
       if (error) throw error;
@@ -172,7 +171,7 @@ const AdminCardsPage = () => {
 
   const handleCreateCard = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedUserId) { toast({ title: "Select a user first", variant: "destructive" }); return; }
+    if (!selectedUserId) { toast({ title: "Select a customer first", variant: "destructive" }); return; }
     setCreating(true);
     try {
       const { error } = await supabase.from("cards").insert({
@@ -201,7 +200,7 @@ const AdminCardsPage = () => {
         });
       }
 
-      toast({ title: "Card Created", description: `Card provisioned for the selected user.` });
+      toast({ title: "Card Provisioned", description: `Card created for selected customer.` });
       setShowCreate(false);
       setSelectedUserId("");
       setFoundUsers([]);
@@ -217,7 +216,7 @@ const AdminCardsPage = () => {
 
   const totalCards = cards.length;
   const activeCards = cards.filter(c => c.status === "Active").length;
-  const signatureCards = cards.filter(c => c.type === "Signature Elite Debit").length;
+  const physicalCount = cards.filter(c => c.is_physical).length;
   const pendingCards = cards.filter(c => c.status === "Pending").length;
 
   return (
@@ -225,7 +224,7 @@ const AdminCardsPage = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-lg sm:text-xl font-bold font-poppins text-foreground mb-0.5">Card Management</h1>
-          <p className="text-xs text-muted-foreground font-sans">Manage customer cards and approvals</p>
+          <p className="text-xs text-muted-foreground font-sans">Manage customer cards and physical issuance approvals</p>
         </div>
         <Button size="sm" className="font-bold text-xs h-8 rounded-lg" onClick={() => setShowCreate(true)}>
           <Plus className="h-3.5 w-3.5 mr-1" /> Create Card
@@ -234,9 +233,9 @@ const AdminCardsPage = () => {
 
       <StaggerContainer className="grid grid-cols-2 md:grid-cols-4 gap-2.5 font-sans">
         {[
-          { label: "Total Cards Issued", value: loading ? "-" : totalCards.toString(), icon: CreditCard },
-          { label: "Active Digital Cards", value: loading ? "-" : activeCards.toString() },
-          { label: "Signature Debit Cards", value: loading ? "-" : signatureCards.toString() },
+          { label: "Total Cards Issued", value: loading ? "-" : totalCards.toString() },
+          { label: "Active Cards", value: loading ? "-" : activeCards.toString() },
+          { label: "Physical Cards", value: loading ? "-" : physicalCount.toString() },
           { label: "Pending Approvals", value: loading ? "-" : pendingCards.toString() },
         ].map(s => (
           <StaggerItem key={s.label}>
@@ -248,16 +247,16 @@ const AdminCardsPage = () => {
         ))}
       </StaggerContainer>
 
-      <SlideUp className="bg-card rounded-3xl border overflow-hidden shadow-sm hover-lift">
+      <SlideUp className="bg-card rounded-xl border overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full font-sans">
             <thead>
               <tr className="border-b bg-muted/20">
                 <th className="text-left p-4 text-xs font-semibold font-poppins text-muted-foreground">Customer</th>
                 <th className="text-left p-4 text-xs font-semibold font-poppins text-muted-foreground">Card Type</th>
-                <th className="text-left p-4 text-xs font-semibold font-poppins text-muted-foreground hidden md:table-cell">Funding Account</th>
+                <th className="text-left p-4 text-xs font-semibold font-poppins text-muted-foreground hidden md:table-cell">Account</th>
                 <th className="text-left p-4 text-xs font-semibold font-poppins text-muted-foreground">Status</th>
-                <th className="text-left p-4 text-xs font-semibold font-poppins text-muted-foreground hidden lg:table-cell">Request Date</th>
+                <th className="text-left p-4 text-xs font-semibold font-poppins text-muted-foreground hidden lg:table-cell">Issue Date</th>
                 <th className="text-center p-4 text-xs font-semibold font-poppins text-muted-foreground">Actions</th>
               </tr>
             </thead>
@@ -274,11 +273,11 @@ const AdminCardsPage = () => {
               ) : cards.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="p-8 text-center text-muted-foreground text-sm">
-                    No card requests found.
+                    No card records found.
                   </td>
                 </tr>
               ) : cards.map((c) => (
-                <tr key={c.id} className="border-b last:border-primary hover:bg-muted/10 transition-colors align-middle">
+                <tr key={c.id} className="border-b hover:bg-muted/10 transition-colors align-middle">
                   <td className="p-4 text-sm font-bold text-foreground">{c.customer}</td>
                   <td className="p-4"><span className="text-[10px] font-bold uppercase tracking-wider bg-muted/50 border px-2.5 py-1 rounded-sm">{c.type}</span></td>
                   <td className="p-4 text-sm font-semibold text-muted-foreground font-mono hidden md:table-cell">{c.account}</td>
@@ -314,56 +313,61 @@ const AdminCardsPage = () => {
         </div>
       </SlideUp>
 
+      {/* Edit Card Dialog */}
       <Dialog open={!!editingCard} onOpenChange={(open) => !open && setEditingCard(null)}>
         <DialogContent className="max-w-md font-sans">
           <DialogHeader>
-            <DialogTitle className="font-poppins font-bold">Edit Card Details</DialogTitle>
-            <DialogDescription>Modify the raw parameters of this card.</DialogDescription>
+            <DialogTitle className="font-poppins font-bold">Edit Card Parameters</DialogTitle>
+            <DialogDescription>Modify card parameters and limits.</DialogDescription>
           </DialogHeader>
           {editingCard && (
             <FadeIn>
-            <form onSubmit={updateCard} className="space-y-4 mt-2">
-              <div>
-                <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground block mb-1">Card Holder Name</Label>
-                <Input value={editingCard.cardholder_name || ""} onChange={e => setEditingCard({...editingCard, cardholder_name: e.target.value})} required className="font-bold uppercase" />
-              </div>
-              <div>
-                <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground block mb-1">Card Number</Label>
-                <Input value={editingCard.card_number || ""} onChange={e => setEditingCard({...editingCard, card_number: e.target.value})} required className="font-mono font-bold" />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
+              <form onSubmit={updateCard} className="space-y-4 mt-2">
                 <div>
-                  <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground block mb-1">Expiry</Label>
-                  <Input value={editingCard.expiry_date || ""} onChange={e => setEditingCard({...editingCard, expiry_date: e.target.value})} required className="font-mono font-bold" />
+                  <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground block mb-1">Card Holder Name</Label>
+                  <Input value={editingCard.cardholder_name || ""} onChange={e => setEditingCard({...editingCard, cardholder_name: e.target.value})} required className="font-bold uppercase" />
                 </div>
                 <div>
-                  <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground block mb-1">CVV</Label>
-                  <Input value={editingCard.cvv || ""} onChange={e => setEditingCard({...editingCard, cvv: e.target.value})} required className="font-mono font-bold" />
+                  <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground block mb-1">Card Number</Label>
+                  <Input value={editingCard.card_number || ""} onChange={e => setEditingCard({...editingCard, card_number: e.target.value})} required className="font-mono font-bold" />
                 </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground block mb-1">Expiry</Label>
+                    <Input value={editingCard.expiry_date || ""} onChange={e => setEditingCard({...editingCard, expiry_date: e.target.value})} required className="font-mono font-bold" />
+                  </div>
+                  <div>
+                    <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground block mb-1">CVV</Label>
+                    <Input value={editingCard.cvv || ""} onChange={e => setEditingCard({...editingCard, cvv: e.target.value})} required className="font-mono font-bold" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground block mb-1">Status</Label>
+                    <select className="w-full rounded-md border bg-background px-3 py-2 text-sm font-bold h-10" value={editingCard.status || "inactive"} onChange={e => setEditingCard({...editingCard, status: e.target.value})}>
+                      <option value="active">Active</option>
+                      <option value="inactive">Inactive</option>
+                      <option value="pending">Pending</option>
+                      <option value="rejected">Rejected</option>
+                    </select>
+                  </div>
+                  <div>
+                    <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground block mb-1">Frozen</Label>
+                    <select className="w-full rounded-md border bg-background px-3 py-2 text-sm font-bold h-10" value={editingCard.is_frozen ? "yes" : "no"} onChange={e => setEditingCard({...editingCard, is_frozen: e.target.value === "yes"})}>
+                      <option value="no">No</option>
+                      <option value="yes">Yes</option>
+                    </select>
+                  </div>
+                </div>
                 <div>
-                  <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground block mb-1">Status</Label>
-                  <select className="w-full rounded-md border bg-background px-3 py-2 text-base font-bold h-11" value={editingCard.status || "inactive"} onChange={e => setEditingCard({...editingCard, status: e.target.value})}>
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                    <option value="pending">Pending</option>
-                    <option value="rejected">Rejected</option>
-                  </select>
+                  <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground block mb-1">Spending Limit ($)</Label>
+                  <Input type="number" value={editingCard.spending_limit || ""} onChange={e => setEditingCard({...editingCard, spending_limit: parseInt(e.target.value) || 0})} className="font-mono font-bold" />
                 </div>
-                <div>
-                  <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground block mb-1">Frozen</Label>
-                  <select className="w-full rounded-md border bg-background px-3 py-2 text-base font-bold h-11" value={editingCard.is_frozen ? "yes" : "no"} onChange={e => setEditingCard({...editingCard, is_frozen: e.target.value === "yes"})}>
-                    <option value="no">No</option>
-                    <option value="yes">Yes</option>
-                  </select>
+                <div className="flex gap-3 pt-2">
+                  <Button type="submit" className="flex-1 font-bold">Save Changes</Button>
+                  <Button type="button" variant="outline" className="font-bold" onClick={() => setEditingCard(null)}>Cancel</Button>
                 </div>
-              </div>
-              <div className="flex gap-3 pt-2">
-                <Button type="submit" className="flex-1 font-bold">Save Changes</Button>
-                <Button type="button" variant="outline" className="font-bold" onClick={() => setEditingCard(null)}>Cancel</Button>
-              </div>
-            </form>
+              </form>
             </FadeIn>
           )}
         </DialogContent>
@@ -374,7 +378,7 @@ const AdminCardsPage = () => {
         <DialogContent className="max-w-lg font-sans">
           <DialogHeader>
             <DialogTitle className="font-poppins font-bold">Create New Card</DialogTitle>
-            <DialogDescription>Search for a customer and create a card on their behalf.</DialogDescription>
+            <DialogDescription>Search for a customer and issue a card on their behalf.</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleCreateCard} className="space-y-4 mt-2">
             <div>
@@ -401,14 +405,14 @@ const AdminCardsPage = () => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground block mb-1">Card Type</Label>
-                <select className="w-full rounded-md border bg-background px-3 py-2 text-base font-bold h-11" value={createForm.cardType} onChange={e => setCreateForm(f => ({ ...f, cardType: e.target.value as any }))}>
+                <select className="w-full rounded-md border bg-background px-3 py-2 text-sm font-bold h-10" value={createForm.cardType} onChange={e => setCreateForm(f => ({ ...f, cardType: e.target.value as any }))}>
                   <option value="virtual">Virtual Card</option>
                   <option value="debit">Physical Debit Card</option>
                 </select>
               </div>
               <div>
                 <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground block mb-1">Status</Label>
-                <select className="w-full rounded-md border bg-background px-3 py-2 text-base font-bold h-11" value={createForm.status} onChange={e => setCreateForm(f => ({ ...f, status: e.target.value }))}>
+                <select className="w-full rounded-md border bg-background px-3 py-2 text-sm font-bold h-10" value={createForm.status} onChange={e => setCreateForm(f => ({ ...f, status: e.target.value }))}>
                   <option value="active">Active</option>
                   <option value="inactive">Inactive</option>
                 </select>

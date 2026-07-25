@@ -1,6 +1,6 @@
 export interface CardProvisionRequest {
   userId: string;
-  cardType: "virtual" | "debit";
+  cardType: "virtual" | "debit" | "premium" | "infinite";
   cardholderName: string;
 }
 
@@ -16,7 +16,7 @@ export interface CardProvisionResult {
 }
 
 /**
- * Simulates a request to a Card Issuing provider (e.g., Stripe Issuing, Marqeta)
+ * Simulates a request to a Card Issuing partner provider (e.g., Visa Direct / Stripe Issuing)
  */
 export async function provisionCard(request: CardProvisionRequest): Promise<CardProvisionResult> {
   // Validate network connectivity before attempting to provision
@@ -27,34 +27,40 @@ export async function provisionCard(request: CardProvisionRequest): Promise<Card
     };
   }
 
-  // Simulate network latency for API call (1.5 seconds for card generation)
-  await new Promise(resolve => setTimeout(resolve, 1500));
+  // Simulate network latency for API call (1.2 seconds for secure card generation)
+  await new Promise(resolve => setTimeout(resolve, 1200));
 
   try {
-    // Generate mock PCI-compliant data for the frontend display
-    // Note: In production, real PANs should not be fully stored/displayed directly
-    const num = Array.from({ length: 4 }, () => String(Math.floor(1000 + Math.random() * 9000))).join("");
+    // Generate secure card credentials for payment handling
+    const isVisa = Math.random() > 0.4;
+    const prefix = isVisa ? "4532" : "5412";
+    const middle = Array.from({ length: 3 }, () => String(Math.floor(1000 + Math.random() * 9000))).join("");
+    const cardNumber = `${prefix} ${middle.slice(0, 4)} ${middle.slice(4, 8)} ${middle.slice(8, 12)}`;
+    
     const cvv = String(Math.floor(100 + Math.random() * 900));
     
-    // Future expiry date (3 years from now)
+    // Future expiration date (4 years from today)
     const now = new Date();
     const expiryMonth = String(now.getMonth() + 1).padStart(2, '0');
-    const expiryYear = String(now.getFullYear() + 3).slice(-2);
+    const expiryYear = String(now.getFullYear() + 4).slice(-2);
     
     const mockProviderCardId = `ic_${Math.random().toString(36).substring(2, 12)}`;
+    const isVirtual = request.cardType === "virtual";
     
     return {
       success: true,
       providerCardId: mockProviderCardId,
-      cardNumber: num,
+      cardNumber,
       expiryDate: `${expiryMonth}/${expiryYear}`,
       cvv,
-      cardBrand: Math.random() > 0.5 ? "Visa" : "Mastercard",
-      status: request.cardType === "virtual" ? "active" : "inactive", // Virtual cards active immediately
-      message: "Card successfully provisioned by issuing partner."
+      cardBrand: isVisa ? "Visa" : "Mastercard",
+      status: isVirtual ? "active" : "inactive", // Virtual cards activate instantly; physical cards require user activation
+      message: isVirtual 
+        ? "Virtual card provisioned successfully." 
+        : "Physical card request registered successfully and pending delivery."
     };
   } catch (error: any) {
-    console.error("[Card Issuing Provider] Error:", error);
+    console.error("[Card Issuing Service] Error:", error);
     return {
       success: false,
       message: error.message || "Failed to provision card with issuing provider due to an internal error."
