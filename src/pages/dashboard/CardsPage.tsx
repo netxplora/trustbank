@@ -11,6 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useBrand } from "@/contexts/BrandContext";
 import { StaggerContainer, StaggerItem, FadeIn, SlideUp } from "@/components/public/Motion";
 import { provisionCard } from "@/services/cardIssuingProvider";
+import { CardSkeleton } from "@/components/skeletons/DashboardSkeleton";
 
 interface Card {
   id: string;
@@ -589,7 +590,7 @@ const CardsPage = () => {
     }
 
     if (!isVirtual && primaryAccountId) {
-      const { error: rpcError } = await (supabase.rpc as any)("process_card_fee", {
+      const { error: rpcError } = await supabase.rpc("process_card_fee", {
         p_user_id: user.id,
         p_account_id: primaryAccountId,
         p_fee_amount: currentFee,
@@ -645,7 +646,20 @@ const CardsPage = () => {
     fetchCards();
   };
 
-  if (loading) return <div className="flex items-center justify-center py-20"><div className="h-8 w-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" /></div>;
+  if (loading) {
+    return (
+      <div className="space-y-6 max-w-6xl mx-auto px-1 sm:px-4 py-2 font-sans">
+        <div className="space-y-2">
+          <div className="h-7 w-48 bg-muted animate-pulse rounded-lg" />
+          <div className="h-4 w-64 bg-muted animate-pulse rounded-lg" />
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-4xl mx-auto py-2">
+          <CardSkeleton />
+          <CardSkeleton />
+        </div>
+      </div>
+    );
+  }
 
   const kycTier = profile?.kyc_tier || 0;
   if (kycTier < 2) {

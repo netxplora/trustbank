@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { TableSkeleton } from "@/components/skeletons/DashboardSkeleton";
 
 type EnrichedCard = {
   id: string;
@@ -247,71 +248,66 @@ const AdminCardsPage = () => {
         ))}
       </StaggerContainer>
 
-      <SlideUp className="bg-card rounded-xl border overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full font-sans">
-            <thead>
-              <tr className="border-b bg-muted/20">
-                <th className="text-left p-4 text-xs font-semibold font-poppins text-muted-foreground">Customer</th>
-                <th className="text-left p-4 text-xs font-semibold font-poppins text-muted-foreground">Card Type</th>
-                <th className="text-left p-4 text-xs font-semibold font-poppins text-muted-foreground hidden md:table-cell">Account</th>
-                <th className="text-left p-4 text-xs font-semibold font-poppins text-muted-foreground">Status</th>
-                <th className="text-left p-4 text-xs font-semibold font-poppins text-muted-foreground hidden lg:table-cell">Issue Date</th>
-                <th className="text-center p-4 text-xs font-semibold font-poppins text-muted-foreground">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr>
-                  <td colSpan={6} className="p-8 text-center text-muted-foreground">
-                    <div className="flex flex-col items-center justify-center gap-2">
-                      <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                      <span className="text-sm">Loading card records...</span>
-                    </div>
-                  </td>
+      {loading ? (
+        <TableSkeleton rows={5} />
+      ) : (
+        <SlideUp className="bg-card rounded-xl border overflow-hidden shadow-sm">
+          <div className="overflow-x-auto">
+            <table className="w-full font-sans">
+              <thead>
+                <tr className="border-b bg-muted/20">
+                  <th className="text-left p-4 text-xs font-semibold font-poppins text-muted-foreground">Customer</th>
+                  <th className="text-left p-4 text-xs font-semibold font-poppins text-muted-foreground">Card Type</th>
+                  <th className="text-left p-4 text-xs font-semibold font-poppins text-muted-foreground hidden md:table-cell">Account</th>
+                  <th className="text-left p-4 text-xs font-semibold font-poppins text-muted-foreground">Status</th>
+                  <th className="text-left p-4 text-xs font-semibold font-poppins text-muted-foreground hidden lg:table-cell">Issue Date</th>
+                  <th className="text-center p-4 text-xs font-semibold font-poppins text-muted-foreground">Actions</th>
                 </tr>
-              ) : cards.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="p-8 text-center text-muted-foreground text-sm">
-                    No card records found.
-                  </td>
-                </tr>
-              ) : cards.map((c) => (
-                <tr key={c.id} className="border-b hover:bg-muted/10 transition-colors align-middle">
-                  <td className="p-4 text-sm font-bold text-foreground">{c.customer}</td>
-                  <td className="p-4"><span className="text-[10px] font-bold uppercase tracking-wider bg-muted/50 border px-2.5 py-1 rounded-sm">{c.type}</span></td>
-                  <td className="p-4 text-sm font-semibold text-muted-foreground font-mono hidden md:table-cell">{c.account}</td>
-                  <td className="p-4">
-                    <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-sm border ${c.status === "Active" ? "bg-success/10 text-success border-success/20" : c.status === "Pending" ? "bg-warning/10 text-warning border-warning/20" : c.status === "Frozen" ? "bg-primary/10 text-primary border-primary/20" : "bg-destructive/10 text-destructive border-destructive/20"}`}>{c.status}</span>
-                  </td>
-                  <td className="p-4 text-xs font-semibold text-muted-foreground hidden lg:table-cell">{c.date}</td>
-                  <td className="p-4 text-center">
-                    <div className="flex items-center justify-center gap-1.5">
-                      {c.status === "Pending" && (
-                        <>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-success/10 transition-colors" onClick={() => handleAction(c.id, "active")}><CheckCircle className="h-4 w-4 text-success" /></Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-destructive/10 transition-colors" onClick={() => handleAction(c.id, "rejected")}><XCircle className="h-4 w-4 text-destructive" /></Button>
-                        </>
-                      )}
-                      {(c.status === "Active" || c.status === "Frozen") && (
-                        <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-warning/10 transition-colors" onClick={() => handleAction(c.id, c.status === "Active" ? "frozen" : "active", true)}>
-                          {c.status === "Active" ? <Lock className="h-4 w-4 text-warning" /> : <Unlock className="h-4 w-4 text-success" />}
+              </thead>
+              <tbody>
+                {cards.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="p-8 text-center text-muted-foreground text-sm">
+                      No card records found.
+                    </td>
+                  </tr>
+                ) : cards.map((c) => (
+                  <tr key={c.id} className="border-b hover:bg-muted/10 transition-colors align-middle">
+                    <td className="p-4 text-sm font-bold text-foreground">{c.customer}</td>
+                    <td className="p-4"><span className="text-[10px] font-bold uppercase tracking-wider bg-muted/50 border px-2.5 py-1 rounded-sm">{c.type}</span></td>
+                    <td className="p-4 text-sm font-semibold text-muted-foreground font-mono hidden md:table-cell">{c.account}</td>
+                    <td className="p-4">
+                      <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-sm border ${c.status === "Active" ? "bg-success/10 text-success border-success/20" : c.status === "Pending" ? "bg-warning/10 text-warning border-warning/20" : c.status === "Frozen" ? "bg-primary/10 text-primary border-primary/20" : "bg-destructive/10 text-destructive border-destructive/20"}`}>{c.status}</span>
+                    </td>
+                    <td className="p-4 text-xs font-semibold text-muted-foreground hidden lg:table-cell">{c.date}</td>
+                    <td className="p-4 text-center">
+                      <div className="flex items-center justify-center gap-1.5">
+                        {c.status === "Pending" && (
+                          <>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-success/10 transition-colors" onClick={() => handleAction(c.id, "active")}><CheckCircle className="h-4 w-4 text-success" /></Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-destructive/10 transition-colors" onClick={() => handleAction(c.id, "rejected")}><XCircle className="h-4 w-4 text-destructive" /></Button>
+                          </>
+                        )}
+                        {(c.status === "Active" || c.status === "Frozen") && (
+                          <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-warning/10 transition-colors" onClick={() => handleAction(c.id, c.status === "Active" ? "frozen" : "active", true)}>
+                            {c.status === "Active" ? <Lock className="h-4 w-4 text-warning" /> : <Unlock className="h-4 w-4 text-success" />}
+                          </Button>
+                        )}
+                        <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-primary/10 transition-colors" onClick={() => setEditingCard(c.raw)}>
+                          <Edit className="h-4 w-4 text-primary" />
                         </Button>
-                      )}
-                      <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-primary/10 transition-colors" onClick={() => setEditingCard(c.raw)}>
-                        <Edit className="h-4 w-4 text-primary" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-destructive/10 transition-colors" onClick={() => deleteCard(c.id)}>
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </SlideUp>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-destructive/10 transition-colors" onClick={() => deleteCard(c.id)}>
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </SlideUp>
+      )}
 
       {/* Edit Card Dialog */}
       <Dialog open={!!editingCard} onOpenChange={(open) => !open && setEditingCard(null)}>

@@ -34,7 +34,7 @@ export default defineConfig(({ mode }) => ({
       svg: {
         multipass: true,
         plugins: [
-          { name: 'preset-default', params: { overrides: { removeViewBox: false } } },
+          'preset-default',
         ],
       }
     })
@@ -45,11 +45,8 @@ export default defineConfig(({ mode }) => ({
     },
     dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime", "@tanstack/react-query", "@tanstack/query-core"],
   },
-  esbuild: {
-    // Strip all console statements from production builds
-    drop: mode === "production" ? ["console", "debugger"] : [],
-  },
   build: {
+    minify: 'esbuild',
     chunkSizeWarningLimit: 1500,
     rollupOptions: {
       output: {
@@ -63,11 +60,13 @@ export default defineConfig(({ mode }) => ({
             if (id.includes('react-router')) return 'vendor-router';
             if (id.includes('react-dom') || id.includes('react/') || id.includes('react@')) return 'vendor-react';
             
-            // Group all other node_modules into a generic vendor chunk to avoid hundreds of tiny files
             return 'vendor';
           }
         }
       }
     }
+  },
+  esbuild: {
+    drop: mode === "production" ? ["console", "debugger"] : [],
   }
 }));
