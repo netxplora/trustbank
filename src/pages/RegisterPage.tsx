@@ -20,7 +20,7 @@ const RegisterPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [agreed, setAgreed] = useState(false);
-  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phone: "", bvn: "", password: "" });
+  const [form, setForm] = useState({ firstName: "", lastName: "", email: "", phone: "", password: "" });
   const { toast } = useToast();
   const navigate = useNavigate();
   const { visuals, identity } = useBrand();
@@ -53,7 +53,6 @@ const RegisterPage = () => {
     const sanitizedFirst = sanitizeInput(form.firstName);
     const sanitizedLast = sanitizeInput(form.lastName);
     const sanitizedPhone = sanitizeInput(form.phone);
-    const sanitizedBvn = sanitizeInput(form.bvn);
     const { error } = await supabase.auth.signUp({
       email: form.email.trim(),
       password: form.password,
@@ -62,8 +61,7 @@ const RegisterPage = () => {
           first_name: sanitizedFirst,
           last_name: sanitizedLast,
           phone: sanitizedPhone,
-          bvn: sanitizedBvn,
-        },
+          },
         emailRedirectTo: window.location.origin,
       },
     });
@@ -133,8 +131,7 @@ const RegisterPage = () => {
               <Input type="tel" placeholder="+1 800 000 0000" className="h-14 bg-muted/30 border-border focus:bg-background transition-colors text-base" value={form.phone} onChange={(e) => updateForm("phone", e.target.value)} required />
             </div>
             <div>
-              <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">SSN / Tax ID</label>
-              <Input placeholder="Social Security Number" className="h-14 bg-muted/30 border-border focus:bg-background transition-colors text-base" value={form.bvn} onChange={(e) => updateForm("bvn", e.target.value.replace(/\D/g, ""))} maxLength={9} required />
+              
             </div>
             <div>
               <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2 block">Password</label>
