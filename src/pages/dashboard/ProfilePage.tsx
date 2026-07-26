@@ -151,6 +151,45 @@ const ProfilePage = () => {
 
   
 
+  
+  const isLocked = profile?.kyc_status === 'approved';
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user || isLocked) return;
+    setLoading(true);
+    try {
+      const { error } = await (supabase as any).from("profiles").update({
+        first_name: form.firstName,
+        last_name: form.lastName,
+        date_of_birth: form.dateOfBirth,
+        gender: form.gender,
+        nationality: form.nationality,
+        mailing_address: form.mailingAddress,
+        city: form.city,
+        state_province: form.stateProvince,
+        postal_code: form.postalCode,
+        country: form.country,
+        occupation: form.occupation,
+        employer_name: form.employerName,
+        annual_income_range: form.annualIncomeRange,
+        source_of_funds: form.sourceOfFunds,
+        gov_id_type: form.govIdType,
+        gov_id_number: form.govIdNumber,
+        preferred_language: form.preferredLanguage,
+        preferred_currency: form.preferredCurrency,
+      }).eq("user_id", user.id);
+      
+      if (error) throw error;
+      toast({ title: "Profile Updated", description: "Your information has been saved successfully." });
+      refreshProfile();
+    } catch (err: any) {
+      toast({ title: "Update Failed", description: err.message, variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
     const formData = new FormData(e.target as HTMLFormElement);
@@ -266,16 +305,9 @@ const ProfilePage = () => {
       <StaggerItem>
         <div>
           
-          <div className="mb-4 bg-primary/10 border border-primary/20 rounded-xl p-3 flex gap-3 items-start">
-            <div className="p-2 bg-background rounded-full shrink-0">
-              <Lock className="w-4 h-4 text-primary" />
-            </div>
-            <div>
-              <h3 className="text-sm font-bold text-foreground font-poppins">Profile Information Locked</h3>
-              <p className="text-xs text-muted-foreground mt-0.5">To update your verification details, contact information, or banking preferences, please contact an administrator.</p>
-            </div>
-          </div>
-          <Tabs defaultValue="personal" className="w-full">
+          
+          <form onSubmit={handleSubmit}>
+            <Tabs defaultValue="personal" className="w-full">
             <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full h-auto mb-4 p-1 bg-muted/40 rounded-lg text-xs">
               <TabsTrigger value="personal" className="py-1.5 text-xs rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm"><User className="w-3.5 h-3.5 mr-1.5"/> Personal</TabsTrigger>
               <TabsTrigger value="address" className="py-1.5 text-xs rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm"><MapPin className="w-3.5 h-3.5 mr-1.5"/> Contact & Work</TabsTrigger>
@@ -289,20 +321,19 @@ const ProfilePage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div className="space-y-1">
                     <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">First Name</Label>
-                    <Input readOnly className="opacity-80 h-8 text-xs rounded-lg" value={form.firstName} />
+                    <Input readOnly={isLocked} className={`h-8 text-xs rounded-lg ${isLocked ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground focus-visible:ring-0 cursor-not-allowed" : ""}`} value={form.firstName} onChange={(e) => setForm({...form, firstName: e.target.value})} />
                   </div>
                   <div className="space-y-1">
                     <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Last Name</Label>
-                    <Input readOnly className="opacity-80 h-8 text-xs rounded-lg" value={form.lastName} />
+                    <Input readOnly={isLocked} className={`h-8 text-xs rounded-lg ${isLocked ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground focus-visible:ring-0 cursor-not-allowed" : ""}`} value={form.lastName} onChange={(e) => setForm({...form, lastName: e.target.value})} />
                   </div>
                   <div className="space-y-1">
                     <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Date of Birth</Label>
-                    <Input readOnly className="opacity-80"  type="date" className="h-8 text-xs rounded-lg" value={form.dateOfBirth} />
+                    <Input readOnly={isLocked} className={`h-8 text-xs rounded-lg ${isLocked ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground focus-visible:ring-0 cursor-not-allowed" : ""}`} value={form.dateOfBirth} onChange={(e) => setForm({...form, dateOfBirth: e.target.value})} type="date" />
                   </div>
                   <div className="space-y-1">
                     <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Gender</Label>
-                    <select disabled className="opacity-80 flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary" 
-                      value={form.gender}>
+                    <select disabled={isLocked} className={`flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none ${isLocked ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground cursor-not-allowed" : "focus:ring-1 focus:ring-primary"}`} value={form.gender} onChange={(e) => setForm({...form, gender: e.target.value})}>
                       <option value="">Select Gender</option>
                       <option value="Male">Male</option>
                       <option value="Female">Female</option>
@@ -311,7 +342,7 @@ const ProfilePage = () => {
                   </div>
                   <div className="space-y-1 md:col-span-2">
                     <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Nationality</Label>
-                    <Input readOnly className="opacity-80 h-8 text-xs rounded-lg" value={form.nationality} placeholder="e.g. American, British, Canadian" />
+                    <Input readOnly={isLocked} className={`h-8 text-xs rounded-lg ${isLocked ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground focus-visible:ring-0 cursor-not-allowed" : ""}`} value={form.nationality} onChange={(e) => setForm({...form, nationality: e.target.value})} placeholder="e.g. American, British, Canadian" />
                   </div>
                 </div>
 
@@ -320,10 +351,7 @@ const ProfilePage = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Government ID Type</Label>
-                      <select disabled className="opacity-80 flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary"
-                        value={form.govIdType} 
-                       
-                      >
+                      <select disabled={isLocked} className={`flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none ${isLocked ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground cursor-not-allowed" : "focus:ring-1 focus:ring-primary"}`} value={form.govIdType} onChange={(e) => setForm({...form, govIdType: e.target.value})}>
                         <option value="">Select ID Type...</option>
                         <option value="Passport">Passport</option>
                         <option value="Driver's License">Driver's License</option>
@@ -333,11 +361,7 @@ const ProfilePage = () => {
                     </div>
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Government ID Number</Label>
-                      <Input readOnly className="opacity-80 h-8 text-xs rounded-lg" 
-                        value={form.govIdNumber} 
-                        
-                        placeholder="e.g. A12345678 or License No." 
-                      />
+                      <Input readOnly={isLocked} className={`h-8 text-xs rounded-lg ${isLocked ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground focus-visible:ring-0 cursor-not-allowed" : ""}`} value={form.govIdNumber} onChange={(e) => setForm({...form, govIdNumber: e.target.value})} placeholder="e.g. A12345678 or License No." />
                     </div>
                   </div>
                 </div>
@@ -349,31 +373,31 @@ const ProfilePage = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Email Address</Label>
-                      <Input readOnly className="opacity-80"  type="email" value={form.email} disabled className="h-8 text-xs rounded-lg bg-muted/50" />
+                      <Input readOnly disabled className="h-8 text-xs rounded-lg bg-muted/50 shadow-inner border-border/60 text-muted-foreground cursor-not-allowed" value={form.email} />
                     </div>
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Phone Number</Label>
-                      <Input readOnly className="opacity-80 h-8 text-xs rounded-lg" value={form.phone} />
+                      <Input readOnly={isLocked} className={`h-8 text-xs rounded-lg ${isLocked ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground focus-visible:ring-0 cursor-not-allowed" : ""}`} value={form.phone} onChange={(e) => setForm({...form, phone: e.target.value})} />
                     </div>
                     <div className="space-y-1 md:col-span-2">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Mailing Address</Label>
-                      <Input readOnly className="opacity-80 h-8 text-xs rounded-lg" value={form.mailingAddress} />
+                      <Input readOnly={isLocked} className={`h-8 text-xs rounded-lg ${isLocked ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground focus-visible:ring-0 cursor-not-allowed" : ""}`} value={form.mailingAddress} onChange={(e) => setForm({...form, mailingAddress: e.target.value})} />
                     </div>
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">City</Label>
-                      <Input readOnly className="opacity-80 h-8 text-xs rounded-lg" value={form.city} />
+                      <Input readOnly={isLocked} className={`h-8 text-xs rounded-lg ${isLocked ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground focus-visible:ring-0 cursor-not-allowed" : ""}`} value={form.city} onChange={(e) => setForm({...form, city: e.target.value})} />
                     </div>
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">State / Province</Label>
-                      <Input readOnly className="opacity-80 h-8 text-xs rounded-lg" value={form.stateProvince} />
+                      <Input readOnly={isLocked} className={`h-8 text-xs rounded-lg ${isLocked ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground focus-visible:ring-0 cursor-not-allowed" : ""}`} value={form.stateProvince} onChange={(e) => setForm({...form, stateProvince: e.target.value})} />
                     </div>
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Postal / ZIP Code</Label>
-                      <Input readOnly className="opacity-80 h-8 text-xs rounded-lg" value={form.postalCode} />
+                      <Input readOnly={isLocked} className={`h-8 text-xs rounded-lg ${isLocked ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground focus-visible:ring-0 cursor-not-allowed" : ""}`} value={form.postalCode} onChange={(e) => setForm({...form, postalCode: e.target.value})} />
                     </div>
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Country</Label>
-                      <Input readOnly className="opacity-80 h-8 text-xs rounded-lg" value={form.country} />
+                      <Input readOnly={isLocked} className={`h-8 text-xs rounded-lg ${isLocked ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground focus-visible:ring-0 cursor-not-allowed" : ""}`} value={form.country} onChange={(e) => setForm({...form, country: e.target.value})} />
                     </div>
                   </div>
                 </div>
@@ -383,16 +407,15 @@ const ProfilePage = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Occupation</Label>
-                      <Input readOnly className="opacity-80 h-8 text-xs rounded-lg" value={form.occupation} />
+                      <Input readOnly={isLocked} className={`h-8 text-xs rounded-lg ${isLocked ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground focus-visible:ring-0 cursor-not-allowed" : ""}`} value={form.occupation} onChange={(e) => setForm({...form, occupation: e.target.value})} />
                     </div>
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Employer or Business Name</Label>
-                      <Input readOnly className="opacity-80 h-8 text-xs rounded-lg" value={form.employerName} />
+                      <Input readOnly={isLocked} className={`h-8 text-xs rounded-lg ${isLocked ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground focus-visible:ring-0 cursor-not-allowed" : ""}`} value={form.employerName} onChange={(e) => setForm({...form, employerName: e.target.value})} />
                     </div>
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Annual Income Range</Label>
-                      <select disabled className="opacity-80 flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary" 
-                        value={form.annualIncomeRange}>
+                      <select disabled={isLocked} className={`flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none ${isLocked ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground cursor-not-allowed" : "focus:ring-1 focus:ring-primary"}`} value={form.annualIncomeRange} onChange={(e) => setForm({...form, annualIncomeRange: e.target.value})}>
                         <option value="">Select Range</option>
                         <option value="$0 - $50,000">$0 - $50,000</option>
                         <option value="$50,001 - $100,000">$50,001 - $100,000</option>
@@ -402,8 +425,7 @@ const ProfilePage = () => {
                     </div>
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Source of Funds</Label>
-                      <select disabled className="opacity-80 flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary" 
-                        value={form.sourceOfFunds}>
+                      <select disabled={isLocked} className={`flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none ${isLocked ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground cursor-not-allowed" : "focus:ring-1 focus:ring-primary"}`} value={form.sourceOfFunds} onChange={(e) => setForm({...form, sourceOfFunds: e.target.value})}>
                         <option value="">Select Source</option>
                         <option value="Salary">Salary</option>
                         <option value="Business">Business</option>
@@ -421,8 +443,7 @@ const ProfilePage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div className="space-y-1">
                     <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Preferred Language</Label>
-                    <select disabled className="opacity-80 flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary" 
-                      value={form.preferredLanguage}>
+                    <select disabled={isLocked} className={`flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none ${isLocked ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground cursor-not-allowed" : "focus:ring-1 focus:ring-primary"}`} value={form.preferredLanguage} onChange={(e) => setForm({...form, preferredLanguage: e.target.value})}>
                       <option value="en">English (US)</option>
                       <option value="fr">French</option>
                       <option value="es">Spanish</option>
@@ -431,8 +452,7 @@ const ProfilePage = () => {
                   </div>
                   <div className="space-y-1">
                     <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Preferred Currency</Label>
-                    <select disabled className="opacity-80 flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary" 
-                      value={form.preferredCurrency}>
+                    <select disabled={isLocked} className={`flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none ${isLocked ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground cursor-not-allowed" : "focus:ring-1 focus:ring-primary"}`} value={form.preferredCurrency} onChange={(e) => setForm({...form, preferredCurrency: e.target.value})}>
                       <option value="USD">USD - US Dollar</option>
                       <option value="EUR">EUR - Euro</option>
                       <option value="GBP">GBP - British Pound</option>
@@ -463,6 +483,16 @@ const ProfilePage = () => {
 
               </div>
           </Tabs>
+            
+            {!isLocked && (
+              <div className="flex justify-end mt-6">
+                <Button type="submit" disabled={loading} className="h-9 px-6 text-xs font-bold rounded-xl shadow-sm">
+                  {loading ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Save className="w-3.5 h-3.5 mr-1.5" />}
+                  Save Changes
+                </Button>
+              </div>
+            )}
+            </form>
         </div>
       </StaggerItem>
     </StaggerContainer>
