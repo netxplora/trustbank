@@ -235,7 +235,7 @@ export default function TaxRefundWizard() {
           <ArrowLeft className="h-4 w-4 text-muted-foreground" />
         </button>
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-foreground">Tax Refund Application</h1>
+          <h1 className="text-xl sm:text-2xl font-bold font-poppins text-foreground tracking-tight">Tax Refund Application</h1>
           <p className="text-xs sm:text-sm text-muted-foreground">Complete the steps below to apply for a tax refund.</p>
         </div>
       </div>
@@ -270,7 +270,7 @@ export default function TaxRefundWizard() {
           <SlideUp>
             <div className="space-y-6">
               <div>
-                <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+                <h2 className="text-lg sm:text-xl font-bold font-poppins text-foreground flex items-center gap-2">
                   <Landmark className="h-5 w-5 text-primary" />
                   Tax Refund Information
                 </h2>
@@ -343,7 +343,7 @@ export default function TaxRefundWizard() {
           <SlideUp>
             <div className="space-y-6">
               <div>
-                <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+                <h2 className="text-lg sm:text-xl font-bold font-poppins text-foreground flex items-center gap-2">
                   <FileText className="h-5 w-5 text-primary" />
                   Supporting Documents
                 </h2>
@@ -383,7 +383,7 @@ export default function TaxRefundWizard() {
                 {/* Uploaded Files List */}
                 {documents.length > 0 && (
                   <div className="mt-6 space-y-3">
-                    <h3 className="text-sm font-bold text-foreground">Uploaded Documents ({documents.length})</h3>
+                    <h3 className="text-xs sm:text-sm font-bold font-poppins text-foreground">Uploaded Documents ({documents.length})</h3>
                     {documents.map((doc, idx) => (
                       <div key={idx} className="flex items-center justify-between p-3 border border-border rounded-lg bg-card">
                         <div className="flex items-center gap-3 overflow-hidden">
@@ -410,7 +410,7 @@ export default function TaxRefundWizard() {
           <SlideUp>
             <div className="space-y-6">
               <div>
-                <h2 className="text-xl font-bold text-foreground">Declarations</h2>
+                <h2 className="text-lg sm:text-xl font-bold font-poppins text-foreground">Declarations</h2>
                 <p className="text-sm text-muted-foreground mt-1">Please confirm the following to proceed.</p>
               </div>
 
@@ -465,7 +465,7 @@ export default function TaxRefundWizard() {
           <SlideUp>
             <div className="space-y-6">
               <div>
-                <h2 className="text-xl font-bold text-foreground">Review & Submit</h2>
+                <h2 className="text-lg sm:text-xl font-bold font-poppins text-foreground">Review & Submit</h2>
                 <p className="text-sm text-muted-foreground mt-1">Review your application details before submitting.</p>
               </div>
 
@@ -474,7 +474,7 @@ export default function TaxRefundWizard() {
                 {/* Profile Summary */}
                 <div className="bg-muted/30 rounded-xl p-5 border border-border space-y-4">
                   <div className="pb-2 border-b border-border">
-                    <h3 className="font-bold text-foreground">Applicant Information</h3>
+                    <h3 className="text-sm sm:text-base font-bold font-poppins text-foreground">Applicant Information</h3>
                   </div>
                   <div className="grid grid-cols-2 gap-y-4 gap-x-6">
                     <div className="space-y-1">
@@ -499,7 +499,7 @@ export default function TaxRefundWizard() {
                 {/* Tax Refund Details */}
                 <div className="bg-muted/30 rounded-xl p-5 border border-border space-y-4">
                   <div className="flex justify-between items-center pb-2 border-b border-border">
-                    <h3 className="font-bold text-foreground">Tax Refund Details</h3>
+                    <h3 className="text-sm sm:text-base font-bold font-poppins text-foreground">Tax Refund Details</h3>
                     <Button variant="link" size="sm" onClick={() => setCurrentStep(1)} className="h-auto p-0">Edit</Button>
                   </div>
                   <div className="grid grid-cols-2 gap-y-4 gap-x-6">
@@ -531,7 +531,7 @@ export default function TaxRefundWizard() {
                 {/* Uploaded Documents */}
                 <div className="bg-muted/30 rounded-xl p-5 border border-border space-y-4">
                   <div className="flex justify-between items-center pb-2 border-b border-border">
-                    <h3 className="font-bold text-foreground">Uploaded Documents</h3>
+                    <h3 className="text-sm sm:text-base font-bold font-poppins text-foreground">Uploaded Documents</h3>
                     <Button variant="link" size="sm" onClick={() => setCurrentStep(2)} className="h-auto p-0">Edit</Button>
                   </div>
                   <div className="space-y-2">
@@ -547,7 +547,7 @@ export default function TaxRefundWizard() {
                 {/* Declaration Summary */}
                 <div className="bg-muted/30 rounded-xl p-5 border border-border space-y-3">
                   <div className="pb-2 border-b border-border">
-                    <h3 className="font-bold text-foreground">Declarations</h3>
+                    <h3 className="text-sm sm:text-base font-bold font-poppins text-foreground">Declarations</h3>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <CheckCircle2 className="h-4 w-4 text-primary" />

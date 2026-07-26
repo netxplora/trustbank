@@ -64,7 +64,7 @@ export default function TaxRefundPage() {
     <div className="max-w-3xl mx-auto space-y-6 sm:space-y-8 pb-12">
       <FadeIn>
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-foreground">Tax Refund Applications</h1>
+          <h1 className="text-xl sm:text-2xl font-bold font-poppins text-foreground tracking-tight">Tax Refund Applications</h1>
           <p className="text-xs sm:text-sm text-muted-foreground mt-1">
             Apply for your annual tax return seamlessly or track the status of your existing claims.
           </p>
@@ -75,7 +75,7 @@ export default function TaxRefundPage() {
         <Card className="bg-card border border-border shadow-sm overflow-hidden">
           <div className="flex flex-col md:flex-row md:items-center">
             <div className="p-5 md:w-2/3">
-              <h2 className="text-lg font-bold text-foreground mb-2 flex items-center gap-2">
+              <h2 className="text-base sm:text-lg font-bold font-poppins text-foreground mb-2 flex items-center gap-2">
                 <FileSpreadsheet className="h-4 w-4 text-primary" />
                 Submit a New Tax Refund
               </h2>
@@ -97,14 +97,14 @@ export default function TaxRefundPage() {
       </SlideUp>
 
       <div className="space-y-4">
-        <h3 className="text-base font-bold text-foreground">Your Applications</h3>
+        <h3 className="text-sm sm:text-base font-bold font-poppins text-foreground">Your Applications</h3>
         
         {loading ? (
           <div className="text-center py-12 text-muted-foreground animate-pulse">Loading applications...</div>
         ) : applications.length === 0 ? (
           <div className="bg-card border border-border border-dashed rounded-xl p-12 text-center">
             <FileSpreadsheet className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-foreground mb-1">No Applications Yet</h3>
+            <h3 className="text-base sm:text-lg font-semibold font-poppins text-foreground mb-1">No Applications Yet</h3>
             <p className="text-sm text-muted-foreground mb-4">You haven't submitted any tax refund applications.</p>
             <Button onClick={() => navigate("/dashboard/tax-refund/apply")} variant="outline" className="gap-2 border-border text-foreground hover:bg-muted">
               Start an Application <Plus className="h-4 w-4" />
@@ -123,7 +123,7 @@ export default function TaxRefundPage() {
                         </span>
                         {getStatusBadge(app.status)}
                       </div>
-                      <h4 className="font-semibold text-foreground">{app.tax_refund_program || 'Standard Tax Refund'} - Tax Year {app.tax_year}</h4>
+                      <h4 className="text-sm sm:text-base font-semibold font-poppins text-foreground">{app.tax_refund_program || 'Standard Tax Refund'} - Tax Year {app.tax_year}</h4>
                       <p className="text-xs text-muted-foreground">Submitted on {new Date(app.created_at || "").toLocaleDateString()}</p>
                     </div>
 

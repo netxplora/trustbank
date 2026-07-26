@@ -194,9 +194,9 @@ export default function CustomerDashboardLayout() {
           <span className="text-[9px] font-semibold tracking-wide">Home</span>
         </Link>
         
-        <Link to="/dashboard/accounts" className={`flex flex-col items-center justify-center w-full h-full space-y-0.5 transition-colors ${location.pathname === "/dashboard/accounts" ? 'text-primary' : 'text-muted-foreground'}`}>
-          <Wallet className={`h-4.5 w-4.5 ${location.pathname === "/dashboard/accounts" ? 'fill-primary/20' : ''}`} strokeWidth={location.pathname === "/dashboard/accounts" ? 2.5 : 2} />
-          <span className="text-[9px] font-semibold tracking-wide">Accounts</span>
+        <Link to="/dashboard/deposit" className={`flex flex-col items-center justify-center w-full h-full space-y-0.5 transition-colors ${location.pathname === "/dashboard/deposit" ? 'text-primary' : 'text-muted-foreground'}`}>
+          <PlusCircle className={`h-4.5 w-4.5 ${location.pathname === "/dashboard/deposit" ? 'fill-primary/20' : ''}`} strokeWidth={location.pathname === "/dashboard/deposit" ? 2.5 : 2} />
+          <span className="text-[9px] font-semibold tracking-wide">Deposit</span>
         </Link>
 
         {/* Floating Action Button for Transfer */}
@@ -210,9 +210,9 @@ export default function CustomerDashboardLayout() {
           <span className="text-[9px] font-semibold tracking-wide absolute bottom-1 text-muted-foreground">Transfer</span>
         </div>
 
-        <Link to="/dashboard/payments" className={`flex flex-col items-center justify-center w-full h-full space-y-0.5 transition-colors ${location.pathname === "/dashboard/payments" ? 'text-primary' : 'text-muted-foreground'}`}>
-          <Receipt className={`h-4.5 w-4.5 ${location.pathname === "/dashboard/payments" ? 'fill-primary/20' : ''}`} strokeWidth={location.pathname === "/dashboard/payments" ? 2.5 : 2} />
-          <span className="text-[9px] font-semibold tracking-wide">Payments</span>
+        <Link to="/dashboard/cards" className={`flex flex-col items-center justify-center w-full h-full space-y-0.5 transition-colors ${location.pathname === "/dashboard/cards" ? 'text-primary' : 'text-muted-foreground'}`}>
+          <CreditCard className={`h-4.5 w-4.5 ${location.pathname === "/dashboard/cards" ? 'fill-primary/20' : ''}`} strokeWidth={location.pathname === "/dashboard/cards" ? 2.5 : 2} />
+          <span className="text-[9px] font-semibold tracking-wide">Cards</span>
         </Link>
 
         <Link to="/dashboard/services" className={`flex flex-col items-center justify-center w-full h-full space-y-0.5 transition-colors ${location.pathname === "/dashboard/services" ? 'text-primary' : 'text-muted-foreground'}`}>
