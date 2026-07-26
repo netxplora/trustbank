@@ -8,43 +8,44 @@ import { useAuth } from "@/contexts/AuthContext";
 import { PageTransition } from "@/components/PageTransition";
 import { AnimatePresence } from "framer-motion";
 import logo from "@/assets/logo.png";
+import { ActionTooltip } from "@/components/ui/action-tooltip";
 
 const navGroups = [
   {
     title: "Core Banking",
     items: [
-      { icon: LayoutDashboard, label: "Overview", to: "/admin" },
-      { icon: Users, label: "Customers", to: "/admin/customers" },
-      { icon: Wallet, label: "Accounts", to: "/admin/accounts" },
-      { icon: Briefcase, label: "Current Apps", to: "/admin/current-applications" },
-      { icon: ArrowRightLeft, label: "Transactions", to: "/admin/transactions" },
-      { icon: ArrowDownCircle, label: "Deposits", to: "/admin/deposits" },
-      { icon: Bitcoin, label: "Digital Currency & Swaps", to: "/admin/digital-currency" },
-      { icon: TrendingUp, label: "Loans", to: "/admin/loans" },
-      { icon: CreditCard, label: "Cards", to: "/admin/cards" },
-      { icon: LineChart, label: "Investments", to: "/admin/investments" },
+      { icon: LayoutDashboard, label: "Overview", to: "/admin", tooltip: "View platform statistics and recent activity." },
+      { icon: Users, label: "Customers", to: "/admin/customers", tooltip: "Manage registered users and profiles." },
+      { icon: Wallet, label: "Accounts", to: "/admin/accounts", tooltip: "Manage savings and checking accounts." },
+      { icon: Briefcase, label: "Current Apps", to: "/admin/current-applications", tooltip: "Review current account applications." },
+      { icon: ArrowRightLeft, label: "Transactions", to: "/admin/transactions", tooltip: "Monitor all platform transactions." },
+      { icon: ArrowDownCircle, label: "Deposits", to: "/admin/deposits", tooltip: "Review and approve deposits." },
+      { icon: Bitcoin, label: "Digital Currency & Swaps", to: "/admin/digital-currency", tooltip: "Manage crypto assets and swap rates." },
+      { icon: TrendingUp, label: "Loans", to: "/admin/loans", tooltip: "Review loan applications and statuses." },
+      { icon: CreditCard, label: "Cards", to: "/admin/cards", tooltip: "Manage physical and virtual card requests." },
+      { icon: LineChart, label: "Investments", to: "/admin/investments", tooltip: "Monitor investment portfolios." },
     ]
   },
   {
     title: "Programs & Compliance",
     items: [
-      { icon: ShieldCheck, label: "KYC Management", to: "/admin/kyc" },
-      { icon: FileSpreadsheet, label: "Tax Refunds", to: "/admin/tax-refunds" },
-      { icon: Award, label: "Grant Programs", to: "/admin/grants" },
-      { icon: MessageCircle, label: "Support Chat", to: "/admin/chat" },
-      { icon: Bell, label: "Notifications", to: "/admin/notifications" },
-      { icon: FileText, label: "Reports", to: "/admin/reports" },
+      { icon: ShieldCheck, label: "KYC Management", to: "/admin/kyc", tooltip: "Review identity verification requests." },
+      { icon: FileSpreadsheet, label: "Tax Refunds", to: "/admin/tax-refunds", tooltip: "Process tax refund applications." },
+      { icon: Award, label: "Grant Programs", to: "/admin/grants", tooltip: "Manage government and institutional grants." },
+      { icon: MessageCircle, label: "Support Chat", to: "/admin/chat", tooltip: "Respond to customer inquiries." },
+      { icon: Bell, label: "Notifications", to: "/admin/notifications", tooltip: "Send and manage platform alerts." },
+      { icon: FileText, label: "Reports", to: "/admin/reports", tooltip: "Generate and view financial reports." },
     ]
   },
   {
     title: "Brand & CMS",
     items: [
-      { icon: Paintbrush, label: "Brand Settings", to: "/admin/settings" },
-      { icon: Globe, label: "Pages Content", to: "/admin/cms-pages" },
-      { icon: Box, label: "Banking Products", to: "/admin/cms-products" },
-      { icon: ScrollText, label: "News & Insights", to: "/admin/cms-news" },
-      { icon: Image, label: "Media Library", to: "/admin/cms-media" },
-      { icon: ShieldCheck, label: "Audit Logs", to: "/admin/audit-logs" },
+      { icon: Paintbrush, label: "Brand Settings", to: "/admin/settings", tooltip: "Configure platform branding and layout." },
+      { icon: Globe, label: "Pages Content", to: "/admin/cms-pages", tooltip: "Manage website pages and text." },
+      { icon: Box, label: "Banking Products", to: "/admin/cms-products", tooltip: "Configure banking products and rates." },
+      { icon: ScrollText, label: "News & Insights", to: "/admin/cms-news", tooltip: "Publish blog posts and news articles." },
+      { icon: Image, label: "Media Library", to: "/admin/cms-media", tooltip: "Manage uploaded images and files." },
+      { icon: ShieldCheck, label: "Audit Logs", to: "/admin/audit-logs", tooltip: "Review system activity and security logs." },
     ]
   }
 ];
@@ -96,13 +97,15 @@ export default function AdminDashboardLayout() {
                 {group.title}
               </h4>
               <div className="space-y-0.5">
-                {group.items.map(({ icon: Icon, label, to }) => {
+                {group.items.map(({ icon: Icon, label, to, tooltip }) => {
                   const active = location.pathname === to;
                   return (
-                    <Link key={to} to={to} onClick={() => setSidebarOpen(false)} className={`flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-nav-std font-medium tracking-[0.2px] transition-all duration-300 ${active ? "bg-primary text-primary-foreground shadow-md shadow-primary/20" : "text-muted-foreground hover:bg-muted/80 hover:text-foreground"}`}>
-                      <Icon className={`h-4 w-4 ${active ? "text-primary-foreground" : "text-muted-foreground"}`} />
-                      {label}
-                    </Link>
+                    <ActionTooltip key={to} content={tooltip} side="right">
+                      <Link to={to} onClick={() => setSidebarOpen(false)} className={`flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-nav-std font-medium tracking-[0.2px] transition-all duration-300 ${active ? "bg-primary text-primary-foreground shadow-md shadow-primary/20" : "text-muted-foreground hover:bg-muted/80 hover:text-foreground"}`}>
+                        <Icon className={`h-4 w-4 ${active ? "text-primary-foreground" : "text-muted-foreground"}`} />
+                        {label}
+                      </Link>
+                    </ActionTooltip>
                   );
                 })}
               </div>
@@ -111,14 +114,18 @@ export default function AdminDashboardLayout() {
         </nav>
 
         <div className="p-2.5 border-t shrink-0 border-border/50 font-sans bg-background/30 space-y-0.5">
-          <Link to="/" onClick={() => setSidebarOpen(false)} className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-muted-foreground hover:bg-muted/80 hover:text-foreground transition-all duration-300">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-            Go to Homepage
-          </Link>
-          <button onClick={handleSignOut} className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-all duration-300 w-full">
-            <LogOut className="h-3.5 w-3.5" />
-            Sign Out
-          </button>
+          <ActionTooltip content="Return to public website" side="right">
+            <Link to="/" onClick={() => setSidebarOpen(false)} className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-muted-foreground hover:bg-muted/80 hover:text-foreground transition-all duration-300">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              Go to Homepage
+            </Link>
+          </ActionTooltip>
+          <ActionTooltip content="Securely sign out of your account" side="right">
+            <button onClick={handleSignOut} className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-all duration-300 w-full">
+              <LogOut className="h-3.5 w-3.5" />
+              Sign Out
+            </button>
+          </ActionTooltip>
         </div>
       </aside>
 
@@ -126,16 +133,20 @@ export default function AdminDashboardLayout() {
         <header className="h-13 bg-background/70 backdrop-blur-xl border-b border-border/50 flex items-center justify-between px-3 md:px-6 sticky top-0 z-30 shadow-sm w-full">
           <div className="flex items-center gap-2.5 lg:hidden">
             {location.pathname !== "/admin" && (
-              <button 
-                className="p-1.5 -ml-1 rounded-lg hover:bg-muted/80 transition-colors text-muted-foreground"
-                onClick={() => navigate(-1)}
-              >
-                <ChevronLeft className="h-5 w-5" />
-              </button>
+              <ActionTooltip content="Go back to previous page" side="bottom">
+                <button 
+                  className="p-1.5 -ml-1 rounded-lg hover:bg-muted/80 transition-colors text-muted-foreground"
+                  onClick={() => navigate(-1)}
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </button>
+              </ActionTooltip>
             )}
-            <button className="p-1.5 -ml-1 rounded-lg hover:bg-muted/80 transition-colors" onClick={() => setSidebarOpen(true)}>
-              <Menu className="h-5 w-5" />
-            </button>
+            <ActionTooltip content="Open navigation menu" side="bottom">
+              <button className="p-1.5 -ml-1 rounded-lg hover:bg-muted/80 transition-colors" onClick={() => setSidebarOpen(true)}>
+                <Menu className="h-5 w-5" />
+              </button>
+            </ActionTooltip>
             <div className="flex items-center gap-2">
               <div className="h-6 w-6 rounded-md bg-primary/10 flex items-center justify-center border border-primary/20">
                 <img src={logo} alt="TrustBank" className="h-3.5 w-3.5" />
@@ -158,15 +169,25 @@ export default function AdminDashboardLayout() {
           </div>
 
           <div className="flex items-center gap-1.5 lg:gap-2">
-            <ThemeToggle />
-            <NotificationPopover basePath="/admin" />
-            <Link to="/admin/settings" className="h-8 w-8 rounded-full hover:bg-muted/80 transition-all flex items-center justify-center group relative border border-transparent hover:border-border/50 overflow-hidden">
-              {profile?.avatar_url ? (
-                <img src={profile.avatar_url} alt="Profile" className="h-full w-full object-cover group-hover:scale-110 transition-transform" />
-              ) : (
-                <User className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-              )}
-            </Link>
+            <ActionTooltip content="Toggle theme" side="bottom">
+              <div>
+                <ThemeToggle />
+              </div>
+            </ActionTooltip>
+            <ActionTooltip content="View notifications" side="bottom">
+              <div>
+                <NotificationPopover basePath="/admin" />
+              </div>
+            </ActionTooltip>
+            <ActionTooltip content="View admin settings" side="bottom">
+              <Link to="/admin/settings" className="h-8 w-8 rounded-full hover:bg-muted/80 transition-all flex items-center justify-center group relative border border-transparent hover:border-border/50 overflow-hidden">
+                {profile?.avatar_url ? (
+                  <img src={profile.avatar_url} alt="Profile" className="h-full w-full object-cover group-hover:scale-110 transition-transform" />
+                ) : (
+                  <User className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                )}
+              </Link>
+            </ActionTooltip>
           </div>
         </header>
 

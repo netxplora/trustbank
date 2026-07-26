@@ -12,6 +12,7 @@ import { useBrand } from "@/contexts/BrandContext";
 import { StaggerContainer, StaggerItem, FadeIn, SlideUp } from "@/components/public/Motion";
 import { provisionCard } from "@/services/cardIssuingProvider";
 import { CardSkeleton } from "@/components/skeletons/DashboardSkeleton";
+import { ActionTooltip } from "@/components/ui/action-tooltip";
 
 interface Card {
   id: string;
@@ -215,7 +216,7 @@ const ATMCard = ({ card, onViewDetails }: { card: Card; onViewDetails: () => voi
   
   const last4 = card.card_number ? card.card_number.slice(-4) : '••••';
   const isVisa = card.card_brand?.toLowerCase() === 'visa';
-  const isPhysical = card.is_physical === true || (card.card_type !== 'virtual' && card.card_type !== 'digital');
+  const isPhysical = card.is_physical === true || card.is_physical === 'true' as any || (card.card_type !== 'virtual' && card.card_type !== 'digital' && card.is_physical !== false && card.is_physical !== 'false' as any);
 
   if (card.card_type === 'infinite') {
     return <InfiniteMetalCard card={card} onViewDetails={onViewDetails} showNumber={showNumber} setShowNumber={setShowNumber} isFlipped={isFlipped} setIsFlipped={setIsFlipped} />;
@@ -393,7 +394,8 @@ const CardsPage = () => {
   }, [user?.id]);
 
   const isCardPhysical = (c: Card) => {
-    if (c.is_physical) return true;
+    if (c.is_physical === true || c.is_physical === 'true' as any) return true;
+    if (c.is_physical === false || c.is_physical === 'false' as any) return false;
     return c.card_type === 'physical' || c.card_type === 'debit' || c.card_type === 'premium' || c.card_type === 'infinite';
   };
 
@@ -424,12 +426,14 @@ const CardsPage = () => {
       
       const loadedCards = (data as Card[]) || [];
 
+      // Determine if we should auto-switch category
       setCards(prev => {
         if (prev.length === 0 && loadedCards.length > 0) {
           const hasPhysical = loadedCards.some(c => isCardPhysical(c));
           const hasVirtual = loadedCards.some(c => !isCardPhysical(c));
           if (!hasPhysical && hasVirtual) {
-            setCardCategory("virtual");
+            // Schedule it safely after render
+            setTimeout(() => setCardCategory("virtual"), 0);
           }
         }
         return loadedCards;
@@ -686,9 +690,11 @@ const CardsPage = () => {
           <h1 className="text-xl sm:text-2xl font-bold font-poppins text-foreground tracking-tight">Card Management</h1>
           <p className="text-xs sm:text-sm text-muted-foreground mt-1">Provision and manage your debit and virtual cards</p>
         </div>
-        <Button size="sm" onClick={() => setShowRequest(!showRequest)} className="font-bold text-xs h-9 rounded-lg px-4">
-          <Plus className="h-4 w-4 mr-1.5" /> Provision Card
-        </Button>
+        <ActionTooltip content="Create a new physical or virtual card" side="left">
+          <Button size="sm" onClick={() => setShowRequest(!showRequest)} className="font-bold text-xs h-9 rounded-lg px-4">
+            <Plus className="h-4 w-4 mr-1.5" /> Provision Card
+          </Button>
+        </ActionTooltip>
       </div>
 
       {/* Category Tabs: Physical vs Virtual Cards */}
@@ -764,7 +770,9 @@ const CardsPage = () => {
               )}
 
               <div className="flex gap-2 pt-1">
-                <Button type="submit" className="flex-1 font-bold text-xs h-8 rounded-lg">Authorize Provisioning</Button>
+                <ActionTooltip content="Submit request and provision card" side="bottom">
+                  <Button type="submit" className="flex-1 font-bold text-xs h-8 rounded-lg">Authorize Provisioning</Button>
+                </ActionTooltip>
                 <Button type="button" variant="outline" onClick={() => setShowRequest(false)} className="font-bold text-xs h-8 rounded-lg">Cancel</Button>
               </div>
             </form>
@@ -800,9 +808,11 @@ const CardsPage = () => {
               ? "Provision a physical debit or metal card for direct delivery."
               : "Provision a digital virtual card for instant payment processing."}
           </p>
-          <Button size="sm" className="h-8 text-xs font-bold rounded-lg px-4" onClick={() => { setSelectedType(cardCategory === "virtual" ? "virtual" : "premium"); setShowRequest(true); }}>
-            <Plus className="h-3.5 w-3.5 mr-1" /> Provision {cardCategory === "virtual" ? "Virtual" : "Physical"} Card
-          </Button>
+          <ActionTooltip content={`Create a new ${cardCategory} card`} side="top">
+            <Button size="sm" className="h-8 text-xs font-bold rounded-lg px-4" onClick={() => { setSelectedType(cardCategory === "virtual" ? "virtual" : "premium"); setShowRequest(true); }}>
+              <Plus className="h-3.5 w-3.5 mr-1" /> Provision {cardCategory === "virtual" ? "Virtual" : "Physical"} Card
+            </Button>
+          </ActionTooltip>
         </div>
       ) : (
         <StaggerContainer key={cardCategory} className={displayedCards.length === 1 ? "max-w-md mx-auto space-y-4 py-2" : "grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-4xl mx-auto py-2"}>
@@ -810,20 +820,28 @@ const CardsPage = () => {
             <StaggerItem key={card.id} className="space-y-0">
               <ATMCard card={card} onViewDetails={() => { setSelectedCard(card); setShowDetails(true); }} />
               <div className="bg-card border border-t-0 rounded-b-xl p-2 sm:p-2.5 grid grid-cols-2 sm:grid-cols-4 gap-1.5 shadow-sm max-w-[400px] mx-auto">
-                <Button variant="outline" size="sm" className="text-xs font-bold h-8 rounded-lg" onClick={() => { navigator.clipboard.writeText(card.card_number); toast({ title: "Copied to Clipboard!" }); }}>
-                  <Copy className="h-3.5 w-3.5 mr-1" /> Copy
-                </Button>
-                <Button variant="outline" size="sm" className="text-xs font-bold h-8 rounded-lg" onClick={() => toggleFreeze(card.id)}>
-                  {card.is_frozen ? <Unlock className="h-3.5 w-3.5 mr-1" /> : <Snowflake className="h-3.5 w-3.5 mr-1" />}
-                  {card.is_frozen ? "Unfreeze" : "Freeze"}
-                </Button>
-                <Button variant="outline" size="sm" className="text-xs font-bold h-8 rounded-lg" onClick={() => toggleActivation(card.id)}>
-                  <Power className="h-3.5 w-3.5 mr-1" />
-                  {card.status === "inactive" ? "Activate" : "Off"}
-                </Button>
-                <Button variant="outline" size="sm" className="text-xs font-bold h-8 rounded-lg" onClick={() => { setSelectedCard(card); setShowLimits(true); }}>
-                  <DollarSign className="h-3.5 w-3.5 mr-1" /> Limits
-                </Button>
+                <ActionTooltip content="Copy card number to clipboard" side="bottom">
+                  <Button variant="outline" size="sm" className="text-xs font-bold h-8 rounded-lg w-full" onClick={() => { navigator.clipboard.writeText(card.card_number); toast({ title: "Copied to Clipboard!" }); }}>
+                    <Copy className="h-3.5 w-3.5 mr-1" /> Copy
+                  </Button>
+                </ActionTooltip>
+                <ActionTooltip content={card.is_frozen ? "Unfreeze this card for transactions" : "Temporarily freeze this card"} side="bottom">
+                  <Button variant="outline" size="sm" className="text-xs font-bold h-8 rounded-lg w-full" onClick={() => toggleFreeze(card.id)}>
+                    {card.is_frozen ? <Unlock className="h-3.5 w-3.5 mr-1" /> : <Snowflake className="h-3.5 w-3.5 mr-1" />}
+                    {card.is_frozen ? "Unfreeze" : "Freeze"}
+                  </Button>
+                </ActionTooltip>
+                <ActionTooltip content={card.status === "inactive" ? "Activate card for use" : "Deactivate this card"} side="bottom">
+                  <Button variant="outline" size="sm" className="text-xs font-bold h-8 rounded-lg w-full" onClick={() => toggleActivation(card.id)}>
+                    <Power className="h-3.5 w-3.5 mr-1" />
+                    {card.status === "inactive" ? "Activate" : "Off"}
+                  </Button>
+                </ActionTooltip>
+                <ActionTooltip content="Manage spending limits and restrictions" side="bottom">
+                  <Button variant="outline" size="sm" className="text-xs font-bold h-8 rounded-lg w-full" onClick={() => { setSelectedCard(card); setShowLimits(true); }}>
+                    <DollarSign className="h-3.5 w-3.5 mr-1" /> Limits
+                  </Button>
+                </ActionTooltip>
               </div>
             </StaggerItem>
           ))}
@@ -887,8 +905,12 @@ const CardsPage = () => {
                   ))}
                 </div>
                 <div className="pt-2 border-t mt-4 flex gap-2">
-                  <Button variant="outline" className="flex-1 font-bold text-destructive hover:bg-destructive/10" onClick={() => deleteCard(selectedCard.id)}>Delete Card</Button>
-                  <Button className="flex-1 font-bold" onClick={() => replaceCard(selectedCard.id)}>Replace Card</Button>
+                  <ActionTooltip content="Permanently delete this card" side="bottom">
+                    <Button variant="outline" className="flex-1 font-bold text-destructive hover:bg-destructive/10" onClick={() => deleteCard(selectedCard.id)}>Delete Card</Button>
+                  </ActionTooltip>
+                  <ActionTooltip content="Request a replacement for this card" side="bottom">
+                    <Button className="flex-1 font-bold" onClick={() => replaceCard(selectedCard.id)}>Replace Card</Button>
+                  </ActionTooltip>
                 </div>
               </div>
             </FadeIn>
@@ -915,7 +937,9 @@ const CardsPage = () => {
                   <Input type="text" placeholder="e.g. 5000" value={newLimit} onChange={(e) => setNewLimit(e.target.value)} className="font-mono font-bold" />
                 </div>
                 <div className="flex gap-3 pt-2">
-                  <Button className="flex-1 font-bold" onClick={updateLimit}>Save Changes</Button>
+                  <ActionTooltip content="Apply the new daily spending limit" side="bottom">
+                    <Button className="flex-1 font-bold" onClick={updateLimit}>Save Changes</Button>
+                  </ActionTooltip>
                   <Button variant="outline" className="font-bold" onClick={() => setShowLimits(false)}>Cancel</Button>
                 </div>
               </div>

@@ -10,23 +10,24 @@ import { AnimatePresence } from "framer-motion";
 import logo from "@/assets/logo.png";
 import { supabase } from "@/integrations/supabase/client";
 import { LiveChatWidget } from "./LiveChatWidget";
+import { ActionTooltip } from "@/components/ui/action-tooltip";
 
 const navItems = [
-  { icon: LayoutDashboard, label: "Overview", to: "/dashboard" },
-  { icon: Wallet, label: "Accounts", to: "/dashboard/accounts" },
-  { icon: Bitcoin, label: "Digital Currency", to: "/dashboard/digital-currency" },
-  { icon: ArrowRightLeft, label: "Transfers", to: "/dashboard/transfers" },
-  { icon: PlusCircle, label: "Top Up", to: "/dashboard/deposit" },
-  { icon: LineChart, label: "Investments & Stocks", to: "/dashboard/investments" },
-  { icon: TrendingUp, label: "Loans", to: "/dashboard/loans" },
-  { icon: FileSpreadsheet, label: "Tax Refund", to: "/dashboard/tax-refund" },
-  { icon: Award, label: "Grants", to: "/dashboard/grants" },
-  { icon: CreditCard, label: "Cards", to: "/dashboard/cards" },
-  { icon: FileText, label: "Statements", to: "/dashboard/statements" },
-  { icon: ShieldCheck, label: "KYC Verification", to: "/dashboard/kyc" },
-  { icon: Bell, label: "Notifications", to: "/dashboard/notifications" },
-  { icon: User, label: "Profile", to: "/dashboard/profile" },
-  { icon: Settings, label: "Security", to: "/dashboard/security" },
+  { icon: LayoutDashboard, label: "Overview", to: "/dashboard", tooltip: "View your account summary and recent activity." },
+  { icon: Wallet, label: "Accounts", to: "/dashboard/accounts", tooltip: "Manage your checking and savings accounts." },
+  { icon: Bitcoin, label: "Digital Currency", to: "/dashboard/digital-currency", tooltip: "Buy, sell, and manage crypto assets." },
+  { icon: ArrowRightLeft, label: "Transfers", to: "/dashboard/transfers", tooltip: "Send money to other accounts." },
+  { icon: PlusCircle, label: "Top Up", to: "/dashboard/deposit", tooltip: "Add money to your account." },
+  { icon: LineChart, label: "Investments & Stocks", to: "/dashboard/investments", tooltip: "Manage your stock and investment portfolio." },
+  { icon: TrendingUp, label: "Loans", to: "/dashboard/loans", tooltip: "Apply for and manage your loans." },
+  { icon: FileSpreadsheet, label: "Tax Refund", to: "/dashboard/tax-refund", tooltip: "Submit and track your tax refund application." },
+  { icon: Award, label: "Grants", to: "/dashboard/grants", tooltip: "Apply for available government or institutional grant programs." },
+  { icon: CreditCard, label: "Cards", to: "/dashboard/cards", tooltip: "Manage your physical and virtual cards." },
+  { icon: FileText, label: "Statements", to: "/dashboard/statements", tooltip: "Download your monthly account statements." },
+  { icon: ShieldCheck, label: "KYC Verification", to: "/dashboard/kyc", tooltip: "Complete identity verification to unlock limits." },
+  { icon: Bell, label: "Notifications", to: "/dashboard/notifications", tooltip: "View your account alerts and messages." },
+  { icon: User, label: "Profile", to: "/dashboard/profile", tooltip: "Update your personal information." },
+  { icon: Settings, label: "Security", to: "/dashboard/security", tooltip: "Manage passwords and security settings." },
 ];
 
 export default function CustomerDashboardLayout() {
@@ -91,33 +92,42 @@ export default function CustomerDashboardLayout() {
         </div>
 
         <nav className="flex-1 px-2.5 py-3 space-y-0.5 overflow-y-auto">
-          {navItems.map(({ icon: Icon, label, to }) => {
+          {navItems.map(({ icon: Icon, label, to, tooltip }) => {
             const active = location.pathname === to || location.pathname.startsWith(`${to}/`);
             return (
-              <Link key={to} to={to} onClick={() => setSidebarOpen(false)} className={`flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-nav-std font-medium tracking-[0.2px] transition-all duration-300 ${active ? "bg-primary text-primary-foreground shadow-md shadow-primary/20" : "text-muted-foreground hover:bg-muted/80 hover:text-foreground"}`}>
-                <Icon className={`h-4 w-4 ${active ? "text-primary-foreground" : "text-muted-foreground"}`} />
-                {label}
-              </Link>
+              <ActionTooltip key={to} content={tooltip} side="right">
+                <Link to={to} onClick={() => setSidebarOpen(false)} className={`flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-nav-std font-medium tracking-[0.2px] transition-all duration-300 ${active ? "bg-primary text-primary-foreground shadow-md shadow-primary/20" : "text-muted-foreground hover:bg-muted/80 hover:text-foreground"}`}>
+                  <Icon className={`h-4 w-4 ${active ? "text-primary-foreground" : "text-muted-foreground"}`} />
+                  {label}
+                </Link>
+              </ActionTooltip>
             );
           })}
         </nav>
 
         <div className="p-2.5 border-t border-border/50 space-y-0.5 bg-background/30">
           {isAdmin && (
-            <Link to="/admin" onClick={() => setSidebarOpen(false)} className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-muted-foreground hover:bg-muted/80 hover:text-foreground transition-all duration-300">
-              <ShieldCheck className="h-3.5 w-3.5" />
-              Admin Portal
-            </Link>
+            <ActionTooltip content="Access administration panel" side="right">
+              <Link to="/admin" onClick={() => setSidebarOpen(false)} className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-muted-foreground hover:bg-muted/80 hover:text-foreground transition-all duration-300">
+                <ShieldCheck className="h-3.5 w-3.5" />
+                Admin Portal
+              </Link>
+            </ActionTooltip>
           )}
 
-          <Link to="/" onClick={() => setSidebarOpen(false)} className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-muted-foreground hover:bg-muted/80 hover:text-foreground transition-all duration-300">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-            Go to Homepage
-          </Link>
-          <button onClick={handleSignOut} className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-all duration-300 w-full">
-            <LogOut className="h-3.5 w-3.5" />
-            Sign Out
-          </button>
+          <ActionTooltip content="Return to public website" side="right">
+            <Link to="/" onClick={() => setSidebarOpen(false)} className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-muted-foreground hover:bg-muted/80 hover:text-foreground transition-all duration-300">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              Go to Homepage
+            </Link>
+          </ActionTooltip>
+          
+          <ActionTooltip content="Securely sign out of your account" side="right">
+            <button onClick={handleSignOut} className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-all duration-300 w-full">
+              <LogOut className="h-3.5 w-3.5" />
+              Sign Out
+            </button>
+          </ActionTooltip>
         </div>
       </aside>
 
@@ -125,16 +135,20 @@ export default function CustomerDashboardLayout() {
         <header className="h-13 bg-background/70 backdrop-blur-xl border-b border-border/50 flex items-center justify-between px-3 md:px-6 sticky top-0 z-30 shadow-sm w-full">
           <div className="flex items-center gap-2.5 lg:hidden">
             {location.pathname !== "/dashboard" && (
-              <button 
-                className="p-1.5 -ml-1 rounded-lg hover:bg-muted/80 transition-colors text-muted-foreground"
-                onClick={() => navigate(-1)}
-              >
-                <ChevronLeft className="h-5 w-5" />
-              </button>
+              <ActionTooltip content="Go back to previous page" side="bottom">
+                <button 
+                  className="p-1.5 -ml-1 rounded-lg hover:bg-muted/80 transition-colors text-muted-foreground"
+                  onClick={() => navigate(-1)}
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </button>
+              </ActionTooltip>
             )}
-            <button className="p-1.5 -ml-1 rounded-lg hover:bg-muted/80 transition-colors" onClick={() => setSidebarOpen(true)}>
-              <Menu className="h-5 w-5" />
-            </button>
+            <ActionTooltip content="Open navigation menu" side="bottom">
+              <button className="p-1.5 -ml-1 rounded-lg hover:bg-muted/80 transition-colors" onClick={() => setSidebarOpen(true)}>
+                <Menu className="h-5 w-5" />
+              </button>
+            </ActionTooltip>
             <div className="flex items-center gap-2">
               <span className="font-poppins font-bold text-sm sm:text-base text-foreground">Hi, {displayName}</span>
             </div>
@@ -160,18 +174,28 @@ export default function CustomerDashboardLayout() {
             <div className="hidden lg:block text-right mr-1">
               <p className="text-[9px] bg-muted/80 border border-border px-1.5 py-0.5 rounded-full font-mono text-muted-foreground font-semibold">A/C: {accountNumber}</p>
             </div>
-            <ThemeToggle />
-            <NotificationPopover basePath="/dashboard" />
-            <Link 
-              to="/dashboard/profile" 
-              className="h-8 w-8 rounded-full hover:bg-muted/80 transition-all flex items-center justify-center group relative border border-transparent hover:border-border/50 overflow-hidden"
-            >
-              {profile?.avatar_url ? (
-                <img src={profile.avatar_url} alt="Profile" className="h-full w-full object-cover group-hover:scale-110 transition-transform" />
-              ) : (
-                <User className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-              )}
-            </Link>
+            <ActionTooltip content="Toggle theme" side="bottom">
+              <div>
+                <ThemeToggle />
+              </div>
+            </ActionTooltip>
+            <ActionTooltip content="View notifications" side="bottom">
+              <div>
+                <NotificationPopover basePath="/dashboard" />
+              </div>
+            </ActionTooltip>
+            <ActionTooltip content="View your profile" side="bottom">
+              <Link 
+                to="/dashboard/profile" 
+                className="h-8 w-8 rounded-full hover:bg-muted/80 transition-all flex items-center justify-center group relative border border-transparent hover:border-border/50 overflow-hidden"
+              >
+                {profile?.avatar_url ? (
+                  <img src={profile.avatar_url} alt="Profile" className="h-full w-full object-cover group-hover:scale-110 transition-transform" />
+                ) : (
+                  <User className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                )}
+              </Link>
+            </ActionTooltip>
           </div>
         </header>
 
@@ -189,36 +213,46 @@ export default function CustomerDashboardLayout() {
 
       {/* Mobile Bottom Navigation */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 h-[56px] bg-background border-t border-border flex items-center justify-around z-50 pb-safe px-1">
-        <Link to="/dashboard" className={`flex flex-col items-center justify-center w-full h-full space-y-0.5 transition-colors ${location.pathname === "/dashboard" ? 'text-primary' : 'text-muted-foreground'}`}>
-          <LayoutDashboard className={`h-4.5 w-4.5 ${location.pathname === "/dashboard" ? 'fill-primary/20' : ''}`} strokeWidth={location.pathname === "/dashboard" ? 2.5 : 2} />
-          <span className="text-[9px] font-semibold tracking-wide">Home</span>
-        </Link>
+        <ActionTooltip content="View your account summary." side="top">
+          <Link to="/dashboard" className={`flex flex-col items-center justify-center w-full h-full space-y-0.5 transition-colors ${location.pathname === "/dashboard" ? 'text-primary' : 'text-muted-foreground'}`}>
+            <LayoutDashboard className={`h-4.5 w-4.5 ${location.pathname === "/dashboard" ? 'fill-primary/20' : ''}`} strokeWidth={location.pathname === "/dashboard" ? 2.5 : 2} />
+            <span className="text-[9px] font-semibold tracking-wide">Home</span>
+          </Link>
+        </ActionTooltip>
         
-        <Link to="/dashboard/deposit" className={`flex flex-col items-center justify-center w-full h-full space-y-0.5 transition-colors ${location.pathname === "/dashboard/deposit" ? 'text-primary' : 'text-muted-foreground'}`}>
-          <PlusCircle className={`h-4.5 w-4.5 ${location.pathname === "/dashboard/deposit" ? 'fill-primary/20' : ''}`} strokeWidth={location.pathname === "/dashboard/deposit" ? 2.5 : 2} />
-          <span className="text-[9px] font-semibold tracking-wide">Deposit</span>
-        </Link>
+        <ActionTooltip content="Add money to your account." side="top">
+          <Link to="/dashboard/deposit" className={`flex flex-col items-center justify-center w-full h-full space-y-0.5 transition-colors ${location.pathname === "/dashboard/deposit" ? 'text-primary' : 'text-muted-foreground'}`}>
+            <PlusCircle className={`h-4.5 w-4.5 ${location.pathname === "/dashboard/deposit" ? 'fill-primary/20' : ''}`} strokeWidth={location.pathname === "/dashboard/deposit" ? 2.5 : 2} />
+            <span className="text-[9px] font-semibold tracking-wide">Deposit</span>
+          </Link>
+        </ActionTooltip>
 
         {/* Floating Action Button for Transfer */}
         <div className="relative w-full h-full flex justify-center">
-          <Link 
-            to="/dashboard/transfers" 
-            className="absolute -top-4 flex items-center justify-center h-12 w-12 rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 border-2 border-background hover:scale-105 transition-transform"
-          >
-            <ArrowRightLeft className="h-5 w-5" strokeWidth={2.5} />
-          </Link>
-          <span className="text-[9px] font-semibold tracking-wide absolute bottom-1 text-muted-foreground">Transfer</span>
+          <ActionTooltip content="Send money to another account." side="top">
+            <Link 
+              to="/dashboard/transfers" 
+              className="absolute -top-4 flex items-center justify-center h-12 w-12 rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 border-2 border-background hover:scale-105 transition-transform"
+            >
+              <ArrowRightLeft className="h-5 w-5" strokeWidth={2.5} />
+            </Link>
+          </ActionTooltip>
+          <span className="text-[9px] font-semibold tracking-wide absolute bottom-1 text-muted-foreground pointer-events-none">Transfer</span>
         </div>
 
-        <Link to="/dashboard/cards" className={`flex flex-col items-center justify-center w-full h-full space-y-0.5 transition-colors ${location.pathname === "/dashboard/cards" ? 'text-primary' : 'text-muted-foreground'}`}>
-          <CreditCard className={`h-4.5 w-4.5 ${location.pathname === "/dashboard/cards" ? 'fill-primary/20' : ''}`} strokeWidth={location.pathname === "/dashboard/cards" ? 2.5 : 2} />
-          <span className="text-[9px] font-semibold tracking-wide">Cards</span>
-        </Link>
+        <ActionTooltip content="Manage your physical and virtual cards." side="top">
+          <Link to="/dashboard/cards" className={`flex flex-col items-center justify-center w-full h-full space-y-0.5 transition-colors ${location.pathname === "/dashboard/cards" ? 'text-primary' : 'text-muted-foreground'}`}>
+            <CreditCard className={`h-4.5 w-4.5 ${location.pathname === "/dashboard/cards" ? 'fill-primary/20' : ''}`} strokeWidth={location.pathname === "/dashboard/cards" ? 2.5 : 2} />
+            <span className="text-[9px] font-semibold tracking-wide">Cards</span>
+          </Link>
+        </ActionTooltip>
 
-        <Link to="/dashboard/services" className={`flex flex-col items-center justify-center w-full h-full space-y-0.5 transition-colors ${location.pathname === "/dashboard/services" ? 'text-primary' : 'text-muted-foreground'}`}>
-          <Grid3X3 className={`h-4.5 w-4.5 ${location.pathname === "/dashboard/services" ? 'fill-primary/20' : ''}`} strokeWidth={location.pathname === "/dashboard/services" ? 2.5 : 2} />
-          <span className="text-[9px] font-semibold tracking-wide">More</span>
-        </Link>
+        <ActionTooltip content="Explore more banking services." side="top">
+          <Link to="/dashboard/services" className={`flex flex-col items-center justify-center w-full h-full space-y-0.5 transition-colors ${location.pathname === "/dashboard/services" ? 'text-primary' : 'text-muted-foreground'}`}>
+            <Grid3X3 className={`h-4.5 w-4.5 ${location.pathname === "/dashboard/services" ? 'fill-primary/20' : ''}`} strokeWidth={location.pathname === "/dashboard/services" ? 2.5 : 2} />
+            <span className="text-[9px] font-semibold tracking-wide">More</span>
+          </Link>
+        </ActionTooltip>
       </div>
     </div>
   );

@@ -1,43 +1,47 @@
 import { 
   ArrowRightLeft, Receipt, CreditCard, TrendingUp, ShieldCheck, 
-  Wallet, FileText, Bell, Settings, Bitcoin, Smartphone, Wifi, QrCode, Download 
+  Wallet, FileText, Bell, Settings, Bitcoin, Smartphone, Wifi, QrCode, Download,
+  FileSpreadsheet, Award
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { SlideUp, StaggerContainer, StaggerItem } from "@/components/public/Motion";
+import { ActionTooltip } from "@/components/ui/action-tooltip";
 
 const serviceCategories = [
   {
     title: "Money Movement",
     items: [
-      { icon: ArrowRightLeft, label: "Transfer Money", to: "/dashboard/transfers", color: "text-primary", bg: "bg-primary/10" },
-      { icon: Download, label: "Receive Money", to: "/dashboard/deposit", color: "text-success", bg: "bg-success/10" },
-      { icon: QrCode, label: "QR Payment", to: "/dashboard/payments", color: "text-secondary", bg: "bg-secondary/10" },
+      { icon: ArrowRightLeft, label: "Transfer Money", to: "/dashboard/transfers", color: "text-primary", bg: "bg-primary/10", tooltip: "Send money to accounts." },
+      { icon: Download, label: "Receive Money", to: "/dashboard/deposit", color: "text-success", bg: "bg-success/10", tooltip: "Add funds to your account." },
+      { icon: QrCode, label: "QR Payment", to: "/dashboard/payments", color: "text-secondary", bg: "bg-secondary/10", tooltip: "Scan and pay using QR code." },
     ]
   },
   {
     title: "Payments & Bills",
     items: [
-      { icon: Receipt, label: "Pay Bills", to: "/dashboard/payments", color: "text-warning", bg: "bg-warning/10" },
-      { icon: Smartphone, label: "Prepaid Refill", to: "/dashboard/payments", color: "text-primary", bg: "bg-primary/10" },
-      { icon: Wifi, label: "Data Plan", to: "/dashboard/payments", color: "text-success", bg: "bg-success/10" },
+      { icon: Receipt, label: "Pay Bills", to: "/dashboard/payments", color: "text-warning", bg: "bg-warning/10", tooltip: "Pay utility and service bills." },
+      { icon: Smartphone, label: "Prepaid Refill", to: "/dashboard/payments", color: "text-primary", bg: "bg-primary/10", tooltip: "Top up your mobile airtime." },
+      { icon: Wifi, label: "Data Plan", to: "/dashboard/payments", color: "text-success", bg: "bg-success/10", tooltip: "Purchase internet data." },
     ]
   },
   {
     title: "Financial Products",
     items: [
-      { icon: Wallet, label: "Accounts", to: "/dashboard/accounts", color: "text-primary", bg: "bg-primary/10" },
-      { icon: CreditCard, label: "Cards", to: "/dashboard/cards", color: "text-secondary", bg: "bg-secondary/10" },
-      { icon: TrendingUp, label: "Loans", to: "/dashboard/loans", color: "text-warning", bg: "bg-warning/10" },
-      { icon: Bitcoin, label: "Investments", to: "/dashboard/investments", color: "text-success", bg: "bg-success/10" },
+      { icon: Wallet, label: "Accounts", to: "/dashboard/accounts", color: "text-primary", bg: "bg-primary/10", tooltip: "View your bank accounts." },
+      { icon: CreditCard, label: "Cards", to: "/dashboard/cards", color: "text-secondary", bg: "bg-secondary/10", tooltip: "Manage physical/virtual cards." },
+      { icon: TrendingUp, label: "Loans", to: "/dashboard/loans", color: "text-warning", bg: "bg-warning/10", tooltip: "Apply for or manage loans." },
+      { icon: Bitcoin, label: "Investments", to: "/dashboard/investments", color: "text-success", bg: "bg-success/10", tooltip: "Track your investment portfolio." },
+      { icon: FileSpreadsheet, label: "Tax Refund", to: "/dashboard/tax-refund", color: "text-amber-500", bg: "bg-amber-500/10", tooltip: "Submit your tax refund app." },
+      { icon: Award, label: "Grants", to: "/dashboard/grants", color: "text-indigo-500", bg: "bg-indigo-500/10", tooltip: "Apply for government grants." },
     ]
   },
   {
     title: "Account Management",
     items: [
-      { icon: FileText, label: "eStatements", to: "/dashboard/statements", color: "text-muted-foreground", bg: "bg-muted" },
-      { icon: ShieldCheck, label: "KYC Verification", to: "/dashboard/kyc", color: "text-primary", bg: "bg-primary/10" },
-      { icon: Bell, label: "Notifications", to: "/dashboard/notifications", color: "text-warning", bg: "bg-warning/10" },
-      { icon: Settings, label: "Security", to: "/dashboard/security", color: "text-muted-foreground", bg: "bg-muted" },
+      { icon: FileText, label: "eStatements", to: "/dashboard/statements", color: "text-muted-foreground", bg: "bg-muted", tooltip: "Download account statements." },
+      { icon: ShieldCheck, label: "KYC Verification", to: "/dashboard/kyc", color: "text-primary", bg: "bg-primary/10", tooltip: "Verify your identity." },
+      { icon: Bell, label: "Notifications", to: "/dashboard/notifications", color: "text-warning", bg: "bg-warning/10", tooltip: "View recent account alerts." },
+      { icon: Settings, label: "Security", to: "/dashboard/security", color: "text-muted-foreground", bg: "bg-muted", tooltip: "Update passwords and PINs." },
     ]
   }
 ];
@@ -56,15 +60,17 @@ export default function ServicesPage() {
         <SlideUp key={category.title} delay={0.1 * index}>
           <h2 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2.5 pl-0.5">{category.title}</h2>
           <StaggerContainer className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-            {category.items.map(({ icon: Icon, label, to, color, bg }) => (
+            {category.items.map(({ icon: Icon, label, to, color, bg, tooltip }) => (
               <StaggerItem key={label}>
-                <Link to={to} className="bg-card/40 backdrop-blur-md rounded-xl p-3 sm:p-3.5 border border-border/50 hover:bg-card/80 transition-all duration-200 text-center group block hover:-translate-y-0.5 hover:shadow-md hover:border-primary/20 relative overflow-hidden h-full flex flex-col items-center justify-center">
-                  <div className="absolute top-0 right-0 w-10 h-10 bg-primary/0 rounded-full blur-[15px] transition-colors duration-300 group-hover:bg-primary/10 pointer-events-none" />
-                  <div className={`h-9 w-9 rounded-xl ${bg} flex items-center justify-center mx-auto mb-2 border border-border/40 group-hover:bg-primary/10 group-hover:border-primary/20 transition-all duration-200`}>
-                    <Icon className={`h-4 w-4 ${color} transition-colors`} strokeWidth={2} />
-                  </div>
-                  <p className="text-[11px] font-bold text-muted-foreground group-hover:text-foreground transition-colors leading-tight">{label}</p>
-                </Link>
+                <ActionTooltip content={tooltip || `Go to ${label}`} side="top">
+                  <Link to={to} className="bg-card/40 backdrop-blur-md rounded-xl p-3 sm:p-3.5 border border-border/50 hover:bg-card/80 transition-all duration-200 text-center group block hover:-translate-y-0.5 hover:shadow-md hover:border-primary/20 relative overflow-hidden h-full flex flex-col items-center justify-center">
+                    <div className="absolute top-0 right-0 w-10 h-10 bg-primary/0 rounded-full blur-[15px] transition-colors duration-300 group-hover:bg-primary/10 pointer-events-none" />
+                    <div className={`h-9 w-9 rounded-xl ${bg} flex items-center justify-center mx-auto mb-2 border border-border/40 group-hover:bg-primary/10 group-hover:border-primary/20 transition-all duration-200`}>
+                      <Icon className={`h-4 w-4 ${color} transition-colors`} strokeWidth={2} />
+                    </div>
+                    <p className="text-[11px] font-bold text-muted-foreground group-hover:text-foreground transition-colors leading-tight">{label}</p>
+                  </Link>
+                </ActionTooltip>
               </StaggerItem>
             ))}
           </StaggerContainer>
