@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Award, Plus, CheckCircle2, Calendar, DollarSign, FileText, ArrowUpRight, Activity, Zap, FileSpreadsheet, Search, Filter, HelpCircle, ShieldCheck, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,8 +28,12 @@ const statusColor = (status: string) => {
 };
 
 export default function GrantsPage() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
+
+  // KYC verification gate — only verified users can participate
+  const isVerified = profile?.kyc_status === 'verified' || profile?.kyc_status === 'approved';
 
   const [programs, setPrograms] = useState<GrantProgram[]>([]);
   const [applications, setApplications] = useState<GrantApplication[]>([]);
@@ -80,9 +84,15 @@ export default function GrantsPage() {
     setApplications(appList);
   };
 
-  const navigate = useNavigate();
-
   const handleApplyClick = (program: GrantProgram) => {
+    if (!isVerified) {
+      toast({
+        title: "Verification Required",
+        description: "You must complete identity verification before applying for a grant.",
+        variant: "destructive"
+      });
+      return;
+    }
     const alreadyApplied = applications.some(app => app.grant_program_id === program.id && app.status !== 'closed' && app.status !== 'rejected');
     if (alreadyApplied) {
       toast({ 
@@ -104,10 +114,31 @@ export default function GrantsPage() {
   };
 
   const activeAppsCount = applications.filter(a => a.status === 'submitted' || a.status === 'under_review').length;
-  const totalAwarded = applications.filter(a => a.status === 'awarded' || a.status === 'approved').reduce((sum, a) => sum + Number(a.requested_amount), 0);
+  const totalAwarded = applications.filter(a => (a.status as any) === 'awarded' || a.status === 'approved').reduce((sum, a) => sum + Number(a.requested_amount), 0);
 
   return (
     <div className="space-y-5 font-sans max-w-6xl mx-auto px-1 sm:px-4 py-2">
+
+      {/* KYC Verification Gate */}
+      {!isVerified && (
+        <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+          <div className="h-12 w-12 rounded-xl bg-amber-500/20 flex items-center justify-center shrink-0">
+            <ShieldCheck className="h-6 w-6 text-amber-500" />
+          </div>
+          <div className="flex-1">
+            <h2 className="text-sm sm:text-base font-bold font-poppins text-foreground mb-1">Identity Verification Required</h2>
+            <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+              Access to the Grants &amp; Relief Portal is restricted to fully verified account holders. Complete your KYC verification to unlock access to grant programs.
+            </p>
+          </div>
+          <Link to="/dashboard/kyc">
+            <Button size="sm" className="font-bold text-xs h-8 rounded-lg shrink-0 w-full sm:w-auto">
+              <ShieldCheck className="h-3.5 w-3.5 mr-1.5" /> Verify Identity
+            </Button>
+          </Link>
+        </div>
+      )}
+
       {/* 1. Header Section */}
       <SlideUp>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gradient-to-r from-slate-900 via-primary/95 to-slate-900 p-4 sm:p-5 rounded-2xl text-white shadow-lg relative overflow-hidden">

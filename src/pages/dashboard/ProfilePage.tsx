@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { User, Camera, Save, Upload, X, Loader2, ShieldCheck, Mail, MapPin, Briefcase, Settings, Lock } from "lucide-react";
+import { User, Camera, Save, Upload, X, Loader2, ShieldCheck, Mail, MapPin, Briefcase, Settings, Lock, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,10 +11,12 @@ import { StaggerContainer, StaggerItem, FadeIn } from "@/components/public/Motio
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { sanitizeInput, EnterpriseValidation } from "@/utils/security";
 import { z } from "zod";
+import { useNavigate } from "react-router-dom";
 
 const ProfilePage = () => {
   const { toast } = useToast();
-  const { user, profile, refreshProfile } = useAuth();
+  const { user, profile, refreshProfile, signOut } = useAuth();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [showWebcam, setShowWebcam] = useState(false);
@@ -70,7 +72,7 @@ const ProfilePage = () => {
       if (uploadError) throw uploadError;
 
       const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(fileName);
-      const { error: updateError } = await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('user_id', user.id);
+      const { error: updateError } = await (supabase as any).from('profiles').update({ avatar_url: publicUrl }).eq('user_id', user.id);
       if (updateError) throw updateError;
       
       await refreshProfile();
@@ -166,7 +168,7 @@ const ProfilePage = () => {
     }
 
     setLoading(true);
-    const { error } = await supabase.from("profiles").update({
+    const { error } = await (supabase as any).from("profiles").update({
       first_name: sanitizedFirstName,
       last_name: sanitizedLastName,
       display_name: `${sanitizedFirstName} ${sanitizedLastName}`.trim(),
@@ -193,7 +195,7 @@ const ProfilePage = () => {
     setLoading(false);
     if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
     
-    await supabase.from("notifications").insert({
+    await (supabase as any).from("notifications").insert({
       user_id: user.id, title: "Profile Updated", message: "Your comprehensive profile information was updated successfully.", type: "system"
     });
 
@@ -220,7 +222,7 @@ const ProfilePage = () => {
     if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
     
     if (user) {
-      await supabase.from("notifications").insert({
+      await (supabase as any).from("notifications").insert({
         user_id: user.id, title: "Password Changed", message: "Your account password was updated successfully.", type: "security"
       });
     }
@@ -276,6 +278,18 @@ const ProfilePage = () => {
                 A/C: {profile?.account_number || "—"}
               </span>
             </div>
+          </div>
+
+          <div className="shrink-0">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 text-xs font-bold rounded-lg text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/20 flex items-center gap-1.5"
+              onClick={async () => { await signOut(); navigate("/login"); }}
+            >
+              <LogOut className="h-3.5 w-3.5" />
+              Sign Out
+            </Button>
           </div>
         </div>
       </StaggerItem>

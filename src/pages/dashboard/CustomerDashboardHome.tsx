@@ -105,7 +105,7 @@ export default function CustomerDashboardHome() {
 
   const fetchRecentTransactions = async () => {
     if (!user?.id) return;
-    const { data } = await supabase
+    const { data } = await (supabase as any)
       .from('transactions')
       .select('*')
       .eq('user_id', user.id)
@@ -133,8 +133,8 @@ export default function CustomerDashboardHome() {
           id: a.id,
           account_number: a.account_number,
           account_type: a.account_type as any,
-          balance: parseFloat(a.balance),
-          ledger_balance: parseFloat(a.ledger_balance || a.balance),
+          balance: parseFloat(String(a.balance)),
+          ledger_balance: parseFloat(String((a as any).ledger_balance || a.balance)),
           status: a.status,
           currency: a.currency || "USD",
         }))

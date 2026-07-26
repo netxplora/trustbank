@@ -10,8 +10,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 
 export default function TaxRefundPage() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const navigate = useNavigate();
+
+  // KYC verification gate — only verified users can apply
+  const isVerified = profile?.kyc_status === 'verified' || profile?.kyc_status === 'approved';
 
   const [applications, setApplications] = useState<TaxRefundApplication[]>([]);
   const [loading, setLoading] = useState(true);
@@ -71,6 +74,26 @@ export default function TaxRefundPage() {
         </div>
       </FadeIn>
 
+      {/* KYC Verification Gate */}
+      {!isVerified && (
+        <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+          <div className="h-12 w-12 rounded-xl bg-amber-500/20 flex items-center justify-center shrink-0">
+            <AlertCircle className="h-6 w-6 text-amber-500" />
+          </div>
+          <div className="flex-1">
+            <h2 className="text-sm sm:text-base font-bold font-poppins text-foreground mb-1">Identity Verification Required</h2>
+            <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+              Tax refund applications are only available to fully verified account holders. Please complete your KYC verification to proceed.
+            </p>
+          </div>
+          <a href="/dashboard/kyc">
+            <Button size="sm" className="font-bold text-xs h-8 rounded-lg shrink-0 w-full sm:w-auto">
+              <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" /> Complete Verification
+            </Button>
+          </a>
+        </div>
+      )}
+
       <SlideUp>
         <Card className="bg-card border border-border shadow-sm overflow-hidden">
           <div className="flex flex-col md:flex-row md:items-center">
@@ -82,7 +105,12 @@ export default function TaxRefundPage() {
               <p className="text-xs text-muted-foreground mb-4 leading-relaxed max-w-xl">
                 Ready to file for your tax refund? Our fast, secure, and mobile-friendly wizard auto-populates your verified profile information to save you time. Track your application status directly from this dashboard.
               </p>
-              <Button onClick={() => navigate("/dashboard/tax-refund/apply")} className="w-full sm:w-auto font-semibold gap-2 shadow-sm">
+              <Button
+                onClick={() => { if (!isVerified) return; navigate("/dashboard/tax-refund/apply"); }}
+                className="w-full sm:w-auto font-semibold gap-2 shadow-sm"
+                disabled={!isVerified}
+                title={!isVerified ? "Verification required" : ""}
+              >
                 Apply Now <ArrowRight className="h-4 w-4" />
               </Button>
             </div>
@@ -106,7 +134,12 @@ export default function TaxRefundPage() {
             <FileSpreadsheet className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
             <h3 className="text-base sm:text-lg font-semibold font-poppins text-foreground mb-1">No Applications Yet</h3>
             <p className="text-sm text-muted-foreground mb-4">You haven't submitted any tax refund applications.</p>
-            <Button onClick={() => navigate("/dashboard/tax-refund/apply")} variant="outline" className="gap-2 border-border text-foreground hover:bg-muted">
+            <Button
+              onClick={() => { if (!isVerified) return; navigate("/dashboard/tax-refund/apply"); }}
+              variant="outline"
+              className="gap-2 border-border text-foreground hover:bg-muted"
+              disabled={!isVerified}
+            >
               Start an Application <Plus className="h-4 w-4" />
             </Button>
           </div>
