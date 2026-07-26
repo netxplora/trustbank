@@ -165,15 +165,11 @@ export default function CustomerDashboardLayout() {
               <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mb-0.5">Welcome Back</p>
               <div className="flex items-center gap-2">
                 <p className="font-poppins font-bold text-foreground text-xs m-0">{displayName}</p>
-                <span className="text-[9px] bg-muted/80 border border-border px-1.5 py-0.5 rounded-full font-mono text-muted-foreground font-semibold">A/C: {accountNumber}</span>
               </div>
             </div>
           </div>
 
           <div className="flex items-center gap-1.5 lg:gap-2">
-            <div className="hidden lg:block text-right mr-1">
-              <p className="text-[9px] bg-muted/80 border border-border px-1.5 py-0.5 rounded-full font-mono text-muted-foreground font-semibold">A/C: {accountNumber}</p>
-            </div>
             <ActionTooltip content="Toggle theme" side="bottom">
               <div>
                 <ThemeToggle />
