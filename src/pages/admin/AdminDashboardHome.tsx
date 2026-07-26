@@ -22,24 +22,24 @@ const AdminDashboardHome = () => {
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
     const [profiles, activeProfiles, newProfiles, accounts, activeAccounts, transactions, loans, kycDocs, conversations, pages, products, posts, faqs, pendingCurrentAccounts, pendingCardsData, pendingFiat, pendingCrypto, bankPortfolio] = await Promise.all([
-      supabase.from("profiles").select("id", { count: "exact", head: true }),
-      supabase.from("profiles").select("id", { count: "exact", head: true }).eq("kyc_status", "approved"),
-      supabase.from("profiles").select("id", { count: "exact", head: true }).gte("created_at", thirtyDaysAgo.toISOString()),
-      supabase.from("accounts").select("id", { count: "exact", head: true }),
-      supabase.from("accounts").select("balance").eq("status", "active"),
-      supabase.from("transactions").select("id, amount", { count: "exact" }),
-      supabase.from("loans").select("id, status, purpose, amount", { count: "exact" }),
-      supabase.from("kyc_documents").select("id, status"),
-      supabase.from("conversations").select("id, status"),
+      (supabase as any).from("profiles").select("id", { count: "exact", head: true }),
+      (supabase as any).from("profiles").select("id", { count: "exact", head: true }).eq("kyc_status", "approved"),
+      (supabase as any).from("profiles").select("id", { count: "exact", head: true }).gte("created_at", thirtyDaysAgo.toISOString()),
+      (supabase as any).from("accounts").select("id", { count: "exact", head: true }),
+      (supabase as any).from("accounts").select("balance").eq("status", "active"),
+      (supabase as any).from("transactions").select("id, amount", { count: "exact" }),
+      (supabase as any).from("loans").select("id, status, purpose, amount", { count: "exact" }),
+      (supabase as any).from("kyc_documents").select("id, status"),
+      (supabase as any).from("conversations").select("id, status"),
       (supabase as any).from("cms_pages").select("id", { count: "exact", head: true }),
       (supabase as any).from("cms_products").select("id", { count: "exact", head: true }),
       (supabase as any).from("cms_posts").select("id", { count: "exact", head: true }),
       (supabase as any).from("cms_faqs").select("id", { count: "exact", head: true }),
-      supabase.from("current_account_applications").select("id", { count: "exact", head: true }).in("status", ["submitted", "under_review"]),
-      supabase.from("cards").select("id", { count: "exact", head: true }).eq("status", "pending"),
-      supabase.from("payment_sessions").select("id", { count: "exact", head: true }).eq("status", "under_review"),
-      supabase.from("crypto_deposits").select("id", { count: "exact", head: true }).eq("status", "pending"),
-      supabase.from("bank_portfolio").select("amount")
+      (supabase as any).from("current_account_applications").select("id", { count: "exact", head: true }).in("status", ["submitted", "under_review"]),
+      (supabase as any).from("cards").select("id", { count: "exact", head: true }).eq("status", "pending"),
+      (supabase as any).from("payment_sessions").select("id", { count: "exact", head: true }).eq("status", "under_review"),
+      (supabase as any).from("crypto_deposits").select("id", { count: "exact", head: true }).eq("status", "pending"),
+      (supabase as any).from("bank_portfolio").select("amount")
     ]);
 
     const pendingKyc = kycDocs.data?.filter(d => d.status === "pending").length || 0;
@@ -99,10 +99,10 @@ const AdminDashboardHome = () => {
       setLoanDistribution([]);
     }
 
-    const { data: recentTx } = await supabase.from("transactions").select("*").order("created_at", { ascending: false }).limit(5);
+    const { data: recentTx } = await (supabase as any).from("transactions").select("*").order("created_at", { ascending: false }).limit(5);
     setRecentActivity(recentTx || []);
 
-    const { data: monthlyTx } = await supabase.from("transactions").select("amount, created_at, type").gte("created_at", thirtyDaysAgo.toISOString());
+    const { data: monthlyTx } = await (supabase as any).from("transactions").select("amount, created_at, type").gte("created_at", thirtyDaysAgo.toISOString());
     if (monthlyTx) {
       const volumeMap: Record<string, { deposits: number, withdrawals: number }> = {};
       const today = new Date();
@@ -150,40 +150,15 @@ const AdminDashboardHome = () => {
   if (loading) return <div className="flex items-center justify-center py-20"><div className="h-6 w-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" /></div>;
 
   return (
-    <div className="space-y-4 max-w-6xl mx-auto px-1 sm:px-4 py-2 font-sans">
-      <div>
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 max-w-6xl mx-auto px-1 sm:px-4 py-2 font-sans">
+      <div className="lg:col-span-3">
         <h1 className="text-lg sm:text-xl font-bold font-poppins text-foreground tracking-tight mb-0.5">Institution Overview</h1>
         <p className="text-xs text-muted-foreground">Monitor administrative operations and portfolio health</p>
       </div>
 
-      <div className="space-y-2.5">
-        <div className="flex justify-between items-end mb-1">
-          <h2 className="font-poppins font-bold text-foreground text-sm">Customer Statistics</h2>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {statCards.slice(0, 3).map(({ icon: Icon, label, value, change, color }) => (
-            <div key={label} className="bg-card rounded-xl p-3.5 border border-border/60 shadow-sm flex flex-col justify-between">
-              <div className="flex items-center justify-between mb-3">
-                <div className={`h-8 w-8 rounded-lg flex items-center justify-center border ${color.replace("bg-", "bg-").replace("/10", "/10 border-").replace("text-", "border-")}`}>
-                  <Icon className="h-4 w-4" />
-                </div>
-                <span className="text-[9px] font-bold px-2 py-0.5 rounded-md uppercase bg-muted/40 border border-border/40 text-muted-foreground">{change}</span>
-              </div>
-              <div>
-                <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-wider mb-0.5">{label}</p>
-                <p className="text-xl font-bold font-poppins text-foreground tracking-tight">{value}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="space-y-2.5">
-        <div className="flex justify-between items-end mb-1">
-          <h2 className="font-poppins font-bold text-foreground text-sm">Portfolio Statistics</h2>
-        </div>
+      <div className="lg:col-span-3 mb-2">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {statCards.slice(3, 7).map(({ icon: Icon, label, value, change, color }, i) => (
+          {statCards.map(({ icon: Icon, label, value, change, color }, i) => (
             <div key={label} className={`rounded-xl p-3.5 shadow-sm border flex flex-col justify-between ${
               i === 3 
                 ? "bg-[#0f2c59] border-[#0f2c59]" 
@@ -212,8 +187,7 @@ const AdminDashboardHome = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-        <div className="bg-card rounded-xl border border-border/60 p-3.5 sm:p-4 shadow-sm flex flex-col">
+      <div className="lg:col-span-1 bg-card rounded-xl border border-border/60 p-3.5 sm:p-4 shadow-sm flex flex-col">
           <div className="mb-2">
             <h2 className="font-poppins font-bold text-foreground text-xs">Credit Portfolio Distribution</h2>
             <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">By category</p>
@@ -303,10 +277,8 @@ const AdminDashboardHome = () => {
             </StaggerItem>
           </StaggerContainer>
         </div>
-      </div>
 
-      <div className="grid lg:grid-cols-3 gap-3">
-        <div className="lg:col-span-2">
+      <div className="lg:col-span-2">
           <div className="bg-card rounded-xl border border-border/60 shadow-sm overflow-hidden flex flex-col h-full">
             <div className="p-3 sm:p-3.5 border-b border-border/60 bg-muted/10">
               <h2 className="font-poppins font-bold text-foreground text-xs">Global Ledger Activity</h2>
@@ -340,7 +312,7 @@ const AdminDashboardHome = () => {
           </div>
         </div>
 
-        <div>
+        <div className="lg:col-span-1">
           <div className="bg-card rounded-xl border border-border/60 shadow-sm flex flex-col h-full">
             <div className="p-3 sm:p-3.5 border-b border-border/60 bg-muted/10">
               <h2 className="font-poppins font-bold text-foreground text-xs">Action Items</h2>
@@ -356,7 +328,6 @@ const AdminDashboardHome = () => {
             </div>
           </div>
         </div>
-      </div>
     </div>
   );
 };

@@ -149,59 +149,7 @@ const ProfilePage = () => {
     };
   }, [stream]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user) return;
-    
-    // Sanitize and Validate inputs
-    const sanitizedFirstName = sanitizeInput(form.firstName);
-    const sanitizedLastName = sanitizeInput(form.lastName);
-    const sanitizedPhone = sanitizeInput(form.phone);
-    
-    try {
-      if (sanitizedPhone) EnterpriseValidation.phone.parse(sanitizedPhone);
-      // Basic string validation to prevent massive inputs
-      if (sanitizedFirstName.length > 100 || sanitizedLastName.length > 100) throw new Error("Name is too long.");
-    } catch (err: any) {
-      toast({ title: "Validation Error", description: err.errors ? err.errors[0].message : err.message, variant: "destructive" });
-      return;
-    }
-
-    setLoading(true);
-    const { error } = await (supabase as any).from("profiles").update({
-      first_name: sanitizedFirstName,
-      last_name: sanitizedLastName,
-      display_name: `${sanitizedFirstName} ${sanitizedLastName}`.trim(),
-      phone: sanitizedPhone,
-      date_of_birth: form.dateOfBirth,
-      gender: form.gender,
-      nationality: form.nationality,
-      mailing_address: form.mailingAddress,
-      city: form.city,
-      state_province: form.stateProvince,
-      postal_code: form.postalCode,
-      country: form.country,
-      occupation: form.occupation,
-      employer_name: form.employerName,
-      annual_income_range: form.annualIncomeRange,
-      source_of_funds: form.sourceOfFunds,
-      tax_id: form.taxId,
-      gov_id_type: form.govIdType,
-      gov_id_number: form.govIdNumber,
-      preferred_language: form.preferredLanguage,
-      preferred_currency: form.preferredCurrency,
-    }).eq("user_id", user.id);
-    
-    setLoading(false);
-    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
-    
-    await (supabase as any).from("notifications").insert({
-      user_id: user.id, title: "Profile Updated", message: "Your comprehensive profile information was updated successfully.", type: "system"
-    });
-
-    await refreshProfile();
-    toast({ title: "Profile Updated!", description: "Your comprehensive profile has been saved successfully." });
-  };
+  
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -266,7 +214,7 @@ const ProfilePage = () => {
                 <DropdownMenuItem onClick={startWebcam} className="text-xs"><Camera className="h-3.5 w-3.5 mr-1.5" /> Camera</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
+            <input type="file" ref={fileInputRef} className="hidden" accept="image/*" />
           </div>
           
           <div className="text-center md:text-left flex-1">
@@ -316,7 +264,17 @@ const ProfilePage = () => {
       )}
 
       <StaggerItem>
-        <form onSubmit={handleSubmit}>
+        <div>
+          
+          <div className="mb-4 bg-primary/10 border border-primary/20 rounded-xl p-3 flex gap-3 items-start">
+            <div className="p-2 bg-background rounded-full shrink-0">
+              <Lock className="w-4 h-4 text-primary" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-foreground font-poppins">Profile Information Locked</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">To update your verification details, contact information, or banking preferences, please contact an administrator.</p>
+            </div>
+          </div>
           <Tabs defaultValue="personal" className="w-full">
             <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full h-auto mb-4 p-1 bg-muted/40 rounded-lg text-xs">
               <TabsTrigger value="personal" className="py-1.5 text-xs rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm"><User className="w-3.5 h-3.5 mr-1.5"/> Personal</TabsTrigger>
@@ -331,20 +289,20 @@ const ProfilePage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div className="space-y-1">
                     <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">First Name</Label>
-                    <Input className="h-8 text-xs rounded-lg" value={form.firstName} onChange={(e) => setForm(p => ({ ...p, firstName: e.target.value }))} />
+                    <Input readOnly className="opacity-80"  className="h-8 text-xs rounded-lg" value={form.firstName} ))} />
                   </div>
                   <div className="space-y-1">
                     <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Last Name</Label>
-                    <Input className="h-8 text-xs rounded-lg" value={form.lastName} onChange={(e) => setForm(p => ({ ...p, lastName: e.target.value }))} />
+                    <Input readOnly className="opacity-80"  className="h-8 text-xs rounded-lg" value={form.lastName} ))} />
                   </div>
                   <div className="space-y-1">
                     <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Date of Birth</Label>
-                    <Input type="date" className="h-8 text-xs rounded-lg" value={form.dateOfBirth} onChange={(e) => setForm(p => ({ ...p, dateOfBirth: e.target.value }))} />
+                    <Input readOnly className="opacity-80"  type="date" className="h-8 text-xs rounded-lg" value={form.dateOfBirth} ))} />
                   </div>
                   <div className="space-y-1">
                     <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Gender</Label>
-                    <select className="flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary" 
-                      value={form.gender} onChange={(e) => setForm(p => ({ ...p, gender: e.target.value }))}>
+                    <select disabled className="opacity-80" className="flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary" 
+                      value={form.gender} ))}>
                       <option value="">Select Gender</option>
                       <option value="Male">Male</option>
                       <option value="Female">Female</option>
@@ -353,7 +311,7 @@ const ProfilePage = () => {
                   </div>
                   <div className="space-y-1 md:col-span-2">
                     <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Nationality</Label>
-                    <Input className="h-8 text-xs rounded-lg" value={form.nationality} onChange={(e) => setForm(p => ({ ...p, nationality: e.target.value }))} placeholder="e.g. American, British, Canadian" />
+                    <Input readOnly className="opacity-80"  className="h-8 text-xs rounded-lg" value={form.nationality} ))} placeholder="e.g. American, British, Canadian" />
                   </div>
                 </div>
 
@@ -362,10 +320,10 @@ const ProfilePage = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Government ID Type</Label>
-                      <select 
+                      <select disabled className="opacity-80" 
                         className="flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary"
                         value={form.govIdType} 
-                        onChange={(e) => setForm(p => ({ ...p, govIdType: e.target.value }))}
+                        ))}
                       >
                         <option value="">Select ID Type...</option>
                         <option value="Passport">Passport</option>
@@ -376,10 +334,10 @@ const ProfilePage = () => {
                     </div>
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Government ID Number</Label>
-                      <Input 
+                      <Input readOnly className="opacity-80"  
                         className="h-8 text-xs rounded-lg" 
                         value={form.govIdNumber} 
-                        onChange={(e) => setForm(p => ({ ...p, govIdNumber: e.target.value }))} 
+                        ))} 
                         placeholder="e.g. A12345678 or License No." 
                       />
                     </div>
@@ -393,31 +351,31 @@ const ProfilePage = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Email Address</Label>
-                      <Input type="email" value={form.email} disabled className="h-8 text-xs rounded-lg bg-muted/50" />
+                      <Input readOnly className="opacity-80"  type="email" value={form.email} disabled className="h-8 text-xs rounded-lg bg-muted/50" />
                     </div>
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Phone Number</Label>
-                      <Input className="h-8 text-xs rounded-lg" value={form.phone} onChange={(e) => setForm(p => ({ ...p, phone: e.target.value }))} />
+                      <Input readOnly className="opacity-80"  className="h-8 text-xs rounded-lg" value={form.phone} ))} />
                     </div>
                     <div className="space-y-1 md:col-span-2">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Mailing Address</Label>
-                      <Input className="h-8 text-xs rounded-lg" value={form.mailingAddress} onChange={(e) => setForm(p => ({ ...p, mailingAddress: e.target.value }))} />
+                      <Input readOnly className="opacity-80"  className="h-8 text-xs rounded-lg" value={form.mailingAddress} ))} />
                     </div>
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">City</Label>
-                      <Input className="h-8 text-xs rounded-lg" value={form.city} onChange={(e) => setForm(p => ({ ...p, city: e.target.value }))} />
+                      <Input readOnly className="opacity-80"  className="h-8 text-xs rounded-lg" value={form.city} ))} />
                     </div>
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">State / Province</Label>
-                      <Input className="h-8 text-xs rounded-lg" value={form.stateProvince} onChange={(e) => setForm(p => ({ ...p, stateProvince: e.target.value }))} />
+                      <Input readOnly className="opacity-80"  className="h-8 text-xs rounded-lg" value={form.stateProvince} ))} />
                     </div>
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Postal / ZIP Code</Label>
-                      <Input className="h-8 text-xs rounded-lg" value={form.postalCode} onChange={(e) => setForm(p => ({ ...p, postalCode: e.target.value }))} />
+                      <Input readOnly className="opacity-80"  className="h-8 text-xs rounded-lg" value={form.postalCode} ))} />
                     </div>
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Country</Label>
-                      <Input className="h-8 text-xs rounded-lg" value={form.country} onChange={(e) => setForm(p => ({ ...p, country: e.target.value }))} />
+                      <Input readOnly className="opacity-80"  className="h-8 text-xs rounded-lg" value={form.country} ))} />
                     </div>
                   </div>
                 </div>
@@ -427,16 +385,16 @@ const ProfilePage = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Occupation</Label>
-                      <Input className="h-8 text-xs rounded-lg" value={form.occupation} onChange={(e) => setForm(p => ({ ...p, occupation: e.target.value }))} />
+                      <Input readOnly className="opacity-80"  className="h-8 text-xs rounded-lg" value={form.occupation} ))} />
                     </div>
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Employer or Business Name</Label>
-                      <Input className="h-8 text-xs rounded-lg" value={form.employerName} onChange={(e) => setForm(p => ({ ...p, employerName: e.target.value }))} />
+                      <Input readOnly className="opacity-80"  className="h-8 text-xs rounded-lg" value={form.employerName} ))} />
                     </div>
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Annual Income Range</Label>
-                      <select className="flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary" 
-                        value={form.annualIncomeRange} onChange={(e) => setForm(p => ({ ...p, annualIncomeRange: e.target.value }))}>
+                      <select disabled className="opacity-80" className="flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary" 
+                        value={form.annualIncomeRange} ))}>
                         <option value="">Select Range</option>
                         <option value="$0 - $50,000">$0 - $50,000</option>
                         <option value="$50,001 - $100,000">$50,001 - $100,000</option>
@@ -446,8 +404,8 @@ const ProfilePage = () => {
                     </div>
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Source of Funds</Label>
-                      <select className="flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary" 
-                        value={form.sourceOfFunds} onChange={(e) => setForm(p => ({ ...p, sourceOfFunds: e.target.value }))}>
+                      <select disabled className="opacity-80" className="flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary" 
+                        value={form.sourceOfFunds} ))}>
                         <option value="">Select Source</option>
                         <option value="Salary">Salary</option>
                         <option value="Business">Business</option>
@@ -465,8 +423,8 @@ const ProfilePage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div className="space-y-1">
                     <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Preferred Language</Label>
-                    <select className="flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary" 
-                      value={form.preferredLanguage} onChange={(e) => setForm(p => ({ ...p, preferredLanguage: e.target.value }))}>
+                    <select disabled className="opacity-80" className="flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary" 
+                      value={form.preferredLanguage} ))}>
                       <option value="en">English (US)</option>
                       <option value="fr">French</option>
                       <option value="es">Spanish</option>
@@ -475,8 +433,8 @@ const ProfilePage = () => {
                   </div>
                   <div className="space-y-1">
                     <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Preferred Currency</Label>
-                    <select className="flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary" 
-                      value={form.preferredCurrency} onChange={(e) => setForm(p => ({ ...p, preferredCurrency: e.target.value }))}>
+                    <select disabled className="opacity-80" className="flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary" 
+                      value={form.preferredCurrency} ))}>
                       <option value="USD">USD - US Dollar</option>
                       <option value="EUR">EUR - Euro</option>
                       <option value="GBP">GBP - British Pound</option>
@@ -505,15 +463,9 @@ const ProfilePage = () => {
                 </div>
               </TabsContent>
 
-              {/* Save Button for Profile Form */}
-              <div className="mt-4 pt-3 border-t border-border/40 flex justify-end">
-                <Button type="submit" onClick={handleSubmit} disabled={loading} size="sm" className="w-full md:w-auto h-8 px-5 rounded-lg font-bold text-xs shadow-sm">
-                  <Save className="h-3.5 w-3.5 mr-1.5" /> {loading ? "Saving Changes..." : "Save Profile Information"}
-                </Button>
               </div>
-            </div>
           </Tabs>
-        </form>
+        </div>
       </StaggerItem>
     </StaggerContainer>
   );
