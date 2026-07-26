@@ -805,7 +805,7 @@ const CardsPage = () => {
           </Button>
         </div>
       ) : (
-        <StaggerContainer className={displayedCards.length === 1 ? "max-w-md mx-auto space-y-4 py-2" : "grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-4xl mx-auto py-2"}>
+        <StaggerContainer key={cardCategory} className={displayedCards.length === 1 ? "max-w-md mx-auto space-y-4 py-2" : "grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-4xl mx-auto py-2"}>
           {displayedCards.map((card) => (
             <StaggerItem key={card.id} className="space-y-0">
               <ATMCard card={card} onViewDetails={() => { setSelectedCard(card); setShowDetails(true); }} />
