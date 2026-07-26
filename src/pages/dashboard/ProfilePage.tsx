@@ -289,20 +289,20 @@ const ProfilePage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div className="space-y-1">
                     <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">First Name</Label>
-                    <Input readOnly className="opacity-80"  className="h-8 text-xs rounded-lg" value={form.firstName} ))} />
+                    <Input readOnly className="opacity-80 h-8 text-xs rounded-lg" value={form.firstName} />
                   </div>
                   <div className="space-y-1">
                     <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Last Name</Label>
-                    <Input readOnly className="opacity-80"  className="h-8 text-xs rounded-lg" value={form.lastName} ))} />
+                    <Input readOnly className="opacity-80 h-8 text-xs rounded-lg" value={form.lastName} />
                   </div>
                   <div className="space-y-1">
                     <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Date of Birth</Label>
-                    <Input readOnly className="opacity-80"  type="date" className="h-8 text-xs rounded-lg" value={form.dateOfBirth} ))} />
+                    <Input readOnly className="opacity-80"  type="date" className="h-8 text-xs rounded-lg" value={form.dateOfBirth} />
                   </div>
                   <div className="space-y-1">
                     <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Gender</Label>
-                    <select disabled className="opacity-80" className="flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary" 
-                      value={form.gender} ))}>
+                    <select disabled className="opacity-80 flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary" 
+                      value={form.gender}>
                       <option value="">Select Gender</option>
                       <option value="Male">Male</option>
                       <option value="Female">Female</option>
@@ -311,7 +311,7 @@ const ProfilePage = () => {
                   </div>
                   <div className="space-y-1 md:col-span-2">
                     <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Nationality</Label>
-                    <Input readOnly className="opacity-80"  className="h-8 text-xs rounded-lg" value={form.nationality} ))} placeholder="e.g. American, British, Canadian" />
+                    <Input readOnly className="opacity-80 h-8 text-xs rounded-lg" value={form.nationality} placeholder="e.g. American, British, Canadian" />
                   </div>
                 </div>
 
@@ -320,10 +320,9 @@ const ProfilePage = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Government ID Type</Label>
-                      <select disabled className="opacity-80" 
-                        className="flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary"
+                      <select disabled className="opacity-80 flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary"
                         value={form.govIdType} 
-                        ))}
+                       
                       >
                         <option value="">Select ID Type...</option>
                         <option value="Passport">Passport</option>
@@ -334,10 +333,9 @@ const ProfilePage = () => {
                     </div>
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Government ID Number</Label>
-                      <Input readOnly className="opacity-80"  
-                        className="h-8 text-xs rounded-lg" 
+                      <Input readOnly className="opacity-80 h-8 text-xs rounded-lg" 
                         value={form.govIdNumber} 
-                        ))} 
+                        
                         placeholder="e.g. A12345678 or License No." 
                       />
                     </div>
@@ -355,27 +353,27 @@ const ProfilePage = () => {
                     </div>
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Phone Number</Label>
-                      <Input readOnly className="opacity-80"  className="h-8 text-xs rounded-lg" value={form.phone} ))} />
+                      <Input readOnly className="opacity-80 h-8 text-xs rounded-lg" value={form.phone} />
                     </div>
                     <div className="space-y-1 md:col-span-2">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Mailing Address</Label>
-                      <Input readOnly className="opacity-80"  className="h-8 text-xs rounded-lg" value={form.mailingAddress} ))} />
+                      <Input readOnly className="opacity-80 h-8 text-xs rounded-lg" value={form.mailingAddress} />
                     </div>
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">City</Label>
-                      <Input readOnly className="opacity-80"  className="h-8 text-xs rounded-lg" value={form.city} ))} />
+                      <Input readOnly className="opacity-80 h-8 text-xs rounded-lg" value={form.city} />
                     </div>
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">State / Province</Label>
-                      <Input readOnly className="opacity-80"  className="h-8 text-xs rounded-lg" value={form.stateProvince} ))} />
+                      <Input readOnly className="opacity-80 h-8 text-xs rounded-lg" value={form.stateProvince} />
                     </div>
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Postal / ZIP Code</Label>
-                      <Input readOnly className="opacity-80"  className="h-8 text-xs rounded-lg" value={form.postalCode} ))} />
+                      <Input readOnly className="opacity-80 h-8 text-xs rounded-lg" value={form.postalCode} />
                     </div>
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Country</Label>
-                      <Input readOnly className="opacity-80"  className="h-8 text-xs rounded-lg" value={form.country} ))} />
+                      <Input readOnly className="opacity-80 h-8 text-xs rounded-lg" value={form.country} />
                     </div>
                   </div>
                 </div>
@@ -385,16 +383,16 @@ const ProfilePage = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Occupation</Label>
-                      <Input readOnly className="opacity-80"  className="h-8 text-xs rounded-lg" value={form.occupation} ))} />
+                      <Input readOnly className="opacity-80 h-8 text-xs rounded-lg" value={form.occupation} />
                     </div>
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Employer or Business Name</Label>
-                      <Input readOnly className="opacity-80"  className="h-8 text-xs rounded-lg" value={form.employerName} ))} />
+                      <Input readOnly className="opacity-80 h-8 text-xs rounded-lg" value={form.employerName} />
                     </div>
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Annual Income Range</Label>
-                      <select disabled className="opacity-80" className="flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary" 
-                        value={form.annualIncomeRange} ))}>
+                      <select disabled className="opacity-80 flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary" 
+                        value={form.annualIncomeRange}>
                         <option value="">Select Range</option>
                         <option value="$0 - $50,000">$0 - $50,000</option>
                         <option value="$50,001 - $100,000">$50,001 - $100,000</option>
@@ -404,8 +402,8 @@ const ProfilePage = () => {
                     </div>
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Source of Funds</Label>
-                      <select disabled className="opacity-80" className="flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary" 
-                        value={form.sourceOfFunds} ))}>
+                      <select disabled className="opacity-80 flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary" 
+                        value={form.sourceOfFunds}>
                         <option value="">Select Source</option>
                         <option value="Salary">Salary</option>
                         <option value="Business">Business</option>
@@ -423,8 +421,8 @@ const ProfilePage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div className="space-y-1">
                     <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Preferred Language</Label>
-                    <select disabled className="opacity-80" className="flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary" 
-                      value={form.preferredLanguage} ))}>
+                    <select disabled className="opacity-80 flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary" 
+                      value={form.preferredLanguage}>
                       <option value="en">English (US)</option>
                       <option value="fr">French</option>
                       <option value="es">Spanish</option>
@@ -433,8 +431,8 @@ const ProfilePage = () => {
                   </div>
                   <div className="space-y-1">
                     <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Preferred Currency</Label>
-                    <select disabled className="opacity-80" className="flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary" 
-                      value={form.preferredCurrency} ))}>
+                    <select disabled className="opacity-80 flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary" 
+                      value={form.preferredCurrency}>
                       <option value="USD">USD - US Dollar</option>
                       <option value="EUR">EUR - Euro</option>
                       <option value="GBP">GBP - British Pound</option>
@@ -472,3 +470,4 @@ const ProfilePage = () => {
 };
 
 export default ProfilePage;
+
