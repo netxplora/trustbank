@@ -206,8 +206,7 @@ export default function CustomerDashboardHome() {
                 <ShieldCheck className="h-4 w-4 text-foreground" />
               </div>
               <div>
-                <span className="text-[10px] font-bold tracking-widest uppercase text-foreground/80 block">Premier Private Wealth</span>
-                <span className="text-xs font-semibold text-foreground/90">Portfolio Overview</span>
+                <span className="text-[10px] font-bold tracking-widest uppercase text-foreground/80 block">Total Portfolio</span>
               </div>
             </div>
 
@@ -246,7 +245,7 @@ export default function CustomerDashboardHome() {
               <div className="flex justify-between items-center text-[8px] sm:text-[10px] text-foreground/80 pt-1 border-t border-white/15">
                 <span className="truncate opacity-75 hidden sm:inline">Ledger: {showBalances ? `$${(savingsAccount?.ledger_balance || savingsBal).toLocaleString(undefined, { minimumFractionDigits: 0 })}` : "••"}</span>
                 <span className="truncate opacity-75 sm:hidden">{showBalances ? `$${(savingsAccount?.ledger_balance || savingsBal).toLocaleString(undefined, { minimumFractionDigits: 0 })}` : "••"}</span>
-                <Link to="/dashboard/deposit" className="text-foreground hover:underline font-bold shrink-0 ml-0.5 bg-white/15 hover:bg-white/25 px-1.5 py-0.5 rounded text-[8px] sm:text-[9px] transition-colors">Top Up</Link>
+                <Link to="/dashboard/deposit" className="text-foreground hover:underline font-bold shrink-0 ml-0.5 bg-white/15 hover:bg-white/25 px-1.5 py-0.5 rounded text-[8px] sm:text-[9px] transition-colors">Deposit</Link>
               </div>
             </div>
 

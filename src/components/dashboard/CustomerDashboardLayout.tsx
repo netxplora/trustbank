@@ -17,7 +17,7 @@ const navItems = [
   { icon: Wallet, label: "Accounts", to: "/dashboard/accounts", tooltip: "Manage your checking and savings accounts." },
   { icon: Bitcoin, label: "Digital Currency", to: "/dashboard/digital-currency", tooltip: "Buy, sell, and manage crypto assets." },
   { icon: ArrowRightLeft, label: "Transfers", to: "/dashboard/transfers", tooltip: "Send money to other accounts." },
-  { icon: PlusCircle, label: "Top Up", to: "/dashboard/deposit", tooltip: "Add money to your account." },
+  { icon: PlusCircle, label: "Deposit", to: "/dashboard/deposit", tooltip: "Add money to your account." },
   { icon: LineChart, label: "Investments & Stocks", to: "/dashboard/investments", tooltip: "Manage your stock and investment portfolio." },
   { icon: TrendingUp, label: "Loans", to: "/dashboard/loans", tooltip: "Apply for and manage your loans." },
   { icon: FileSpreadsheet, label: "Tax Refund", to: "/dashboard/tax-refund", tooltip: "Submit and track your tax refund application." },
@@ -105,7 +105,7 @@ export default function CustomerDashboardLayout() {
           })}
         </nav>
 
-        <div className="p-2.5 border-t border-border/50 space-y-0.5 bg-background/30">
+        <div className="p-2.5 pb-24 lg:pb-2.5 border-t border-border/50 space-y-0.5 bg-background/30">
           {isAdmin && (
             <ActionTooltip content="Access administration panel" side="right">
               <Link to="/admin" onClick={() => setSidebarOpen(false)} className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-muted-foreground hover:bg-muted/80 hover:text-foreground transition-all duration-300">

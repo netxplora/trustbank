@@ -8,14 +8,13 @@ export function HeroSection({ homePageData }: { homePageData?: any }) {
     <section className="relative min-h-[calc(100vh-4rem)] flex items-center py-20 lg:py-32 overflow-hidden bg-white dark:bg-slate-950 text-foreground dark:text-white">
       {/* Dynamic Background Photography */}
       <div className="absolute right-0 top-0 w-full lg:w-3/5 h-full z-0 select-none">
-        <div className="absolute inset-0 bg-primary/10 mix-blend-multiply dark:mix-blend-overlay z-10" />
         <img
           src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2070&auto=format&fit=crop"
           alt="Modern bank building"
-          className="w-full h-full object-cover object-center opacity-25 dark:opacity-20 lg:opacity-100 dark:lg:opacity-80 transition-opacity duration-1000"
+          className="w-full h-full object-cover object-center opacity-60 lg:opacity-90 transition-opacity duration-1000"
         />
-        {/* Gentle fade: adapts to light/dark mode and responsive layouts */}
-        <div className="absolute inset-0 bg-gradient-to-t from-white via-white/90 to-transparent dark:from-slate-950 dark:via-slate-950/90 dark:to-transparent lg:bg-gradient-to-r lg:from-white lg:via-white/50 lg:to-transparent dark:lg:from-slate-950 dark:lg:via-slate-950/50 dark:lg:to-transparent z-20" />
+        {/* Gentle fade overlay: left-side fade for text readability, bottom fade */}
+        <div className="absolute inset-0 bg-gradient-to-t from-white via-white/60 to-transparent dark:from-slate-950 dark:via-slate-950/60 dark:to-transparent lg:bg-gradient-to-r lg:from-white lg:via-white/30 lg:to-transparent dark:lg:from-slate-950 dark:lg:via-slate-950/30 dark:lg:to-transparent z-10" />
       </div>
 
       {/* Subtle background glow */}
