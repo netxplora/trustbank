@@ -52,10 +52,10 @@ export function PremiumTrustIndicators() {
         </SlideUp>
 
         {/* Stats Grid */}
-        <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        <StaggerContainer className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
           {stats.map(({ value, label, description, icon: Icon }, idx) => (
             <StaggerItem key={idx}>
-              <div className="group relative bg-card border border-border/60 rounded-2xl p-5 sm:p-6 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 h-full flex flex-col">
+              <div className="group relative bg-card border border-border/60 rounded-2xl p-3.5 sm:p-6 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 h-full flex flex-col">
                 {/* Subtle hover glow */}
                 <div className="absolute inset-0 rounded-2xl bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
 

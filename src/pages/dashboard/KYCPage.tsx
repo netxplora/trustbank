@@ -82,10 +82,10 @@ const KYCPage = () => {
       const { error: uploadError } = await supabase.storage.from('kyc_documents').upload(filePath, doc.file);
       if (uploadError) throw uploadError;
       
-      const { data: { publicUrl } } = supabase.storage.from('kyc_documents').getPublicUrl(filePath);
-      
-      await supabase.from("kyc_documents").insert({
-        user_id: user.id, document_type: doc.type, document_number: "Uploaded", file_url: publicUrl, status: "pending"
+      // Store only the private storage path — never expose a public URL for KYC documents.
+      // Admins access documents via signed URLs generated on-demand in the admin panel.
+      await (supabase as any).from("kyc_documents").insert({
+        user_id: user.id, document_type: doc.type, document_number: "Uploaded", file_url: filePath, status: "pending"
       });
     }
   };
@@ -101,20 +101,20 @@ const KYCPage = () => {
       const sanitizedZip = sanitizeInput(formT1.zip);
 
       // Tier 1 auto-approves
-      const { error } = await supabase.from("profiles").update({
+      const { error } = await (supabase as any).from("profiles").update({
         display_name: sanitizedName,
         date_of_birth: formT1.dob,
         mailing_address: sanitizedAddress,
         address: sanitizedAddress,
         city: sanitizedCity,
         postal_code: sanitizedZip,
-        kyc_tier: 1, // Upgrade to tier 1
+        kyc_tier: 1,
         kyc_status: "approved_tier_1"
       }).eq("user_id", user.id);
       
       if (error) throw error;
       
-      await supabase.from("notifications").insert({
+      await (supabase as any).from("notifications").insert({
         user_id: user.id, title: "Tier 1 KYC Approved", message: "You have instantly unlocked Basic banking privileges.", type: "success"
       });
 
@@ -137,7 +137,7 @@ const KYCPage = () => {
     try {
       await uploadDocs(docsT2);
       
-      const { error } = await supabase.from("profiles").update({
+      const { error } = await (supabase as any).from("profiles").update({
         occupation: formT2.occupation,
         source_of_funds: formT2.sourceOfFunds,
         kyc_status: "pending_tier_2"
@@ -164,7 +164,7 @@ const KYCPage = () => {
     try {
       await uploadDocs(docsT3);
       
-      const { error } = await supabase.from("profiles").update({
+      const { error } = await (supabase as any).from("profiles").update({
         annual_income_range: formT3.annualIncome,
         kyc_status: "pending_tier_3"
       }).eq("user_id", user.id);

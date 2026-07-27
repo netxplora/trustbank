@@ -31,7 +31,6 @@ const ProfilePage = () => {
     dateOfBirth: "", gender: "", nationality: "",
     mailingAddress: "", city: "", stateProvince: "", postalCode: "", country: "",
     occupation: "", employerName: "", annualIncomeRange: "", sourceOfFunds: "", taxId: "",
-    govIdType: "", govIdNumber: "",
     preferredLanguage: "en", preferredCurrency: "USD"
   });
 
@@ -55,8 +54,6 @@ const ProfilePage = () => {
         annualIncomeRange: profile.annual_income_range || "",
         sourceOfFunds: profile.source_of_funds || "",
         taxId: profile.tax_id || "",
-        govIdType: profile.gov_id_type || "",
-        govIdNumber: profile.gov_id_number || "",
         preferredLanguage: profile.preferred_language || "en",
         preferredCurrency: profile.preferred_currency || "USD",
       });
@@ -175,8 +172,6 @@ const ProfilePage = () => {
       if (!isFieldLocked(profile?.employer_name)) updates.employer_name = form.employerName;
       if (!isFieldLocked(profile?.annual_income_range)) updates.annual_income_range = form.annualIncomeRange;
       if (!isFieldLocked(profile?.source_of_funds)) updates.source_of_funds = form.sourceOfFunds;
-      if (!isFieldLocked(profile?.gov_id_type)) updates.gov_id_type = form.govIdType;
-      if (!isFieldLocked(profile?.gov_id_number)) updates.gov_id_number = form.govIdNumber;
       if (!isFieldLocked(profile?.preferred_language)) updates.preferred_language = form.preferredLanguage;
       if (!isFieldLocked(profile?.preferred_currency)) updates.preferred_currency = form.preferredCurrency;
 
@@ -351,21 +346,45 @@ const ProfilePage = () => {
                 </div>
 
                 <div className="pt-3 border-t border-border/40 mt-3">
-                  <h3 className="text-sm font-semibold font-poppins mb-2 flex items-center gap-1.5"><ShieldCheck className="w-4 h-4 text-primary" /> Government-Issued Identification (KYC)</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Government ID Type</Label>
-                      <select disabled={isFieldLocked(profile?.gov_id_type)} className={`flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none ${isFieldLocked(profile?.gov_id_type) ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground cursor-not-allowed" : "focus:ring-1 focus:ring-primary"}`} value={form.govIdType} onChange={(e) => setForm({...form, govIdType: e.target.value})}>
-                        <option value="">Select ID Type...</option>
-                        <option value="Passport">Passport</option>
-                        <option value="Driver's License">Driver's License</option>
-                        <option value="Tax ID / SSN">Tax ID / SSN</option>
-                        <option value="Other Government ID">Other Government ID</option>
-                      </select>
+                  <h3 className="text-sm font-semibold font-poppins mb-2 flex items-center gap-1.5"><ShieldCheck className="w-4 h-4 text-primary" /> Identity Verification Status</h3>
+                  <div className={`rounded-xl border p-3 flex items-start gap-3 ${
+                    (profile?.kyc_status || '').startsWith('approved') ? 'bg-success/5 border-success/20' :
+                    (profile?.kyc_status || '').startsWith('pending') ? 'bg-warning/5 border-warning/20' :
+                    'bg-muted/30 border-border/50'
+                  }`}>
+                    <div className={`mt-0.5 h-7 w-7 rounded-full flex items-center justify-center shrink-0 ${
+                      (profile?.kyc_status || '').startsWith('approved') ? 'bg-success/15' :
+                      (profile?.kyc_status || '').startsWith('pending') ? 'bg-warning/15' :
+                      'bg-muted/50'
+                    }`}>
+                      <ShieldCheck className={`w-4 h-4 ${
+                        (profile?.kyc_status || '').startsWith('approved') ? 'text-success' :
+                        (profile?.kyc_status || '').startsWith('pending') ? 'text-warning' :
+                        'text-muted-foreground'
+                      }`} />
                     </div>
-                    <div className="space-y-1">
-                      <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Government ID Number</Label>
-                      <Input readOnly={isFieldLocked(profile?.gov_id_number)} className={`h-8 text-xs rounded-lg ${isFieldLocked(profile?.gov_id_number) ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground focus-visible:ring-0 cursor-not-allowed" : ""}`} value={form.govIdNumber} onChange={(e) => setForm({...form, govIdNumber: e.target.value})} placeholder="e.g. A12345678 or License No." />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-2 mb-1">
+                        <span className={`text-xs font-bold ${
+                          (profile?.kyc_status || '').startsWith('approved') ? 'text-success' :
+                          (profile?.kyc_status || '').startsWith('pending') ? 'text-warning' :
+                          'text-muted-foreground'
+                        }`}>
+                          {(profile?.kyc_status || '').startsWith('approved') ? '✓ Verified' :
+                           (profile?.kyc_status || '').startsWith('pending') ? '⏳ Under Review' :
+                           'Not Started'}
+                        </span>
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-muted/40 border border-border/40 text-muted-foreground">
+                          Tier {profile?.kyc_tier ?? 0}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground leading-relaxed">
+                        {(profile?.kyc_status || '').startsWith('approved')
+                          ? 'Your identity has been verified. Your uploaded identification is securely stored and not displayed for your privacy.'
+                          : (profile?.kyc_status || '').startsWith('pending')
+                          ? 'Your documents are under review. You will be notified once verification is complete.'
+                          : 'Complete KYC verification to unlock full banking features. Visit the KYC page to get started.'}
+                      </p>
                     </div>
                   </div>
                 </div>
