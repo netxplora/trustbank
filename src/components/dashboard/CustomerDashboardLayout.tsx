@@ -133,7 +133,7 @@ export default function CustomerDashboardLayout() {
 
       <div className="flex-1 flex flex-col min-w-0 relative z-10 overflow-hidden">
         <header className="h-13 bg-background/70 backdrop-blur-xl border-b border-border/50 flex items-center justify-between px-3 md:px-6 sticky top-0 z-30 shadow-sm w-full">
-          <div className="flex items-center gap-2.5 lg:hidden">
+          <div className="flex items-center gap-2 lg:hidden">
             {location.pathname !== "/dashboard" && (
               <ActionTooltip content="Go back to previous page" side="bottom">
                 <button 
@@ -144,14 +144,16 @@ export default function CustomerDashboardLayout() {
                 </button>
               </ActionTooltip>
             )}
-            <ActionTooltip content="Open navigation menu" side="bottom">
-              <button className="p-1.5 -ml-1 rounded-lg hover:bg-muted/80 transition-colors" onClick={() => setSidebarOpen(true)}>
-                <Menu className="h-5 w-5" />
-              </button>
-            </ActionTooltip>
-            <div className="flex items-center gap-2">
-              <span className="font-poppins font-bold text-sm sm:text-base text-foreground">Hi, {displayName}</span>
-            </div>
+            <Link to="/dashboard/profile" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+              {profile?.avatar_url ? (
+                <img src={profile.avatar_url} alt={displayName} className="h-8 w-8 rounded-full object-cover border border-primary/20 shadow-inner shrink-0" />
+              ) : (
+                <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center border border-primary/20 text-primary text-xs font-bold shadow-inner shrink-0">
+                  {displayName.charAt(0)}
+                </div>
+              )}
+              <span className="font-poppins font-bold text-sm text-foreground">Hi, {displayName}</span>
+            </Link>
           </div>
           <div className="hidden lg:flex items-center gap-3">
             {profile?.avatar_url ? (
@@ -183,7 +185,7 @@ export default function CustomerDashboardLayout() {
             <ActionTooltip content="View your profile" side="bottom">
               <Link 
                 to="/dashboard/profile" 
-                className="h-8 w-8 rounded-full hover:bg-muted/80 transition-all flex items-center justify-center group relative border border-transparent hover:border-border/50 overflow-hidden"
+                className="hidden lg:flex h-8 w-8 rounded-full hover:bg-muted/80 transition-all items-center justify-center group relative border border-transparent hover:border-border/50 overflow-hidden"
               >
                 {profile?.avatar_url ? (
                   <img src={profile.avatar_url} alt="Profile" className="h-full w-full object-cover group-hover:scale-110 transition-transform" />
@@ -191,6 +193,11 @@ export default function CustomerDashboardLayout() {
                   <User className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
                 )}
               </Link>
+            </ActionTooltip>
+            <ActionTooltip content="Open navigation menu" side="bottom">
+              <button className="lg:hidden p-1.5 rounded-lg hover:bg-muted/80 transition-colors" onClick={() => setSidebarOpen(true)}>
+                <Menu className="h-5 w-5" />
+              </button>
             </ActionTooltip>
           </div>
         </header>
