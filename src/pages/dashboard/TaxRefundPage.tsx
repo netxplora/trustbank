@@ -76,13 +76,13 @@ export default function TaxRefundPage() {
 
       {/* KYC Verification Gate */}
       {!isVerified && (
-        <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+        <div className="bg-amber-50 dark:bg-amber-950/80 border-2 border-amber-400/60 dark:border-amber-500/40 rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 shadow-sm">
           <div className="h-12 w-12 rounded-xl bg-amber-500/20 flex items-center justify-center shrink-0">
             <AlertCircle className="h-6 w-6 text-amber-500" />
           </div>
           <div className="flex-1">
-            <h2 className="text-sm sm:text-base font-bold font-poppins text-foreground mb-1">Identity Verification Required</h2>
-            <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+            <h2 className="text-sm sm:text-base font-bold font-poppins text-amber-900 dark:text-amber-100 mb-1">Identity Verification Required</h2>
+            <p className="text-xs sm:text-sm text-amber-800/80 dark:text-amber-200/80 leading-relaxed">
               Tax refund applications are only available to fully verified account holders. Please complete your KYC verification to proceed.
             </p>
           </div>

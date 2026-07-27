@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Users, Wallet, ArrowRightLeft, TrendingUp, CreditCard, Bell, FileText, Settings, LogOut, Menu, X, User, ShieldCheck, Bitcoin, MessageCircle, LineChart, FileSpreadsheet, Paintbrush, Globe, Box, Image, ScrollText, Briefcase, ArrowDownCircle, Award, ChevronLeft } from "lucide-react";
+import { LayoutDashboard, Users, Wallet, ArrowRightLeft, TrendingUp, CreditCard, Bell, FileText, Settings, LogOut, Menu, X, User, ShieldCheck, Bitcoin, MessageCircle, LineChart, FileSpreadsheet, Paintbrush, Globe, Box, Image, ScrollText, Briefcase, ArrowDownCircle, Award, ChevronLeft, Landmark } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { NotificationPopover } from "./NotificationPopover";
@@ -20,6 +20,7 @@ const navGroups = [
       { icon: Briefcase, label: "Current Apps", to: "/admin/current-applications", tooltip: "Review current account applications." },
       { icon: ArrowRightLeft, label: "Transactions", to: "/admin/transactions", tooltip: "Monitor all platform transactions." },
       { icon: ArrowDownCircle, label: "Deposits", to: "/admin/deposits", tooltip: "Review and approve deposits." },
+      { icon: Landmark, label: "Deposit Settings", to: "/admin/deposit-settings", tooltip: "Manage fiat bank accounts and crypto wallet addresses." },
       { icon: Bitcoin, label: "Digital Currency & Swaps", to: "/admin/digital-currency", tooltip: "Manage crypto assets and swap rates." },
       { icon: TrendingUp, label: "Loans", to: "/admin/loans", tooltip: "Review loan applications and statuses." },
       { icon: CreditCard, label: "Cards", to: "/admin/cards", tooltip: "Manage physical and virtual card requests." },

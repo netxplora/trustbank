@@ -673,10 +673,10 @@ const CardsPage = () => {
           <h1 className="text-xl sm:text-2xl font-bold font-poppins text-foreground tracking-tight">Card Management</h1>
           <p className="text-xs sm:text-sm text-muted-foreground mt-1">Provision and manage your debit and virtual cards</p>
         </div>
-        <div className="bg-card rounded-xl border p-8 text-center shadow-sm font-sans max-w-2xl mx-auto mt-10">
-          <Lock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h2 className="text-xl font-bold font-poppins mb-2">Verification Required</h2>
-          <p className="text-muted-foreground mb-6">Complete KYC Tier 2 (Standard Verification) to access physical and virtual card issuing features.</p>
+        <div className="bg-amber-50 dark:bg-amber-950/80 rounded-xl border-2 border-amber-400/60 dark:border-amber-500/40 p-8 text-center shadow-sm font-sans max-w-2xl mx-auto mt-10">
+          <Lock className="h-12 w-12 text-amber-500 mx-auto mb-4" />
+          <h2 className="text-xl font-bold font-poppins mb-2 text-amber-900 dark:text-amber-100">Verification Required</h2>
+          <p className="text-amber-800/80 dark:text-amber-200/80 mb-6">Complete KYC Tier 2 (Standard Verification) to access physical and virtual card issuing features.</p>
           <Button onClick={() => window.location.href = "/dashboard/kyc"}>Upgrade KYC Tier</Button>
         </div>
       </div>
