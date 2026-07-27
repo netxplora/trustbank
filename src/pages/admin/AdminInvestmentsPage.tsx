@@ -35,6 +35,9 @@ interface AvailableStock {
   asset_class: string;
   current_price: number;
   is_active: boolean;
+  use_live_price: boolean;
+  category?: string;
+  description?: string;
   created_at: string;
 }
 
@@ -67,7 +70,7 @@ export default function AdminInvestmentsPage() {
   const [stocksLoading, setStocksLoading] = useState(true);
   const [stockDialogOpen, setStockDialogOpen] = useState(false);
   const [editingStock, setEditingStock] = useState<AvailableStock | null>(null);
-  const [stockForm, setStockForm] = useState({ symbol: "", name: "", asset_class: "stock", current_price: "" });
+  const [stockForm, setStockForm] = useState({ symbol: "", name: "", asset_class: "stock", category: "tech", current_price: "", use_live_price: false });
 
   // ─── Accounts State ────────────────────────────────────────
   const [investmentAccounts, setInvestmentAccounts] = useState<InvestmentAccountRow[]>([]);
@@ -100,7 +103,7 @@ export default function AdminInvestmentsPage() {
 
   const openAddStock = () => {
     setEditingStock(null);
-    setStockForm({ symbol: "", name: "", asset_class: "stock", current_price: "" });
+    setStockForm({ symbol: "", name: "", asset_class: "stock", category: "general", current_price: "", use_live_price: false });
     setStockDialogOpen(true);
   };
 
@@ -110,7 +113,9 @@ export default function AdminInvestmentsPage() {
       symbol: stock.symbol,
       name: stock.name,
       asset_class: stock.asset_class,
+      category: stock.category || "general",
       current_price: stock.current_price.toString(),
+      use_live_price: stock.use_live_price || false,
     });
     setStockDialogOpen(true);
   };
@@ -132,7 +137,9 @@ export default function AdminInvestmentsPage() {
             symbol: stockForm.symbol.toUpperCase().trim(),
             name: stockForm.name.trim(),
             asset_class: stockForm.asset_class,
+            category: stockForm.category,
             current_price: price,
+            use_live_price: stockForm.use_live_price,
             updated_at: new Date().toISOString(),
           })
           .eq("id", editingStock.id);
@@ -146,7 +153,9 @@ export default function AdminInvestmentsPage() {
             symbol: stockForm.symbol.toUpperCase().trim(),
             name: stockForm.name.trim(),
             asset_class: stockForm.asset_class,
+            category: stockForm.category,
             current_price: price,
+            use_live_price: stockForm.use_live_price,
             is_active: true,
           });
         if (error) throw error;
@@ -441,6 +450,7 @@ export default function AdminInvestmentsPage() {
                         <th className="p-4 font-poppins">Name</th>
                         <th className="p-4 font-poppins">Asset Class</th>
                         <th className="p-4 text-right font-poppins">Current Price</th>
+                        <th className="p-4 text-center font-poppins">Price Source</th>
                         <th className="p-4 font-poppins">Status</th>
                         <th className="p-4 text-center font-poppins">Actions</th>
                       </tr>
@@ -457,6 +467,17 @@ export default function AdminInvestmentsPage() {
                           </td>
                           <td className="p-4 text-right font-mono font-bold text-foreground">
                             ${Number(stock.current_price).toFixed(2)}
+                          </td>
+                          <td className="p-4 text-center">
+                            {stock.use_live_price ? (
+                              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-success/10 text-success border border-success/20">
+                                Live API
+                              </span>
+                            ) : (
+                              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-muted text-muted-foreground border border-border/50">
+                                Manual
+                              </span>
+                            )}
                           </td>
                           <td className="p-4">
                             <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-sm border ${
@@ -537,7 +558,25 @@ export default function AdminInvestmentsPage() {
                 </select>
               </div>
               <div>
-                <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1.5 block">Current Price ($)</label>
+                <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1.5 block">Category</label>
+                <select
+                  className="w-full rounded-lg border bg-background px-3 py-2.5 text-sm font-semibold"
+                  value={stockForm.category}
+                  onChange={(e) => setStockForm({ ...stockForm, category: e.target.value })}
+                >
+                  <option value="general">General</option>
+                  <option value="tech">Technology</option>
+                  <option value="index">Index Fund</option>
+                  <option value="growth">Growth</option>
+                  <option value="finance">Finance</option>
+                  <option value="dividend">Dividend</option>
+                </select>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1.5 block">Base Price ($)</label>
                 <Input
                   type="number"
                   step="0.01"
@@ -546,7 +585,25 @@ export default function AdminInvestmentsPage() {
                   value={stockForm.current_price}
                   onChange={(e) => setStockForm({ ...stockForm, current_price: e.target.value })}
                   className="font-mono font-bold"
+                  disabled={stockForm.use_live_price}
                 />
+                {stockForm.use_live_price && <p className="text-[10px] text-muted-foreground mt-1 text-success">Price will fluctuate automatically.</p>}
+              </div>
+              <div className="flex flex-col justify-center">
+                <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1.5 block">Live Pricing Engine</label>
+                <label className="flex items-center gap-2 cursor-pointer mt-1">
+                  <div className="relative">
+                    <input 
+                      type="checkbox" 
+                      className="sr-only" 
+                      checked={stockForm.use_live_price}
+                      onChange={(e) => setStockForm({ ...stockForm, use_live_price: e.target.checked })}
+                    />
+                    <div className={`block w-10 h-6 rounded-full transition-colors ${stockForm.use_live_price ? 'bg-primary' : 'bg-muted'}`}></div>
+                    <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${stockForm.use_live_price ? 'translate-x-4' : ''}`}></div>
+                  </div>
+                  <span className="text-sm font-bold text-foreground">{stockForm.use_live_price ? 'Enabled' : 'Disabled'}</span>
+                </label>
               </div>
             </div>
             <Button type="submit" className="w-full font-bold h-11 text-sm mt-2">

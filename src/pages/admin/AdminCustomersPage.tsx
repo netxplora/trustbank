@@ -317,7 +317,13 @@ const AdminCustomersPage = () => {
                           <option value="">Select</option><option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option>
                         </select>
                       </div>
-                      <div className="col-span-2"><Label className="text-[10px] font-bold uppercase text-muted-foreground">Nationality</Label><Input value={editForm.nationality || ""} onChange={e => setEditForm(f => ({ ...f, nationality: e.target.value }))} className="h-8 text-xs mt-1" /></div>
+                      <div><Label className="text-[10px] font-bold uppercase text-muted-foreground">Nationality</Label><Input value={editForm.nationality || ""} onChange={e => setEditForm(f => ({ ...f, nationality: e.target.value }))} className="h-8 text-xs mt-1" /></div>
+                      <div>
+                        <Label className="text-[10px] font-bold uppercase text-muted-foreground">Pref. Language</Label>
+                        <select className="flex h-8 w-full rounded-md border border-input bg-background px-2 mt-1 text-xs" value={editForm.preferred_language || ""} onChange={e => setEditForm(f => ({ ...f, preferred_language: e.target.value }))}>
+                          <option value="">Select</option><option value="en">English</option><option value="es">Spanish</option><option value="fr">French</option><option value="de">German</option>
+                        </select>
+                      </div>
                     </div>
                   </TabsContent>
 
@@ -344,9 +350,17 @@ const AdminCustomersPage = () => {
                       <div><Label className="text-[10px] font-bold uppercase text-muted-foreground">KYC Tier</Label><Input type="number" value={editForm.kyc_tier || 0} onChange={e => setEditForm(f => ({ ...f, kyc_tier: parseInt(e.target.value) || 0 }))} className="h-8 text-xs mt-1" /></div>
                       <div><Label className="text-[10px] font-bold uppercase text-muted-foreground">Gov ID Type</Label><Input value={editForm.gov_id_type || ""} onChange={e => setEditForm(f => ({ ...f, gov_id_type: e.target.value }))} className="h-8 text-xs mt-1" /></div>
                       <div><Label className="text-[10px] font-bold uppercase text-muted-foreground">Gov ID Number</Label><Input value={editForm.gov_id_number || ""} onChange={e => setEditForm(f => ({ ...f, gov_id_number: e.target.value }))} className="h-8 text-xs mt-1" /></div>
+                      <div><Label className="text-[10px] font-bold uppercase text-muted-foreground">Tax ID</Label><Input value={editForm.tax_id || ""} onChange={e => setEditForm(f => ({ ...f, tax_id: e.target.value }))} className="h-8 text-xs mt-1" /></div>
+                      <div><Label className="text-[10px] font-bold uppercase text-muted-foreground">Source of Funds</Label><Input value={editForm.source_of_funds || ""} onChange={e => setEditForm(f => ({ ...f, source_of_funds: e.target.value }))} className="h-8 text-xs mt-1" /></div>
                       <div><Label className="text-[10px] font-bold uppercase text-muted-foreground">Occupation</Label><Input value={editForm.occupation || ""} onChange={e => setEditForm(f => ({ ...f, occupation: e.target.value }))} className="h-8 text-xs mt-1" /></div>
                       <div><Label className="text-[10px] font-bold uppercase text-muted-foreground">Employer Name</Label><Input value={editForm.employer_name || ""} onChange={e => setEditForm(f => ({ ...f, employer_name: e.target.value }))} className="h-8 text-xs mt-1" /></div>
                       <div><Label className="text-[10px] font-bold uppercase text-muted-foreground">Annual Income</Label><Input value={editForm.annual_income_range || ""} onChange={e => setEditForm(f => ({ ...f, annual_income_range: e.target.value }))} className="h-8 text-xs mt-1" /></div>
+                      <div>
+                        <Label className="text-[10px] font-bold uppercase text-muted-foreground">Pref. Currency</Label>
+                        <select className="flex h-8 w-full rounded-md border border-input bg-background px-2 mt-1 text-xs" value={editForm.preferred_currency || ""} onChange={e => setEditForm(f => ({ ...f, preferred_currency: e.target.value }))}>
+                          <option value="">Select</option><option value="USD">USD</option><option value="EUR">EUR</option><option value="GBP">GBP</option>
+                        </select>
+                      </div>
                       <div><Label className="text-[10px] font-bold uppercase text-muted-foreground">Loan Limit ($)</Label><Input type="number" value={editForm.loan_limit || 0} onChange={e => setEditForm(f => ({ ...f, loan_limit: parseFloat(e.target.value) || 0 }))} className="h-8 text-xs mt-1" /></div>
                     </div>
                   </TabsContent>
@@ -358,14 +372,59 @@ const AdminCustomersPage = () => {
                   </>
                 ) : (
                   <>
-                  <TabsContent value="personal" className="mt-0">
-                    <div className="text-xs text-muted-foreground italic p-4 text-center">Click Edit to view or modify these details.</div>
+                  <TabsContent value="personal" className="space-y-2 mt-0">
+                    {[
+                      { label: "First Name", value: selectedCustomer.first_name },
+                      { label: "Last Name", value: selectedCustomer.last_name },
+                      { label: "Display Name", value: selectedCustomer.display_name },
+                      { label: "Date of Birth", value: selectedCustomer.date_of_birth },
+                      { label: "Gender", value: selectedCustomer.gender },
+                      { label: "Nationality", value: selectedCustomer.nationality },
+                      { label: "Preferred Language", value: selectedCustomer.preferred_language }
+                    ].map(({ label, value }) => (
+                      <div key={label} className="bg-muted/30 border border-border/50 rounded-lg p-2.5 flex justify-between items-center">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{label}</p>
+                        <p className="font-semibold text-foreground text-xs text-right">{value || "—"}</p>
+                      </div>
+                    ))}
                   </TabsContent>
-                  <TabsContent value="address" className="mt-0">
-                    <div className="text-xs text-muted-foreground italic p-4 text-center">Click Edit to view or modify these details.</div>
+
+                  <TabsContent value="address" className="space-y-2 mt-0">
+                    {[
+                      { label: "Email Address", value: selectedCustomer.email },
+                      { label: "Phone Number", value: selectedCustomer.phone },
+                      { label: "Mailing Address", value: selectedCustomer.mailing_address },
+                      { label: "City", value: selectedCustomer.city },
+                      { label: "State/Province", value: selectedCustomer.state_province },
+                      { label: "Postal Code", value: selectedCustomer.postal_code },
+                      { label: "Country", value: selectedCustomer.country }
+                    ].map(({ label, value }) => (
+                      <div key={label} className="bg-muted/30 border border-border/50 rounded-lg p-2.5 flex justify-between items-center">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{label}</p>
+                        <p className="font-semibold text-foreground text-xs text-right truncate max-w-[200px]">{value || "—"}</p>
+                      </div>
+                    ))}
                   </TabsContent>
-                  <TabsContent value="kyc" className="mt-0">
-                    <div className="text-xs text-muted-foreground italic p-4 text-center">Click Edit to view or modify these details.</div>
+
+                  <TabsContent value="kyc" className="space-y-2 mt-0">
+                    {[
+                      { label: "KYC Status", value: selectedCustomer.kyc_status },
+                      { label: "KYC Tier", value: selectedCustomer.kyc_tier },
+                      { label: "Gov ID Type", value: selectedCustomer.gov_id_type },
+                      { label: "Gov ID Number", value: selectedCustomer.gov_id_number },
+                      { label: "Tax ID", value: selectedCustomer.tax_id },
+                      { label: "Source of Funds", value: selectedCustomer.source_of_funds },
+                      { label: "Occupation", value: selectedCustomer.occupation },
+                      { label: "Employer Name", value: selectedCustomer.employer_name },
+                      { label: "Annual Income", value: selectedCustomer.annual_income_range },
+                      { label: "Pref. Currency", value: selectedCustomer.preferred_currency },
+                      { label: "Loan Limit ($)", value: selectedCustomer.loan_limit }
+                    ].map(({ label, value }) => (
+                      <div key={label} className="bg-muted/30 border border-border/50 rounded-lg p-2.5 flex justify-between items-center">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{label}</p>
+                        <p className="font-semibold text-foreground text-xs text-right truncate max-w-[200px]">{value !== undefined && value !== null && value !== "" ? String(value) : "—"}</p>
+                      </div>
+                    ))}
                   </TabsContent>
 
                   <div className="flex justify-between mt-6 gap-2">

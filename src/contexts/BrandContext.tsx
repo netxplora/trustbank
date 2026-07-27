@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useLayoutEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface BrandIdentity {
@@ -170,7 +170,14 @@ const defaultCorporate: CorporateInfo = {
 
 export const BrandProvider = ({ children }: { children: React.ReactNode }) => {
   const [identity, setIdentity] = useState<BrandIdentity>(defaultIdentity);
-  const [design, setDesign] = useState<DesignSystem>(defaultDesign);
+  const [design, setDesign] = useState<DesignSystem>(() => {
+    try {
+      const cached = localStorage.getItem("brand_design_system");
+      return cached ? JSON.parse(cached) : defaultDesign;
+    } catch {
+      return defaultDesign;
+    }
+  });
   const [visuals, setVisuals] = useState<VisualAssets>(defaultVisuals);
   const [corporate, setCorporate] = useState<CorporateInfo>(defaultCorporate);
   const [loading, setLoading] = useState(true);
@@ -214,7 +221,10 @@ export const BrandProvider = ({ children }: { children: React.ReactNode }) => {
       if (data) {
         data.forEach((setting) => {
           if (setting.key === "brand_identity" && setting.value) setIdentity(setting.value as any);
-          if (setting.key === "design_system" && setting.value) setDesign(setting.value as any);
+          if (setting.key === "design_system" && setting.value) {
+            setDesign(setting.value as any);
+            localStorage.setItem("brand_design_system", JSON.stringify(setting.value));
+          }
           if (setting.key === "visual_assets" && setting.value) setVisuals(setting.value as any);
           if (setting.key === "corporate_info" && setting.value) setCorporate(setting.value as any);
         });
@@ -242,8 +252,8 @@ export const BrandProvider = ({ children }: { children: React.ReactNode }) => {
     };
   }, []);
 
-  // Apply dynamic CSS variables when design changes
-  useEffect(() => {
+  // Apply dynamic CSS variables when design changes (useLayoutEffect prevents FOUC)
+  useLayoutEffect(() => {
     if (design) {
       let styleEl = document.getElementById("theme-engine") as HTMLStyleElement;
       if (!styleEl) {

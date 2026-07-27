@@ -73,218 +73,8 @@ interface StockMeta {
   analyst_rating: "Strong Buy" | "Buy" | "Hold";
   description: string;
   chart_data: { day: string; price: number }[];
+  use_live_price?: boolean;
 }
-
-const EXTENDED_STOCKS: StockMeta[] = [
-  {
-    symbol: "AAPL",
-    name: "Apple Inc.",
-    category: "tech",
-    asset_class: "stock",
-    current_price: 224.50,
-    change_24h: 3.20,
-    change_percent_24h: 1.45,
-    market_cap: "$3.42 Trillion",
-    pe_ratio: "33.8",
-    dividend_yield: "0.44%",
-    high_52w: 237.23,
-    low_52w: 164.08,
-    volume: "48.2M",
-    analyst_rating: "Strong Buy",
-    description: "Global technology leader in consumer electronics, software, and services including iPhone, Mac, and iCloud ecosystems.",
-    chart_data: [
-      { day: "Mon", price: 218.10 },
-      { day: "Tue", price: 220.40 },
-      { day: "Wed", price: 219.80 },
-      { day: "Thu", price: 222.10 },
-      { day: "Fri", price: 221.90 },
-      { day: "Sat", price: 223.40 },
-      { day: "Sun", price: 224.50 },
-    ],
-  },
-  {
-    symbol: "NVDA",
-    name: "NVIDIA Corporation",
-    category: "tech",
-    asset_class: "stock",
-    current_price: 128.80,
-    change_24h: 4.15,
-    change_percent_24h: 3.33,
-    market_cap: "$3.16 Trillion",
-    pe_ratio: "68.4",
-    dividend_yield: "0.03%",
-    high_52w: 140.76,
-    low_52w: 39.23,
-    volume: "82.4M",
-    analyst_rating: "Strong Buy",
-    description: "Pioneer in GPU design, accelerated computing architectures, data center chips, and artificial intelligence hardware.",
-    chart_data: [
-      { day: "Mon", price: 121.50 },
-      { day: "Tue", price: 123.80 },
-      { day: "Wed", price: 122.90 },
-      { day: "Thu", price: 125.60 },
-      { day: "Fri", price: 127.10 },
-      { day: "Sat", price: 126.80 },
-      { day: "Sun", price: 128.80 },
-    ],
-  },
-  {
-    symbol: "MSFT",
-    name: "Microsoft Corporation",
-    category: "tech",
-    asset_class: "stock",
-    current_price: 448.90,
-    change_24h: 2.75,
-    change_percent_24h: 0.62,
-    market_cap: "$3.33 Trillion",
-    pe_ratio: "36.2",
-    dividend_yield: "0.67%",
-    high_52w: 468.35,
-    low_52w: 309.45,
-    volume: "22.1M",
-    analyst_rating: "Strong Buy",
-    description: "Enterprise software giant specializing in Azure cloud platform, Windows OS, Productivity Software, and OpenAI partnership.",
-    chart_data: [
-      { day: "Mon", price: 442.10 },
-      { day: "Tue", price: 444.50 },
-      { day: "Wed", price: 443.20 },
-      { day: "Thu", price: 446.80 },
-      { day: "Fri", price: 447.40 },
-      { day: "Sat", price: 448.10 },
-      { day: "Sun", price: 448.90 },
-    ],
-  },
-  {
-    symbol: "AMZN",
-    name: "Amazon.com Inc.",
-    category: "growth",
-    asset_class: "stock",
-    current_price: 186.30,
-    change_24h: -1.20,
-    change_percent_24h: -0.64,
-    market_cap: "$1.94 Trillion",
-    pe_ratio: "44.1",
-    dividend_yield: "N/A",
-    high_52w: 201.20,
-    low_52w: 118.35,
-    volume: "35.6M",
-    analyst_rating: "Buy",
-    description: "Leading e-commerce retailer and cloud infrastructure provider through Amazon Web Services (AWS).",
-    chart_data: [
-      { day: "Mon", price: 189.50 },
-      { day: "Tue", price: 188.20 },
-      { day: "Wed", price: 187.90 },
-      { day: "Thu", price: 186.50 },
-      { day: "Fri", price: 187.10 },
-      { day: "Sat", price: 186.80 },
-      { day: "Sun", price: 186.30 },
-    ],
-  },
-  {
-    symbol: "VOO",
-    name: "Vanguard S&P 500 ETF",
-    category: "index",
-    asset_class: "etf",
-    current_price: 512.40,
-    change_24h: 3.10,
-    change_percent_24h: 0.61,
-    market_cap: "$1.12 Trillion",
-    pe_ratio: "26.4",
-    dividend_yield: "1.32%",
-    high_52w: 518.90,
-    low_52w: 395.20,
-    volume: "4.5M",
-    analyst_rating: "Strong Buy",
-    description: "Low-cost index fund designed to track the performance of the 500 largest US publicly traded companies.",
-    chart_data: [
-      { day: "Mon", price: 506.20 },
-      { day: "Tue", price: 508.40 },
-      { day: "Wed", price: 507.90 },
-      { day: "Thu", price: 510.10 },
-      { day: "Fri", price: 511.30 },
-      { day: "Sat", price: 511.90 },
-      { day: "Sun", price: 512.40 },
-    ],
-  },
-  {
-    symbol: "QQQ",
-    name: "Invesco QQQ Trust (Nasdaq-100)",
-    category: "index",
-    asset_class: "etf",
-    current_price: 482.10,
-    change_24h: 4.80,
-    change_percent_24h: 1.01,
-    market_cap: "$285 Billion",
-    pe_ratio: "31.5",
-    dividend_yield: "0.58%",
-    high_52w: 503.52,
-    low_52w: 352.10,
-    volume: "31.2M",
-    analyst_rating: "Buy",
-    description: "Exchange-traded fund tracking the 100 largest non-financial companies listed on the Nasdaq stock exchange.",
-    chart_data: [
-      { day: "Mon", price: 472.50 },
-      { day: "Tue", price: 476.10 },
-      { day: "Wed", price: 475.20 },
-      { day: "Thu", price: 479.40 },
-      { day: "Fri", price: 480.90 },
-      { day: "Sat", price: 481.50 },
-      { day: "Sun", price: 482.10 },
-    ],
-  },
-  {
-    symbol: "JPM",
-    name: "JPMorgan Chase & Co.",
-    category: "finance",
-    asset_class: "stock",
-    current_price: 212.75,
-    change_24h: 1.85,
-    change_percent_24h: 0.88,
-    market_cap: "$608 Billion",
-    pe_ratio: "12.4",
-    dividend_yield: "2.16%",
-    high_52w: 218.05,
-    low_52w: 135.20,
-    volume: "8.9M",
-    analyst_rating: "Buy",
-    description: "Largest American banking institution providing commercial banking, investment banking, and asset management.",
-    chart_data: [
-      { day: "Mon", price: 208.90 },
-      { day: "Tue", price: 210.20 },
-      { day: "Wed", price: 209.80 },
-      { day: "Thu", price: 211.50 },
-      { day: "Fri", price: 212.10 },
-      { day: "Sat", price: 212.30 },
-      { day: "Sun", price: 212.75 },
-    ],
-  },
-  {
-    symbol: "GOOGL",
-    name: "Alphabet Inc. (Class A)",
-    category: "tech",
-    asset_class: "stock",
-    current_price: 178.60,
-    change_24h: 1.10,
-    change_percent_24h: 0.62,
-    market_cap: "$2.21 Trillion",
-    pe_ratio: "25.7",
-    dividend_yield: "0.45%",
-    high_52w: 191.75,
-    low_52w: 120.21,
-    volume: "19.4M",
-    analyst_rating: "Strong Buy",
-    description: "Parent company of Google Search, YouTube, Android, Google Cloud, and DeepMind AI research labs.",
-    chart_data: [
-      { day: "Mon", price: 174.20 },
-      { day: "Tue", price: 176.10 },
-      { day: "Wed", price: 175.80 },
-      { day: "Thu", price: 177.30 },
-      { day: "Fri", price: 177.90 },
-      { day: "Sat", price: 178.20 },
-      { day: "Sun", price: 178.60 },
-    ],
-  },
-];
 
 const ASSET_COLORS = {
   stock: "hsl(350, 65%, 38%)",
@@ -307,8 +97,11 @@ const getPremiumInvestmentName = (type: string) => {
 };
 
 export default function InvestmentsPage() {
+  const { user, profile } = useAuth();
   const { toast } = useToast();
-  const { user } = useAuth();
+  
+  const [dbStocks, setDbStocks] = useState<StockMeta[]>([]);
+  const [livePrices, setLivePrices] = useState<Record<string, number>>({});
   const [accounts, setAccounts] = useState<InvestmentAccount[]>([]);
   const [selectedAccount, setSelectedAccount] = useState<InvestmentAccount | null>(null);
   const [holdings, setHoldings] = useState<Holding[]>([]);
@@ -319,12 +112,11 @@ export default function InvestmentsPage() {
   const [activeTab, setActiveTab] = useState<"explore" | "portfolio">("explore");
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
-  const [sortBy, setSortBy] = useState<"default" | "price_asc" | "price_desc" | "gainers" | "symbol">("default");
-  const [allStocksList, setAllStocksList] = useState<StockMeta[]>(EXTENDED_STOCKS);
+  const [sortBy, setSortBy] = useState<"default" | "gainers" | "price_desc" | "price_asc" | "symbol">("default");
 
   // Order Ticket State
   const [orderSide, setOrderSide] = useState<"buy" | "sell">("buy");
-  const [orderSymbol, setOrderSymbol] = useState("AAPL");
+  const [orderStock, setOrderStock] = useState<StockMeta | null>(null);
   const [orderQty, setOrderQty] = useState("");
   const [orderType, setOrderType] = useState<"market" | "limit">("market");
   const [limitPrice, setLimitPrice] = useState("");
@@ -340,92 +132,74 @@ export default function InvestmentsPage() {
   const [checkingAccounts, setCheckingAccounts] = useState<any[]>([]);
   const [selectedCheckingId, setSelectedCheckingId] = useState("");
 
-  // Prices State
-  const [tickerPrices, setTickerPrices] = useState<Record<string, number>>({});
-
   useEffect(() => {
-    if (!user) return;
     fetchData();
-    fetchDbAvailableStocks();
-
-    // Map initial prices
-    const initPrices: Record<string, number> = {};
-    EXTENDED_STOCKS.forEach((s) => {
-      initPrices[s.symbol] = s.current_price;
-    });
-    setTickerPrices(initPrices);
-
-    // Price drift interval
-    const driftInterval = setInterval(() => {
-      setTickerPrices((prev) => {
-        const next = { ...prev };
-        Object.keys(next).forEach((sym) => {
-          const changePercent = (Math.random() - 0.48) * 0.006;
-          next[sym] = Number((next[sym] * (1 + changePercent)).toFixed(2));
-        });
-        return next;
-      });
-    }, 20000);
-
-    return () => clearInterval(driftInterval);
-  }, [user?.id]);
-
-  const fetchDbAvailableStocks = async () => {
-    try {
-      const { data } = await (supabase as any)
-        .from("available_stocks")
-        .select("*")
-        .eq("is_active", true);
-
-      if (data && data.length > 0) {
-        const dbItems: StockMeta[] = data.map((d: any) => {
-          const existing = EXTENDED_STOCKS.find((s) => s.symbol === d.symbol);
-          if (existing) return existing;
-          const currentPrice = Number(d.current_price || 100);
-          return {
-            symbol: d.symbol,
-            name: d.name,
-            category: (d.asset_class === "etf" ? "index" : "growth") as any,
-            asset_class: d.asset_class || "stock",
-            current_price: currentPrice,
-            change_24h: 1.25,
-            change_percent_24h: 0.85,
-            market_cap: "$500 Billion",
-            pe_ratio: "25.0",
-            dividend_yield: "1.2%",
-            high_52w: currentPrice * 1.15,
-            low_52w: currentPrice * 0.85,
-            volume: "12.5M",
-            analyst_rating: "Buy",
-            description: `${d.name} listed equity asset available for self-directed portfolio trading.`,
-            chart_data: [
-              { day: "Mon", price: currentPrice * 0.97 },
-              { day: "Tue", price: currentPrice * 0.98 },
-              { day: "Wed", price: currentPrice * 0.975 },
-              { day: "Thu", price: currentPrice * 0.99 },
-              { day: "Fri", price: currentPrice * 0.995 },
-              { day: "Sat", price: currentPrice * 0.998 },
-              { day: "Sun", price: currentPrice },
-            ],
-          };
-        });
-
-        // Merge DB stocks with static extended list (avoiding duplicate symbols)
-        const combinedMap = new Map<string, StockMeta>();
-        EXTENDED_STOCKS.forEach((s) => combinedMap.set(s.symbol, s));
-        dbItems.forEach((s) => combinedMap.set(s.symbol, s));
-        setAllStocksList(Array.from(combinedMap.values()));
-      }
-    } catch (e) {
-      console.error("DB stocks sync notice:", e);
-    }
-  };
+  }, [user]);
 
   useEffect(() => {
-    if (selectedAccount) {
-      fetchAccountData(selectedAccount.id);
-    }
-  }, [selectedAccount?.id, tickerPrices]);
+    const fetchStocks = async () => {
+      try {
+        const { data, error } = await (supabase as any)
+          .from("available_stocks")
+          .select("*")
+          .eq("is_active", true)
+          .order("symbol");
+
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+          const mapped: StockMeta[] = data.map((s: any) => ({
+            symbol: s.symbol,
+            name: s.name,
+            category: s.category || "tech",
+            asset_class: s.asset_class,
+            current_price: Number(s.current_price),
+            change_24h: Number(s.change_24h || 0),
+            change_percent_24h: Number(s.change_percent_24h || 0),
+            market_cap: s.market_cap || "-",
+            pe_ratio: s.pe_ratio || "-",
+            dividend_yield: s.dividend_yield || "-",
+            high_52w: Number(s.high_52w || 0),
+            low_52w: Number(s.low_52w || 0),
+            volume: s.volume || "-",
+            analyst_rating: s.analyst_rating || "Hold",
+            description: s.description || "",
+            chart_data: typeof s.chart_data === 'string' ? JSON.parse(s.chart_data) : (s.chart_data || []),
+            use_live_price: s.use_live_price || false
+          }));
+          
+          setDbStocks(mapped);
+          const initialPrices: Record<string, number> = {};
+          mapped.forEach(s => initialPrices[s.symbol] = s.current_price);
+          setLivePrices(initialPrices);
+        }
+      } catch (e: any) {
+        console.error("Error fetching stocks:", e);
+      }
+    };
+    
+    fetchStocks();
+  }, []);
+
+  useEffect(() => {
+    if (dbStocks.length === 0) return;
+    const interval = setInterval(() => {
+      setLivePrices(prev => {
+        const next = { ...prev };
+        let changed = false;
+        dbStocks.forEach(stock => {
+          if (stock.use_live_price) {
+            const volatility = stock.current_price * 0.002;
+            const change = (Math.random() * volatility * 2) - volatility;
+            next[stock.symbol] = Math.max(0.01, (prev[stock.symbol] || stock.current_price) + change);
+            changed = true;
+          }
+        });
+        return changed ? next : prev;
+      });
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [dbStocks]);
 
   const fetchData = async () => {
     if (!user) return;
@@ -456,11 +230,7 @@ export default function InvestmentsPage() {
         .select("*")
         .eq("account_id", accountId);
 
-      const holdingsWithPrices = ((hlds as Holding[]) || []).map((h) => {
-        const current_price = tickerPrices[h.symbol] || h.current_price;
-        return { ...h, current_price };
-      });
-      setHoldings(holdingsWithPrices);
+      setHoldings((hlds as Holding[]) || []);
 
       const { data: ords } = await (supabase as any)
         .from("investment_orders")
@@ -495,9 +265,15 @@ export default function InvestmentsPage() {
     }
   };
 
-  const handleOpenTradeModal = (symbol: string, side: "buy" | "sell" = "buy") => {
+  useEffect(() => {
+    if (selectedAccount) {
+      fetchAccountData(selectedAccount.id);
+    }
+  }, [selectedAccount?.id]);
+
+  const openOrder = (stock: StockMeta, side: "buy" | "sell" = "buy") => {
     setOrderSide(side);
-    setOrderSymbol(symbol);
+    setOrderStock(stock);
     setOrderQty("");
     setOrderOpen(true);
   };
@@ -509,14 +285,14 @@ export default function InvestmentsPage() {
 
   const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !selectedAccount) return;
+    if (!user || !selectedAccount || !orderStock) return;
     const qty = parseFloat(orderQty);
     if (isNaN(qty) || qty <= 0) {
       toast({ title: "Invalid Quantity", description: "Please enter a valid number of shares.", variant: "destructive" });
       return;
     }
 
-    const price = tickerPrices[orderSymbol] || EXTENDED_STOCKS.find((s) => s.symbol === orderSymbol)?.current_price || 100;
+    const price = livePrices[orderStock.symbol] || orderStock.current_price;
     const estimatedCost = qty * price;
 
     if (orderSide === "buy" && selectedAccount.cash_balance < estimatedCost) {
@@ -525,7 +301,7 @@ export default function InvestmentsPage() {
     }
 
     if (orderSide === "sell") {
-      const holding = holdings.find((h) => h.symbol === orderSymbol);
+      const holding = holdings.find((h) => h.symbol === orderStock.symbol);
       if (!holding || holding.quantity < qty) {
         toast({ title: "Insufficient Shares", description: "You do not own enough shares of this stock.", variant: "destructive" });
         return;
@@ -533,27 +309,26 @@ export default function InvestmentsPage() {
     }
 
     try {
-      const stockObj = EXTENDED_STOCKS.find((s) => s.symbol === orderSymbol);
       const { error } = await (supabase.rpc as any)("process_trade", {
         p_user_id: user.id,
         p_account_id: selectedAccount.id,
-        p_symbol: orderSymbol,
-        p_asset_name: stockObj?.name || orderSymbol + " Equity",
+        p_symbol: orderStock.symbol,
+        p_asset_name: orderStock.name,
         p_side: orderSide,
         p_quantity: qty,
         p_current_price: price,
-        p_asset_class: stockObj?.asset_class || "stock",
+        p_asset_class: orderStock.asset_class,
       });
 
       if (error) throw error;
-      toast({ title: "Order Filled", description: `${orderSide.toUpperCase()} ${qty} shares of ${orderSymbol} at $${price.toFixed(2)}.` });
+      toast({ title: "Order Filled", description: `${orderSide.toUpperCase()} ${qty} shares of ${orderStock.symbol} at $${price.toFixed(2)}.` });
       setOrderOpen(false);
       setDetailOpen(false);
       setOrderQty("");
       fetchAccountData(selectedAccount.id);
       fetchData();
     } catch (e: any) {
-      toast({ title: "Order Execution Error", description: e.message, variant: "destructive" });
+      toast({ title: "Order Failed", description: e.message, variant: "destructive" });
     }
   };
 
@@ -591,12 +366,12 @@ export default function InvestmentsPage() {
   };
 
   // Portfolio calculations
-  const holdingsVal = holdings.reduce((sum, h) => sum + h.quantity * h.current_price, 0);
+  const holdingsVal = holdings.reduce((sum, h) => sum + h.quantity * (livePrices[h.symbol] || h.current_price), 0);
   const cashVal = selectedAccount ? Number(selectedAccount.cash_balance) : 0;
   const totalVal = holdingsVal + cashVal;
 
   // Multi-field search & category filtering logic
-  let filteredStocks = allStocksList.filter((s) => {
+  let filteredStocks = dbStocks.filter((s) => {
     const q = searchQuery.toLowerCase().trim();
     const matchesSearch =
       q === "" ||
@@ -617,9 +392,9 @@ export default function InvestmentsPage() {
 
   // Sorting logic
   if (sortBy === "price_asc") {
-    filteredStocks = [...filteredStocks].sort((a, b) => (tickerPrices[a.symbol] || a.current_price) - (tickerPrices[b.symbol] || b.current_price));
+    filteredStocks = [...filteredStocks].sort((a, b) => (livePrices[a.symbol] || a.current_price) - (livePrices[b.symbol] || b.current_price));
   } else if (sortBy === "price_desc") {
-    filteredStocks = [...filteredStocks].sort((a, b) => (tickerPrices[b.symbol] || b.current_price) - (tickerPrices[a.symbol] || a.current_price));
+    filteredStocks = [...filteredStocks].sort((a, b) => (livePrices[b.symbol] || b.current_price) - (livePrices[a.symbol] || a.current_price));
   } else if (sortBy === "gainers") {
     filteredStocks = [...filteredStocks].sort((a, b) => b.change_percent_24h - a.change_percent_24h);
   } else if (sortBy === "symbol") {
@@ -842,7 +617,7 @@ export default function InvestmentsPage() {
                 /* Stocks Grid */
                 <StaggerContainer className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
                   {filteredStocks.map((stock) => {
-                    const currentPrice = tickerPrices[stock.symbol] || stock.current_price;
+                    const currentPrice = livePrices[stock.symbol] || stock.current_price;
                     const isPositive = stock.change_24h >= 0;
 
                     return (
@@ -912,19 +687,10 @@ export default function InvestmentsPage() {
 
                           {/* Action Buttons */}
                           <div className="grid grid-cols-2 gap-1 sm:gap-1.5 border-t border-border/40 pt-2 sm:pt-2.5">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="h-6.5 sm:h-7 text-[9px] sm:text-[10px] font-bold rounded-lg px-1 sm:px-3"
-                              onClick={() => openStockDetail(stock)}
-                            >
+                            <Button size="sm" variant="outline" className="h-6.5 sm:h-7 text-[9px] sm:text-[10px] font-bold rounded-lg px-1 sm:px-3" onClick={(e) => { e.stopPropagation(); openStockDetail(stock); }}>
                               <Info className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-0.5 sm:mr-1" /> <span className="hidden sm:inline">Analytics</span><span className="sm:hidden">Info</span>
                             </Button>
-                            <Button
-                              size="sm"
-                              className="h-6.5 sm:h-7 text-[9px] sm:text-[10px] font-bold rounded-lg bg-primary px-1 sm:px-3"
-                              onClick={() => handleOpenTradeModal(stock.symbol, "buy")}
-                            >
+                            <Button size="sm" className="h-6.5 sm:h-7 text-[9px] sm:text-[10px] font-bold rounded-lg bg-primary px-1 sm:px-3" onClick={(e) => { e.stopPropagation(); openOrder(stock, "buy"); }}>
                               <ShoppingBag className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-0.5 sm:mr-1" /> Buy
                             </Button>
                           </div>
@@ -1021,7 +787,7 @@ export default function InvestmentsPage() {
                     </div>
 
                     <div className="space-y-2">
-                      <Button size="sm" className="w-full h-8 text-xs font-bold rounded-lg gap-1.5" onClick={() => handleOpenTradeModal("AAPL", "buy")}>
+                      <Button size="sm" className="w-full h-8 text-xs font-bold rounded-lg gap-1.5" onClick={() => openOrder({ symbol: "AAPL", name: "Apple Inc.", current_price: 180.00, asset_class: "tech" } as any, "buy")}>
                         <BadgeDollarSign className="h-3.5 w-3.5" /> Trade Equities & ETFs
                       </Button>
                       <Button size="sm" variant="outline" className="w-full h-8 text-xs font-bold rounded-lg gap-1.5" onClick={() => setActiveTab("explore")}>
@@ -1062,9 +828,10 @@ export default function InvestmentsPage() {
                         </thead>
                         <tbody className="divide-y divide-border/60 text-xs">
                           {holdings.map((h) => {
-                            const totalValue = h.quantity * h.current_price;
-                            const gainDollars = (h.current_price - h.avg_cost) * h.quantity;
-                            const gainPercent = h.avg_cost > 0 ? ((h.current_price - h.avg_cost) / h.avg_cost) * 100 : 0;
+                            const currentPrice = livePrices[h.symbol] || h.current_price;
+                            const totalValue = h.quantity * currentPrice;
+                            const gainDollars = (currentPrice - h.avg_cost) * h.quantity;
+                            const gainPercent = h.avg_cost > 0 ? ((currentPrice - h.avg_cost) / h.avg_cost) * 100 : 0;
                             const isGain = gainDollars >= 0;
 
                             return (
@@ -1073,21 +840,33 @@ export default function InvestmentsPage() {
                                 <td className="p-2.5 text-muted-foreground font-semibold text-[10px]">{h.name}</td>
                                 <td className="p-2.5 text-right font-bold font-mono">{Number(h.quantity).toFixed(2)}</td>
                                 <td className="p-2.5 text-right font-mono text-muted-foreground">${Number(h.avg_cost).toFixed(2)}</td>
-                                <td className="p-2.5 text-right font-mono font-bold">${Number(h.current_price).toFixed(2)}</td>
+                                <td className="p-2.5 text-right font-mono font-bold">${currentPrice.toFixed(2)}</td>
                                 <td className="p-2.5 text-right font-bold text-foreground font-mono">
                                   ${totalValue.toLocaleString("en-US", { minimumFractionDigits: 2 })}
                                 </td>
                                 <td className={`p-2.5 text-right font-bold font-mono text-[11px] ${isGain ? "text-success" : "text-destructive"}`}>
                                   {isGain ? "+" : ""}${gainDollars.toFixed(2)} ({isGain ? "+" : ""}{gainPercent.toFixed(2)}%)
                                 </td>
-                                <td className="p-2.5 text-center">
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    className="h-6 text-[9px] font-bold px-2 rounded-md"
-                                    onClick={() => handleOpenTradeModal(h.symbol, "sell")}
-                                  >
+                                <td className="p-2.5 text-center flex gap-1">
+                                  <Button size="sm" variant="outline" className="h-7 text-[10px] font-bold rounded-lg" onClick={() => {
+                                    const matchingStock = dbStocks.find(s => s.symbol === h.symbol);
+                                    if (matchingStock) {
+                                      openOrder(matchingStock, "sell");
+                                    } else {
+                                      openOrder({ symbol: h.symbol, name: h.name, current_price: currentPrice, asset_class: h.asset_class } as StockMeta, "sell");
+                                    }
+                                  }}>
                                     Sell
+                                  </Button>
+                                  <Button size="sm" className="h-7 text-[10px] font-bold rounded-lg bg-primary" onClick={() => {
+                                    const matchingStock = dbStocks.find(s => s.symbol === h.symbol);
+                                    if (matchingStock) {
+                                      openOrder(matchingStock, "buy");
+                                    } else {
+                                      openOrder({ symbol: h.symbol, name: h.name, current_price: currentPrice, asset_class: h.asset_class } as StockMeta, "buy");
+                                    }
+                                  }}>
+                                    Buy
                                   </Button>
                                 </td>
                               </tr>
@@ -1185,7 +964,7 @@ export default function InvestmentsPage() {
                     <DialogTitle className="text-sm font-semibold text-muted-foreground">{selectedStock.name}</DialogTitle>
                   </div>
                   <div className="text-right">
-                    <span className="text-lg font-mono font-bold text-foreground">${(tickerPrices[selectedStock.symbol] || selectedStock.current_price).toFixed(2)}</span>
+                    <div className="text-2xl font-bold font-mono">${(livePrices[selectedStock.symbol] || selectedStock.current_price).toFixed(2)}</div>
                     <p className={`text-xs font-mono font-bold ${selectedStock.change_24h >= 0 ? "text-success" : "text-destructive"}`}>
                       {selectedStock.change_24h >= 0 ? "+" : ""}{selectedStock.change_percent_24h}% (24h)
                     </p>
@@ -1194,7 +973,7 @@ export default function InvestmentsPage() {
               </DialogHeader>
 
               {/* Interactive Area Chart */}
-              <div className="h-40 w-full bg-muted/10 rounded-lg p-2 border border-border/40">
+              <div className="h-40 w-full bg-muted/10 rounded-xl p-2 border border-border/30">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={selectedStock.chart_data}>
                     <XAxis dataKey="day" tick={{ fontSize: 9 }} stroke="var(--muted-foreground)" />
@@ -1248,7 +1027,8 @@ export default function InvestmentsPage() {
                 <Button
                   className="flex-1 font-bold h-8 text-xs rounded-lg bg-primary"
                   onClick={() => {
-                    handleOpenTradeModal(selectedStock.symbol, "buy");
+                    setDetailOpen(false);
+                    openOrder(selectedStock, "buy");
                   }}
                 >
                   Buy {selectedStock.symbol} Stock
@@ -1258,7 +1038,8 @@ export default function InvestmentsPage() {
                     variant="outline"
                     className="flex-1 font-bold h-8 text-xs rounded-lg"
                     onClick={() => {
-                      handleOpenTradeModal(selectedStock.symbol, "sell");
+                      setDetailOpen(false);
+                      openOrder(selectedStock, "sell");
                     }}
                   >
                     Sell Position
@@ -1305,22 +1086,21 @@ export default function InvestmentsPage() {
               </div>
             )}
 
-            <div>
-              <label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block mb-1">
-                Security Ticker
-              </label>
-              <select
-                className="w-full rounded-lg border border-input bg-background px-2.5 py-1.5 text-xs font-semibold h-8"
-                value={orderSymbol}
-                onChange={(e) => setOrderSymbol(e.target.value)}
-              >
-                {EXTENDED_STOCKS.map((s) => (
-                  <option key={s.symbol} value={s.symbol}>
-                    {s.symbol} - {s.name} (${(tickerPrices[s.symbol] || s.current_price).toFixed(2)})
-                  </option>
-                ))}
-              </select>
-            </div>
+            {orderStock && (
+              <div className="bg-muted/30 p-3 rounded-xl border border-border/50 flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary border border-primary/20">
+                  {orderStock.symbol.charAt(0)}
+                </div>
+                <div>
+                  <h3 className="font-bold text-foreground text-sm">{orderStock.symbol}</h3>
+                  <p className="text-[10px] text-muted-foreground">{orderStock.name}</p>
+                </div>
+                <div className="ml-auto text-right">
+                  <p className="text-[10px] text-muted-foreground mb-0.5 uppercase tracking-wider font-semibold">Current Price</p>
+                  <p className="font-mono font-bold text-sm">${(livePrices[orderStock.symbol] || orderStock.current_price).toFixed(2)}</p>
+                </div>
+              </div>
+            )}
 
             <div className="grid grid-cols-2 gap-2.5">
               <div>
@@ -1366,7 +1146,7 @@ export default function InvestmentsPage() {
             <div className="pt-2 border-t border-border/60 flex justify-between items-center bg-muted/20 p-2.5 rounded-lg">
               <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Estimated Total Cost</span>
               <span className="font-mono font-bold text-foreground text-sm">
-                ${(Number(orderQty || 0) * (tickerPrices[orderSymbol] || EXTENDED_STOCKS.find((s) => s.symbol === orderSymbol)?.current_price || 0)).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                ${(Number(orderQty || 0) * (orderStock ? (livePrices[orderStock.symbol] || orderStock.current_price) : 0)).toLocaleString("en-US", { minimumFractionDigits: 2 })}
               </span>
             </div>
 
