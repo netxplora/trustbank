@@ -117,7 +117,7 @@ export default function TaxRefundPage() {
             <div className="md:w-1/3 bg-muted/30 p-6 border-t md:border-t-0 md:border-l border-border flex items-center justify-center">
               <div className="relative">
                 <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full"></div>
-                <img src="/placeholder.svg" alt="Tax Returns" className="w-48 h-auto relative z-10" />
+                <FileSpreadsheet className="w-32 h-32 text-primary/60 relative z-10" strokeWidth={1} />
               </div>
             </div>
           </div>

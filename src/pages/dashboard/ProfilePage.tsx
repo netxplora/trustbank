@@ -152,35 +152,39 @@ const ProfilePage = () => {
   
 
   
-  const isLocked = profile?.kyc_status === 'approved';
+  const isFieldLocked = (fieldValue: any) => Boolean(fieldValue && String(fieldValue).trim() !== "");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || isLocked) return;
+    if (!user) return;
     setLoading(true);
     try {
-      const { error } = await (supabase as any).from("profiles").update({
-        first_name: form.firstName,
-        last_name: form.lastName,
-        date_of_birth: form.dateOfBirth,
-        gender: form.gender,
-        nationality: form.nationality,
-        mailing_address: form.mailingAddress,
-        city: form.city,
-        state_province: form.stateProvince,
-        postal_code: form.postalCode,
-        country: form.country,
-        occupation: form.occupation,
-        employer_name: form.employerName,
-        annual_income_range: form.annualIncomeRange,
-        source_of_funds: form.sourceOfFunds,
-        gov_id_type: form.govIdType,
-        gov_id_number: form.govIdNumber,
-        preferred_language: form.preferredLanguage,
-        preferred_currency: form.preferredCurrency,
-      }).eq("user_id", user.id);
+      const updates: any = {};
+      if (!isFieldLocked(profile?.first_name)) updates.first_name = form.firstName;
+      if (!isFieldLocked(profile?.last_name)) updates.last_name = form.lastName;
+      if (!isFieldLocked(profile?.date_of_birth)) updates.date_of_birth = form.dateOfBirth;
+      if (!isFieldLocked(profile?.gender)) updates.gender = form.gender;
+      if (!isFieldLocked(profile?.nationality)) updates.nationality = form.nationality;
+      if (!isFieldLocked(profile?.phone)) updates.phone = form.phone;
+      if (!isFieldLocked(profile?.mailing_address) && !isFieldLocked(profile?.address)) updates.mailing_address = form.mailingAddress;
+      if (!isFieldLocked(profile?.city)) updates.city = form.city;
+      if (!isFieldLocked(profile?.state_province)) updates.state_province = form.stateProvince;
+      if (!isFieldLocked(profile?.postal_code)) updates.postal_code = form.postalCode;
+      if (!isFieldLocked(profile?.country)) updates.country = form.country;
+      if (!isFieldLocked(profile?.occupation)) updates.occupation = form.occupation;
+      if (!isFieldLocked(profile?.employer_name)) updates.employer_name = form.employerName;
+      if (!isFieldLocked(profile?.annual_income_range)) updates.annual_income_range = form.annualIncomeRange;
+      if (!isFieldLocked(profile?.source_of_funds)) updates.source_of_funds = form.sourceOfFunds;
+      if (!isFieldLocked(profile?.gov_id_type)) updates.gov_id_type = form.govIdType;
+      if (!isFieldLocked(profile?.gov_id_number)) updates.gov_id_number = form.govIdNumber;
+      if (!isFieldLocked(profile?.preferred_language)) updates.preferred_language = form.preferredLanguage;
+      if (!isFieldLocked(profile?.preferred_currency)) updates.preferred_currency = form.preferredCurrency;
+
+      if (Object.keys(updates).length > 0) {
+        const { error } = await (supabase as any).from("profiles").update(updates).eq("user_id", user.id);
+        if (error) throw error;
+      }
       
-      if (error) throw error;
       toast({ title: "Profile Updated", description: "Your information has been saved successfully." });
       refreshProfile();
     } catch (err: any) {
@@ -333,7 +337,7 @@ const ProfilePage = () => {
                   </div>
                   <div className="space-y-1">
                     <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Gender</Label>
-                    <select disabled={isLocked} className={`flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none ${isLocked ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground cursor-not-allowed" : "focus:ring-1 focus:ring-primary"}`} value={form.gender} onChange={(e) => setForm({...form, gender: e.target.value})}>
+                    <select disabled={isFieldLocked(profile?.gender)} className={`flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none ${isFieldLocked(profile?.gender) ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground cursor-not-allowed" : "focus:ring-1 focus:ring-primary"}`} value={form.gender} onChange={(e) => setForm({...form, gender: e.target.value})}>
                       <option value="">Select Gender</option>
                       <option value="Male">Male</option>
                       <option value="Female">Female</option>
@@ -351,7 +355,7 @@ const ProfilePage = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Government ID Type</Label>
-                      <select disabled={isLocked} className={`flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none ${isLocked ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground cursor-not-allowed" : "focus:ring-1 focus:ring-primary"}`} value={form.govIdType} onChange={(e) => setForm({...form, govIdType: e.target.value})}>
+                      <select disabled={isFieldLocked(profile?.gov_id_type)} className={`flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none ${isFieldLocked(profile?.gov_id_type) ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground cursor-not-allowed" : "focus:ring-1 focus:ring-primary"}`} value={form.govIdType} onChange={(e) => setForm({...form, govIdType: e.target.value})}>
                         <option value="">Select ID Type...</option>
                         <option value="Passport">Passport</option>
                         <option value="Driver's License">Driver's License</option>
@@ -415,7 +419,7 @@ const ProfilePage = () => {
                     </div>
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Annual Income Range</Label>
-                      <select disabled={isLocked} className={`flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none ${isLocked ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground cursor-not-allowed" : "focus:ring-1 focus:ring-primary"}`} value={form.annualIncomeRange} onChange={(e) => setForm({...form, annualIncomeRange: e.target.value})}>
+                      <select disabled={isFieldLocked(profile?.annual_income_range)} className={`flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none ${isFieldLocked(profile?.annual_income_range) ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground cursor-not-allowed" : "focus:ring-1 focus:ring-primary"}`} value={form.annualIncomeRange} onChange={(e) => setForm({...form, annualIncomeRange: e.target.value})}>
                         <option value="">Select Range</option>
                         <option value="$0 - $50,000">$0 - $50,000</option>
                         <option value="$50,001 - $100,000">$50,001 - $100,000</option>
@@ -425,7 +429,7 @@ const ProfilePage = () => {
                     </div>
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Source of Funds</Label>
-                      <select disabled={isLocked} className={`flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none ${isLocked ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground cursor-not-allowed" : "focus:ring-1 focus:ring-primary"}`} value={form.sourceOfFunds} onChange={(e) => setForm({...form, sourceOfFunds: e.target.value})}>
+                      <select disabled={isFieldLocked(profile?.source_of_funds)} className={`flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none ${isFieldLocked(profile?.source_of_funds) ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground cursor-not-allowed" : "focus:ring-1 focus:ring-primary"}`} value={form.sourceOfFunds} onChange={(e) => setForm({...form, sourceOfFunds: e.target.value})}>
                         <option value="">Select Source</option>
                         <option value="Salary">Salary</option>
                         <option value="Business">Business</option>
@@ -443,7 +447,7 @@ const ProfilePage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div className="space-y-1">
                     <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Preferred Language</Label>
-                    <select disabled={isLocked} className={`flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none ${isLocked ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground cursor-not-allowed" : "focus:ring-1 focus:ring-primary"}`} value={form.preferredLanguage} onChange={(e) => setForm({...form, preferredLanguage: e.target.value})}>
+                    <select disabled={isFieldLocked(profile?.preferred_language)} className={`flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none ${isFieldLocked(profile?.preferred_language) ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground cursor-not-allowed" : "focus:ring-1 focus:ring-primary"}`} value={form.preferredLanguage} onChange={(e) => setForm({...form, preferredLanguage: e.target.value})}>
                       <option value="en">English (US)</option>
                       <option value="fr">French</option>
                       <option value="es">Spanish</option>
@@ -452,7 +456,7 @@ const ProfilePage = () => {
                   </div>
                   <div className="space-y-1">
                     <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Preferred Currency</Label>
-                    <select disabled={isLocked} className={`flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none ${isLocked ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground cursor-not-allowed" : "focus:ring-1 focus:ring-primary"}`} value={form.preferredCurrency} onChange={(e) => setForm({...form, preferredCurrency: e.target.value})}>
+                    <select disabled={isFieldLocked(profile?.preferred_currency)} className={`flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none ${isFieldLocked(profile?.preferred_currency) ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground cursor-not-allowed" : "focus:ring-1 focus:ring-primary"}`} value={form.preferredCurrency} onChange={(e) => setForm({...form, preferredCurrency: e.target.value})}>
                       <option value="USD">USD - US Dollar</option>
                       <option value="EUR">EUR - Euro</option>
                       <option value="GBP">GBP - British Pound</option>
@@ -484,14 +488,12 @@ const ProfilePage = () => {
               </div>
           </Tabs>
             
-            {!isLocked && (
-              <div className="flex justify-end mt-6">
+            <div className="flex justify-end mt-6">
                 <Button type="submit" disabled={loading} className="h-9 px-6 text-xs font-bold rounded-xl shadow-sm">
                   {loading ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Save className="w-3.5 h-3.5 mr-1.5" />}
                   Save Changes
                 </Button>
               </div>
-            )}
             </form>
         </div>
       </StaggerItem>
