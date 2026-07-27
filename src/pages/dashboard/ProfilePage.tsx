@@ -325,15 +325,15 @@ const ProfilePage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div className="space-y-1">
                     <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">First Name</Label>
-                    <Input readOnly={isLocked} className={`h-8 text-xs rounded-lg ${isLocked ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground focus-visible:ring-0 cursor-not-allowed" : ""}`} value={form.firstName} onChange={(e) => setForm({...form, firstName: e.target.value})} />
+                    <Input readOnly={false} className={`h-8 text-xs rounded-lg ${false ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground focus-visible:ring-0 cursor-not-allowed" : ""}`} value={form.firstName} onChange={(e) => setForm({...form, firstName: e.target.value})} />
                   </div>
                   <div className="space-y-1">
                     <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Last Name</Label>
-                    <Input readOnly={isLocked} className={`h-8 text-xs rounded-lg ${isLocked ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground focus-visible:ring-0 cursor-not-allowed" : ""}`} value={form.lastName} onChange={(e) => setForm({...form, lastName: e.target.value})} />
+                    <Input readOnly={false} className={`h-8 text-xs rounded-lg ${false ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground focus-visible:ring-0 cursor-not-allowed" : ""}`} value={form.lastName} onChange={(e) => setForm({...form, lastName: e.target.value})} />
                   </div>
                   <div className="space-y-1">
                     <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Date of Birth</Label>
-                    <Input readOnly={isLocked} className={`h-8 text-xs rounded-lg ${isLocked ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground focus-visible:ring-0 cursor-not-allowed" : ""}`} value={form.dateOfBirth} onChange={(e) => setForm({...form, dateOfBirth: e.target.value})} type="date" />
+                    <Input readOnly={false} className={`h-8 text-xs rounded-lg ${false ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground focus-visible:ring-0 cursor-not-allowed" : ""}`} value={form.dateOfBirth} onChange={(e) => setForm({...form, dateOfBirth: e.target.value})} type="date" />
                   </div>
                   <div className="space-y-1">
                     <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Gender</Label>
@@ -346,7 +346,7 @@ const ProfilePage = () => {
                   </div>
                   <div className="space-y-1 md:col-span-2">
                     <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Nationality</Label>
-                    <Input readOnly={isLocked} className={`h-8 text-xs rounded-lg ${isLocked ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground focus-visible:ring-0 cursor-not-allowed" : ""}`} value={form.nationality} onChange={(e) => setForm({...form, nationality: e.target.value})} placeholder="e.g. American, British, Canadian" />
+                    <Input readOnly={false} className={`h-8 text-xs rounded-lg ${false ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground focus-visible:ring-0 cursor-not-allowed" : ""}`} value={form.nationality} onChange={(e) => setForm({...form, nationality: e.target.value})} placeholder="e.g. American, British, Canadian" />
                   </div>
                 </div>
 
@@ -365,7 +365,7 @@ const ProfilePage = () => {
                     </div>
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Government ID Number</Label>
-                      <Input readOnly={isLocked} className={`h-8 text-xs rounded-lg ${isLocked ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground focus-visible:ring-0 cursor-not-allowed" : ""}`} value={form.govIdNumber} onChange={(e) => setForm({...form, govIdNumber: e.target.value})} placeholder="e.g. A12345678 or License No." />
+                      <Input readOnly={false} className={`h-8 text-xs rounded-lg ${false ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground focus-visible:ring-0 cursor-not-allowed" : ""}`} value={form.govIdNumber} onChange={(e) => setForm({...form, govIdNumber: e.target.value})} placeholder="e.g. A12345678 or License No." />
                     </div>
                   </div>
                 </div>
@@ -381,27 +381,27 @@ const ProfilePage = () => {
                     </div>
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Phone Number</Label>
-                      <Input readOnly={isLocked} className={`h-8 text-xs rounded-lg ${isLocked ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground focus-visible:ring-0 cursor-not-allowed" : ""}`} value={form.phone} onChange={(e) => setForm({...form, phone: e.target.value})} />
+                      <Input readOnly={false} className={`h-8 text-xs rounded-lg ${false ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground focus-visible:ring-0 cursor-not-allowed" : ""}`} value={form.phone} onChange={(e) => setForm({...form, phone: e.target.value})} />
                     </div>
                     <div className="space-y-1 md:col-span-2">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Mailing Address</Label>
-                      <Input readOnly={isLocked} className={`h-8 text-xs rounded-lg ${isLocked ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground focus-visible:ring-0 cursor-not-allowed" : ""}`} value={form.mailingAddress} onChange={(e) => setForm({...form, mailingAddress: e.target.value})} />
+                      <Input readOnly={false} className={`h-8 text-xs rounded-lg ${false ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground focus-visible:ring-0 cursor-not-allowed" : ""}`} value={form.mailingAddress} onChange={(e) => setForm({...form, mailingAddress: e.target.value})} />
                     </div>
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">City</Label>
-                      <Input readOnly={isLocked} className={`h-8 text-xs rounded-lg ${isLocked ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground focus-visible:ring-0 cursor-not-allowed" : ""}`} value={form.city} onChange={(e) => setForm({...form, city: e.target.value})} />
+                      <Input readOnly={false} className={`h-8 text-xs rounded-lg ${false ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground focus-visible:ring-0 cursor-not-allowed" : ""}`} value={form.city} onChange={(e) => setForm({...form, city: e.target.value})} />
                     </div>
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">State / Province</Label>
-                      <Input readOnly={isLocked} className={`h-8 text-xs rounded-lg ${isLocked ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground focus-visible:ring-0 cursor-not-allowed" : ""}`} value={form.stateProvince} onChange={(e) => setForm({...form, stateProvince: e.target.value})} />
+                      <Input readOnly={false} className={`h-8 text-xs rounded-lg ${false ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground focus-visible:ring-0 cursor-not-allowed" : ""}`} value={form.stateProvince} onChange={(e) => setForm({...form, stateProvince: e.target.value})} />
                     </div>
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Postal / ZIP Code</Label>
-                      <Input readOnly={isLocked} className={`h-8 text-xs rounded-lg ${isLocked ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground focus-visible:ring-0 cursor-not-allowed" : ""}`} value={form.postalCode} onChange={(e) => setForm({...form, postalCode: e.target.value})} />
+                      <Input readOnly={false} className={`h-8 text-xs rounded-lg ${false ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground focus-visible:ring-0 cursor-not-allowed" : ""}`} value={form.postalCode} onChange={(e) => setForm({...form, postalCode: e.target.value})} />
                     </div>
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Country</Label>
-                      <Input readOnly={isLocked} className={`h-8 text-xs rounded-lg ${isLocked ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground focus-visible:ring-0 cursor-not-allowed" : ""}`} value={form.country} onChange={(e) => setForm({...form, country: e.target.value})} />
+                      <Input readOnly={false} className={`h-8 text-xs rounded-lg ${false ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground focus-visible:ring-0 cursor-not-allowed" : ""}`} value={form.country} onChange={(e) => setForm({...form, country: e.target.value})} />
                     </div>
                   </div>
                 </div>
@@ -411,11 +411,11 @@ const ProfilePage = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Occupation</Label>
-                      <Input readOnly={isLocked} className={`h-8 text-xs rounded-lg ${isLocked ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground focus-visible:ring-0 cursor-not-allowed" : ""}`} value={form.occupation} onChange={(e) => setForm({...form, occupation: e.target.value})} />
+                      <Input readOnly={false} className={`h-8 text-xs rounded-lg ${false ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground focus-visible:ring-0 cursor-not-allowed" : ""}`} value={form.occupation} onChange={(e) => setForm({...form, occupation: e.target.value})} />
                     </div>
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Employer or Business Name</Label>
-                      <Input readOnly={isLocked} className={`h-8 text-xs rounded-lg ${isLocked ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground focus-visible:ring-0 cursor-not-allowed" : ""}`} value={form.employerName} onChange={(e) => setForm({...form, employerName: e.target.value})} />
+                      <Input readOnly={false} className={`h-8 text-xs rounded-lg ${false ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground focus-visible:ring-0 cursor-not-allowed" : ""}`} value={form.employerName} onChange={(e) => setForm({...form, employerName: e.target.value})} />
                     </div>
                     <div className="space-y-1">
                       <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Annual Income Range</Label>
