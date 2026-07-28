@@ -3,8 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { SlideUp } from "@/components/public/Motion";
 import { Search, ArrowDownLeft, ArrowUpRight, Filter, Download, Share2 } from "lucide-react";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
+import { generateDocument, ContentBlock } from "@/lib/pdf/documentEngine";
+import { generateReferenceNumber, generateVerificationCode } from "@/lib/pdf/referenceGenerator";
+import { saveDocumentRecord } from "@/lib/pdf/documentService";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,7 +26,7 @@ interface Transaction {
 }
 
 export default function TransactionsPage() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -51,54 +52,89 @@ export default function TransactionsPage() {
     setLoading(false);
   };
 
-  const handleDownloadReceipt = () => {
-    if (!selectedTx) return;
+  const handleDownloadReceipt = async () => {
+    if (!selectedTx || !user) return;
 
-    const doc = new jsPDF();
-    const dateStr = new Date(selectedTx.created_at).toLocaleString();
-    
-    // Header
-    doc.setFontSize(22);
-    doc.setTextColor(33, 37, 41);
-    doc.text("TrustBank Transaction Receipt", 14, 22);
-    
-    doc.setFontSize(10);
-    doc.setTextColor(100, 100, 100);
-    doc.text(`Reference ID: ${selectedTx.reference}`, 14, 30);
-    doc.text(`Date & Time: ${dateStr}`, 14, 35);
-    
-    // Details
-    const tableData = [
-      ["Transaction Type", selectedTx.type.toUpperCase().replace('_', ' ')],
-      ["Status", selectedTx.status.toUpperCase()],
-      ["Amount", `${selectedTx.type === 'credit' || selectedTx.type === 'deposit' ? '+' : '-'}$${Math.abs(selectedTx.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}`],
-      ["Balance After", selectedTx.balance_after ? `$${selectedTx.balance_after.toLocaleString(undefined, { minimumFractionDigits: 2 })}` : 'N/A'],
-      ["Description", selectedTx.description || selectedTx.type.toUpperCase()],
+    const isCredit = selectedTx.type === 'credit' || selectedTx.type === 'deposit';
+    const txTypeLabel = selectedTx.type.toUpperCase().replace(/_/g, ' ');
+    const amountStr = `${isCredit ? '+' : '-'}$${Math.abs(selectedTx.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+    const docType = selectedTx.type.includes('transfer') ? 'transfer_receipt' : 
+                    selectedTx.type === 'deposit' ? 'deposit_receipt' :
+                    selectedTx.type === 'withdrawal' ? 'withdrawal_receipt' : 'payment_receipt';
+
+    const refNum = generateReferenceNumber(docType);
+    const verCode = generateVerificationCode();
+
+    const contentRows: ContentBlock[] = [
+      {
+        type: "status",
+        label: "Transaction Status",
+        value: selectedTx.status,
+        color: selectedTx.status === 'completed' ? 'green' : selectedTx.status === 'failed' ? 'red' : 'amber'
+      },
+      { type: "spacer", height: 4 },
+      {
+        type: "rows",
+        data: [
+          { label: "Transaction Type", value: txTypeLabel, bold: true },
+          { label: "Amount", value: amountStr, bold: true, highlight: true },
+          { label: "Balance After", value: selectedTx.balance_after ? `$${selectedTx.balance_after.toLocaleString(undefined, { minimumFractionDigits: 2 })}` : 'N/A' },
+          { label: "Description", value: selectedTx.description || txTypeLabel },
+          { label: "Original Reference", value: selectedTx.reference || '—' },
+          { label: "Date & Time", value: new Date(selectedTx.created_at).toLocaleString() },
+        ]
+      },
     ];
 
-    if (selectedTx.recipient_name) tableData.push(["Recipient Name", selectedTx.recipient_name]);
-    if (selectedTx.recipient_bank) tableData.push(["Recipient Bank", selectedTx.recipient_bank]);
-    if (selectedTx.recipient_account) tableData.push(["Recipient Account", selectedTx.recipient_account]);
+    // Add recipient info if present
+    if (selectedTx.recipient_name || selectedTx.recipient_bank || selectedTx.recipient_account) {
+      contentRows.push({ type: "divider" });
+      contentRows.push({ type: "heading", text: "Beneficiary Details" });
+      const recipientRows = [];
+      if (selectedTx.recipient_name) recipientRows.push({ label: "Recipient Name", value: selectedTx.recipient_name });
+      if (selectedTx.recipient_bank) recipientRows.push({ label: "Recipient Bank", value: selectedTx.recipient_bank });
+      if (selectedTx.recipient_account) recipientRows.push({ label: "Recipient Account", value: selectedTx.recipient_account });
+      contentRows.push({ type: "rows", data: recipientRows });
+    }
 
-    autoTable(doc, {
-      startY: 45,
-      head: [["Detail", "Information"]],
-      body: tableData,
-      theme: 'grid',
-      headStyles: { fillColor: [41, 128, 185], textColor: [255, 255, 255] },
-      styles: { fontSize: 11, cellPadding: 6 },
-      columnStyles: {
-        0: { fontStyle: 'bold', cellWidth: 60 }
-      }
+    // Generate PDF
+    const pdf = generateDocument({
+      config: {
+        title: `${txTypeLabel} Receipt`,
+        documentType: docType,
+        category: 'banking',
+        referenceNumber: refNum,
+        verificationCode: verCode,
+        date: new Date(selectedTx.created_at),
+      },
+      customer: {
+        name: profile?.display_name || profile?.first_name || 'Valued Customer',
+        accountNumber: profile?.account_number || '',
+        email: profile?.email || '',
+        phone: profile?.phone || '',
+      },
+      content: contentRows,
     });
 
-    // Footer
-    const finalY = (doc as any).lastAutoTable.finalY || 100;
-    doc.setFontSize(10);
-    doc.setTextColor(150, 150, 150);
-    doc.text("Thank you for banking with TrustBank.", 14, finalY + 20);
+    pdf.save(`TrustBank_Receipt_${selectedTx.reference || refNum}.pdf`);
 
-    doc.save(`TrustBank_Receipt_${selectedTx.reference}.pdf`);
+    // Save document record to database
+    await saveDocumentRecord({
+      userId: user.id,
+      documentType: docType,
+      documentCategory: 'banking',
+      referenceNumber: refNum,
+      verificationCode: verCode,
+      title: `${txTypeLabel} Receipt`,
+      entityType: 'transactions',
+      entityId: selectedTx.id,
+      metadata: {
+        amount: selectedTx.amount,
+        type: selectedTx.type,
+        status: selectedTx.status,
+        original_reference: selectedTx.reference,
+      },
+    });
   };
 
   const handleShareReceipt = async () => {

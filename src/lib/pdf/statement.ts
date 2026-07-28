@@ -1,14 +1,19 @@
-import { jsPDF } from "jspdf";
-import autoTable from "jspdf-autotable";
+/**
+ * TrustBank Account Statement PDF Generator
+ * Refactored to use the unified corporate document engine.
+ */
 
-interface StatementAccount {
+import { generateDocument, ContentBlock } from "./documentEngine";
+import { generateReferenceNumber, generateVerificationCode } from "./referenceGenerator";
+
+export interface StatementAccount {
   account_number: string;
   account_type: string;
   balance: number;
   currency: string;
 }
 
-interface StatementTransaction {
+export interface StatementTransaction {
   created_at: string;
   description: string | null;
   reference: string | null;
@@ -16,122 +21,143 @@ interface StatementTransaction {
   type: string;
 }
 
+export interface StatementCustomer {
+  name: string;
+  email?: string;
+  phone?: string;
+  accountNumber?: string;
+}
+
 export function generateStatementPDF(
-  customerName: string,
+  customer: StatementCustomer,
   account: StatementAccount,
   transactions: StatementTransaction[],
   periodName: string
-): jsPDF {
-  const doc = new jsPDF();
-  
-  // Crimson Header Color Bar
-  doc.setFillColor(150, 20, 40); // HSL Primary: Crimson Red
-  doc.rect(0, 0, 210, 15, "F");
+) {
+  const refNum = generateReferenceNumber("account_statement");
+  const verCode = generateVerificationCode();
 
-  // Title
-  doc.setFont("Helvetica", "bold");
-  doc.setFontSize(22);
-  doc.setTextColor(150, 20, 40);
-  doc.text("TRUSTBANK", 14, 32);
+  const isCredit = (t: StatementTransaction) =>
+    t.type === "credit" || t.type === "deposit" || t.type === "loan_disbursement";
 
-  doc.setFontSize(8);
-  doc.setTextColor(120, 120, 120);
-  doc.text("MEMBER FDIC · EQUAL HOUSING LENDER · MEMBER SIPC", 14, 37);
+  const startBalance =
+    transactions.length > 0
+      ? account.balance -
+        transactions.reduce(
+          (sum, tx) => sum + (isCredit(tx) ? tx.amount : -tx.amount),
+          0
+        )
+      : account.balance;
 
-  // Bank Info (Right aligned)
-  doc.setFont("Helvetica", "normal");
-  doc.setFontSize(9);
-  doc.setTextColor(80, 80, 80);
-  doc.text("TrustBank Premium Banking", 140, 28);
-  doc.text("350 Fifth Avenue, Suite 4500, New York, NY 10118", 140, 33);
-  doc.text("Email: info@trustbank.com", 140, 38);
-  doc.text("Phone: +1 (212) 555-0180", 140, 43);
+  const totalCredits = transactions
+    .filter(isCredit)
+    .reduce((sum, tx) => sum + tx.amount, 0);
 
-  doc.setDrawColor(200, 200, 200);
-  doc.line(14, 48, 196, 48);
+  const totalDebits = transactions
+    .filter((tx) => !isCredit(tx))
+    .reduce((sum, tx) => sum + tx.amount, 0);
 
-  // Statement Header Info
-  doc.setFont("Helvetica", "bold");
-  doc.setFontSize(14);
-  doc.setTextColor(40, 40, 40);
-  doc.text("Official Account Statement", 14, 58);
+  const fmt = (n: number) =>
+    `${account.currency || "$"}${Number(n).toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+    })}`;
 
-  doc.setFont("Helvetica", "normal");
-  doc.setFontSize(9);
-  doc.text(`Account Holder: ${customerName}`, 14, 65);
-  doc.text(`Account Number: ****${account.account_number.slice(-4)}`, 14, 70);
-  doc.text(`Account Type: ${account.account_type.toUpperCase()}`, 14, 75);
-  doc.text(`Statement Period: ${periodName}`, 14, 80);
+  const accountTypeName =
+    {
+      checking: "Private Client Checking",
+      savings: "High-Yield Portfolio Reserve",
+      investment: "Sovereign Wealth Managed Portfolio",
+      credit: "Signature Elite Credit Facility",
+      loan: "Institutional Credit Facility",
+    }[account.account_type.toLowerCase()] ||
+    `${account.account_type.charAt(0).toUpperCase() + account.account_type.slice(1)} Account`;
 
-  // Balances summary card
-  doc.setFillColor(245, 245, 247);
-  doc.rect(130, 53, 66, 32, "F");
-  doc.setDrawColor(220, 220, 225);
-  doc.rect(130, 53, 66, 32, "D");
-
-  doc.setFont("Helvetica", "bold");
-  doc.setFontSize(8);
-  doc.setTextColor(100, 100, 100);
-  doc.text("STATEMENT SUMMARY", 135, 60);
-
-  doc.setFont("Helvetica", "normal");
-  doc.setFontSize(9);
-  doc.text("Starting Balance:", 135, 68);
-  doc.text("Ending Balance:", 135, 78);
-
-  const startBalance = transactions.length > 0 ? account.balance - transactions.reduce((sum, tx) => sum + (tx.type === "credit" ? tx.amount : -tx.amount), 0) : account.balance;
-  
-  doc.text(`$${Number(startBalance).toLocaleString("en-US", { minimumFractionDigits: 2 })}`, 190, 68, { align: "right" });
-  
-  doc.setFont("Helvetica", "bold");
-  doc.text(`$${Number(account.balance).toLocaleString("en-US", { minimumFractionDigits: 2 })}`, 190, 78, { align: "right" });
-
-  // Generate transaction rows
-  const tableData = transactions.map((t) => {
-    const isCredit = t.type === "credit" || t.type === "deposit" || t.type === "loan_disbursement";
+  // Transaction table rows
+  const tableRows = transactions.map((t) => {
+    const credit = isCredit(t);
     const dateStr = new Date(t.created_at).toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
       year: "numeric",
     });
+    const amountStr = credit
+      ? `+${fmt(t.amount)}`
+      : `-${fmt(t.amount)}`;
 
     return [
       dateStr,
-      t.description || t.type.replace("_", " ").toUpperCase(),
+      t.description || t.type.replace(/_/g, " ").toUpperCase(),
       t.reference || "—",
-      isCredit
-        ? `+$${Number(t.amount).toLocaleString("en-US", { minimumFractionDigits: 2 })}`
-        : `-$${Number(t.amount).toLocaleString("en-US", { minimumFractionDigits: 2 })}`,
+      credit ? amountStr : "",
+      !credit ? amountStr : "",
     ];
   });
 
-  // Render Table
-  autoTable(doc, {
-    startY: 90,
-    head: [["Date", "Description", "Reference Number", "Amount"]],
-    body: tableData,
-    theme: "striped",
-    headStyles: { fillColor: [150, 20, 40] },
-    styles: { fontSize: 8.5 },
-    columnStyles: {
-      3: { halign: "right", fontStyle: "bold" },
+  const content: ContentBlock[] = [
+    {
+      type: "rows",
+      data: [
+        { label: "Account Type", value: accountTypeName, bold: true },
+        {
+          label: "Account Number",
+          value: `****${account.account_number.slice(-4)}`,
+        },
+        { label: "Statement Period", value: periodName },
+        { label: "Currency", value: account.currency || "USD" },
+      ],
     },
+    { type: "divider" },
+    { type: "heading", text: "Period Summary" },
+    {
+      type: "rows",
+      data: [
+        { label: "Opening Balance", value: fmt(startBalance) },
+        { label: "Total Credits", value: fmt(totalCredits) },
+        { label: "Total Debits", value: fmt(totalDebits) },
+        {
+          label: "Closing Balance",
+          value: fmt(account.balance),
+          bold: true,
+          highlight: true,
+        },
+        { label: "Total Transactions", value: String(transactions.length) },
+      ],
+    },
+    { type: "divider" },
+    { type: "heading", text: "Transaction History" },
+    transactions.length === 0
+      ? {
+          type: "paragraph",
+          data: {
+            text: "No transactions were recorded during this statement period.",
+          },
+        }
+      : {
+          type: "table",
+          data: {
+            headers: ["Date", "Description", "Reference", "Credit", "Debit"],
+            rows: tableRows,
+          },
+        },
+  ];
+
+  return generateDocument({
+    config: {
+      title: "Official Account Statement",
+      documentType: "account_statement",
+      category: "accounts",
+      referenceNumber: refNum,
+      verificationCode: verCode,
+      date: new Date(),
+    },
+    customer: {
+      name: customer.name,
+      accountNumber: account.account_number,
+      email: customer.email,
+      phone: customer.phone,
+    },
+    content,
+    additionalDisclaimer:
+      "This statement is provided for your records. Please review all transactions and report any discrepancies within 30 days of the statement date.",
   });
-
-  // Footer (on the last page)
-  const totalPages = (doc as any).internal.getNumberOfPages();
-  for (let i = 1; i <= totalPages; i++) {
-    doc.setPage(i);
-    doc.setFont("Helvetica", "normal");
-    doc.setFontSize(7.5);
-    doc.setTextColor(150, 150, 150);
-    doc.text(
-      "TrustBank Premium Banking is a member of the Federal Deposit Insurance Corporation (FDIC). Deposits are insured up to applicable limits.",
-      14,
-      287
-    );
-    doc.text(`Page ${i} of ${totalPages}`, 196, 287, { align: "right" });
-  }
-
-  return doc;
 }
