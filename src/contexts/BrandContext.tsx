@@ -285,6 +285,7 @@ export const BrandProvider = ({ children }: { children: React.ReactNode }) => {
         --warning: ${hexToHslString(c.warning || "#F59E0B")};
         --error: ${hexToHslString(c.error || "#EF4444")};
         --info: ${hexToHslString(c.info || "#3B82F6")};
+        --ring: ${hexToHslString(c.primary)};
       `;
 
       let css = `

@@ -37,7 +37,7 @@ const LoginPage = () => {
       return;
     }
     // Check if admin
-    const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", data.user.id);
+    const { data: roles } = await (supabase as any).from("user_roles").select("role").eq("user_id", data.user.id);
     const isAdmin = roles?.some((r: any) => ["admin", "super_admin", "support_admin"].includes(r.role));
     navigate(isAdmin ? "/admin" : "/dashboard");
   };
