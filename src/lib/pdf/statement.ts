@@ -5,6 +5,7 @@
 
 import { generateDocument, ContentBlock } from "./documentEngine";
 import { generateReferenceNumber, generateVerificationCode } from "./referenceGenerator";
+import type { PDFBrandColors } from "./brandColorForPDF";
 
 export interface StatementAccount {
   account_number: string;
@@ -32,7 +33,8 @@ export function generateStatementPDF(
   customer: StatementCustomer,
   account: StatementAccount,
   transactions: StatementTransaction[],
-  periodName: string
+  periodName: string,
+  brandColors?: PDFBrandColors
 ) {
   const refNum = generateReferenceNumber("account_statement");
   const verCode = generateVerificationCode();
@@ -157,6 +159,7 @@ export function generateStatementPDF(
       phone: customer.phone,
     },
     content,
+    brandColors,
     additionalDisclaimer:
       "This statement is provided for your records. Please review all transactions and report any discrepancies within 30 days of the statement date.",
   });

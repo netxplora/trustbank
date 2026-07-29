@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ShieldCheck, Upload, FileText, AlertTriangle, CheckCircle, Clock, X, ChevronRight, Lock } from "lucide-react";
+import { ShieldCheck, Upload, FileText, AlertTriangle, CheckCircle, Clock, X, ChevronRight, Lock, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,6 +8,9 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { StaggerContainer, StaggerItem, FadeIn, SlideUp } from "@/components/public/Motion";
+import { generateKYCReceiptPDF } from "@/lib/pdf/domainDocuments";
+import { saveDocumentRecord } from "@/lib/pdf/documentService";
+import { fetchBrandPDFColors } from "@/lib/pdf/brandColorForPDF";
 import { sanitizeInput, EnterpriseValidation } from "@/utils/security";
 
 const KYCPage = () => {
@@ -218,6 +221,26 @@ const KYCPage = () => {
                 <p className="text-[9px] text-warning/80 font-medium">Please wait for admin approval</p>
               </div>
             </div>
+          )}
+          {kycTier >= 1 && !isPending && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 text-[10px] font-bold gap-1.5 rounded-lg shrink-0"
+              onClick={async () => {
+                if (!user || !profile) return;
+                const brandColors = await fetchBrandPDFColors();
+                const { pdf, referenceNumber, verificationCode } = generateKYCReceiptPDF(
+                  { name: profile.display_name || profile.first_name || "Valued Customer", accountNumber: profile.account_number || "", email: profile.email || "", phone: profile.phone || "" },
+                  { id: user.id, status: kycStatus, tier: kycTier, created_at: new Date().toISOString() },
+                  brandColors
+                );
+                pdf.save(`TrustBank_KYC_Verification.pdf`);
+                await saveDocumentRecord({ userId: user.id, documentType: "kyc_approval", documentCategory: "kyc", referenceNumber, verificationCode, title: `KYC Tier ${kycTier} Approval Letter`, metadata: { tier: kycTier, status: kycStatus } });
+              }}
+            >
+              <Download className="h-3.5 w-3.5" /> Download Letter
+            </Button>
           )}
         </div>
       </StaggerItem>

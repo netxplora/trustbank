@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { generateStatementPDF } from "@/lib/pdf/statement";
+import { fetchBrandPDFColors } from "@/lib/pdf/brandColorForPDF";
 import { StaggerContainer, StaggerItem, FadeIn, SlideUp } from "@/components/public/Motion";
 import { TableSkeleton } from "@/components/skeletons/DashboardSkeleton";
 import jsPDF from "jspdf";
@@ -145,9 +146,10 @@ export default function StatementsPage() {
 
       // 2. Generate PDF using jsPDF
       const customerName = profile?.display_name || `${profile?.first_name || ""} ${profile?.last_name || ""}`.trim() || "Valued Customer";
+      const brandColors = await fetchBrandPDFColors();
       const doc = generateStatementPDF(
         { name: customerName, email: profile?.email || "", phone: profile?.phone || "", accountNumber: account.account_number },
-        account, txList as any[], month.label
+        account, txList as any[], month.label, brandColors
       );
 
       // 3. Trigger immediate local browser download

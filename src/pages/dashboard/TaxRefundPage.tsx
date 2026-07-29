@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FileSpreadsheet, Plus, Upload, CheckCircle2, Clock, AlertCircle, FileText, ArrowRight } from "lucide-react";
+import { FileSpreadsheet, Plus, Upload, CheckCircle2, Clock, AlertCircle, FileText, ArrowRight, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +8,9 @@ import { StaggerContainer, StaggerItem, FadeIn, SlideUp } from "@/components/pub
 import { getUserTaxRefundApplications, TaxRefundApplication } from "@/services/taxRefundService";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { generateTaxRefundReceiptPDF } from "@/lib/pdf/domainDocuments";
+import { saveDocumentRecord } from "@/lib/pdf/documentService";
+import { fetchBrandPDFColors } from "@/lib/pdf/brandColorForPDF";
 
 export default function TaxRefundPage() {
   const { user, profile } = useAuth();
@@ -167,8 +170,25 @@ export default function TaxRefundPage() {
                           ${(app.requested_amount || app.estimated_refund_amount || 0).toLocaleString()}
                         </p>
                       </div>
-                      <Button variant="ghost" size="sm" className="hidden sm:flex gap-2 shrink-0">
-                        View Details <ArrowRight className="h-4 w-4" />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-7 text-[10px] font-bold gap-1.5 rounded-lg shrink-0"
+                        onClick={async () => {
+                          if (!user || !profile) return;
+                          const brandColors = await fetchBrandPDFColors();
+                          const isApproved = ["approved","completed","disbursed"].includes(app.status);
+                          const { pdf, referenceNumber, verificationCode } = generateTaxRefundReceiptPDF(
+                            { name: profile.display_name || profile.first_name || "Valued Customer", accountNumber: profile.account_number || "", email: profile.email || "", phone: profile.phone || "" },
+                            { id: app.id, status: app.status, tax_year: app.tax_year, filing_status: app.filing_status, estimated_refund: app.requested_amount || app.estimated_refund_amount, submitted_at: app.created_at, created_at: app.created_at || new Date().toISOString() },
+                            brandColors
+                          );
+                          const docTitle = isApproved ? "Tax Refund Approval Letter" : "Tax Refund Application Receipt";
+                          pdf.save(`TrustBank_TaxRefund_${app.application_number}.pdf`);
+                          await saveDocumentRecord({ userId: user.id, documentType: isApproved ? "tax_refund_approval" : "tax_refund_application", documentCategory: "tax", referenceNumber, verificationCode, title: docTitle, entityType: "tax_refund_applications", entityId: app.id, metadata: { status: app.status, tax_year: app.tax_year, amount: app.requested_amount || app.estimated_refund_amount } });
+                        }}
+                      >
+                        <Download className="h-3 w-3" /> Download
                       </Button>
                     </div>
                   </CardContent>

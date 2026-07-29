@@ -17,6 +17,7 @@ import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { encode } from "uqr";
 import { LOGO_BASE64 } from "./logoBase64";
+import type { PDFBrandColors } from "./brandColorForPDF";
 
 // ─── Types ───────────────────────────────────────────────────────
 
@@ -86,13 +87,18 @@ export interface DocumentOptions {
   additionalDisclaimer?: string;
   /** Optional: skip QR code */
   skipQR?: boolean;
+  /**
+   * Brand colours fetched from admin CMS configuration.
+   * When omitted the engine falls back to the built-in default palette.
+   */
+  brandColors?: PDFBrandColors;
 }
 
-// ─── Color Palette ───────────────────────────────────────────────
+// ─── Static (non-brand) Color Palette ───────────────────────────
+// primary and primaryLight are intentionally absent here —
+// they are injected at runtime from admin CMS configuration.
 
-const COLORS = {
-  primary: [130, 20, 40] as [number, number, number],       // Deep crimson
-  primaryLight: [180, 40, 60] as [number, number, number],
+const STATIC_COLORS = {
   dark: [30, 30, 35] as [number, number, number],
   text: [50, 50, 55] as [number, number, number],
   muted: [120, 120, 130] as [number, number, number],
@@ -104,6 +110,10 @@ const COLORS = {
   amber: [180, 120, 20] as [number, number, number],
   blue: [30, 100, 180] as [number, number, number],
 };
+
+/** Default fallback primary when no brand colour is provided */
+const DEFAULT_PRIMARY: [number, number, number] = [130, 20, 40];
+const DEFAULT_PRIMARY_LIGHT: [number, number, number] = [180, 40, 60];
 
 // ─── Constants ───────────────────────────────────────────────────
 
@@ -159,9 +169,17 @@ function generateQRBase64(value: string, size: number = 80): string {
 // ─── Main Generator ─────────────────────────────────────────────
 
 export function generateDocument(options: DocumentOptions): jsPDF {
-  const { config, customer, content, institution, additionalDisclaimer, skipQR } = options;
+  const { config, customer, content, institution, additionalDisclaimer, skipQR, brandColors } = options;
   const inst = { ...DEFAULT_INSTITUTION, ...institution };
   const doc = new jsPDF({ unit: "mm", format: "a4" });
+
+  // Build the runtime colour palette — brand primary comes from admin CMS,
+  // all other colours are fixed structural shades.
+  const COLORS = {
+    ...STATIC_COLORS,
+    primary: brandColors?.primary ?? DEFAULT_PRIMARY,
+    primaryLight: brandColors?.primaryLight ?? DEFAULT_PRIMARY_LIGHT,
+  };
 
   let y = MARGIN_TOP;
 

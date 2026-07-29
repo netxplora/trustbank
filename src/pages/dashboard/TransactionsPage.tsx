@@ -6,6 +6,7 @@ import { Search, ArrowDownLeft, ArrowUpRight, Filter, Download, Share2 } from "l
 import { generateDocument, ContentBlock } from "@/lib/pdf/documentEngine";
 import { generateReferenceNumber, generateVerificationCode } from "@/lib/pdf/referenceGenerator";
 import { saveDocumentRecord } from "@/lib/pdf/documentService";
+import { fetchBrandPDFColors } from "@/lib/pdf/brandColorForPDF";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -40,14 +41,14 @@ export default function TransactionsPage() {
 
   const fetchTransactions = async () => {
     setLoading(true);
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('transactions')
       .select('*')
       .eq('user_id', user!.id)
       .order('created_at', { ascending: false });
       
     if (data) {
-      setTransactions(data as Transaction[]);
+      setTransactions(data as unknown as Transaction[]);
     }
     setLoading(false);
   };
@@ -98,6 +99,7 @@ export default function TransactionsPage() {
     }
 
     // Generate PDF
+    const brandColors = await fetchBrandPDFColors();
     const pdf = generateDocument({
       config: {
         title: `${txTypeLabel} Receipt`,
@@ -114,6 +116,7 @@ export default function TransactionsPage() {
         phone: profile?.phone || '',
       },
       content: contentRows,
+      brandColors,
     });
 
     pdf.save(`TrustBank_Receipt_${selectedTx.reference || refNum}.pdf`);

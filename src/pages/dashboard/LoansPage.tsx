@@ -1,11 +1,14 @@
 import { useState, useEffect } from "react";
-import { TrendingUp, CheckCircle, Clock, AlertCircle, Lock, Calculator, FileText, ChevronRight } from "lucide-react";
+import { TrendingUp, CheckCircle, Clock, AlertCircle, Lock, Calculator, FileText, ChevronRight, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { StaggerContainer, StaggerItem, FadeIn, SlideUp } from "@/components/public/Motion";
+import { generateLoanSummaryPDF } from "@/lib/pdf/domainDocuments";
+import { saveDocumentRecord } from "@/lib/pdf/documentService";
+import { fetchBrandPDFColors } from "@/lib/pdf/brandColorForPDF";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -80,8 +83,8 @@ const LoansPage = () => {
 
   const fetchLoans = async () => {
     if (!user) return;
-    const { data } = await supabase.from("loans").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
-    setLoans((data as Loan[]) || []);
+    const { data } = await (supabase as any).from("loans").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
+    setLoans((data as unknown as Loan[]) || []);
     setFetchLoading(false);
   };
 
@@ -105,7 +108,7 @@ const LoansPage = () => {
     const tenure = parseInt(form.tenure);
     const { monthlyPayment, totalPayment } = calculateAmortization(amount, tenure, 5.0);
 
-    const { error } = await supabase.from("loans").insert({
+    const { error } = await (supabase as any).from("loans").insert({
       user_id: user.id,
       amount,
       tenure_months: tenure,
@@ -199,6 +202,26 @@ const LoansPage = () => {
                     </div>
                   </>
                 )}
+                  <div className="flex justify-end mt-3">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 text-[10px] font-bold gap-1.5 rounded-lg"
+                      onClick={async () => {
+                        if (!user || !profile) return;
+                        const brandColors = await fetchBrandPDFColors();
+                        const { pdf, referenceNumber, verificationCode } = generateLoanSummaryPDF(
+                          { name: profile.display_name || profile.first_name || "Valued Customer", accountNumber: profile.account_number || "", email: profile.email || "", phone: profile.phone || "" },
+                          loan,
+                          brandColors
+                        );
+                        pdf.save(`TrustBank_Loan_${loan.id.slice(0, 8).toUpperCase()}.pdf`);
+                        await saveDocumentRecord({ userId: user.id, documentType: "loan_application", documentCategory: "loans", referenceNumber, verificationCode, title: "Credit Facility Summary", entityType: "loans", entityId: loan.id, metadata: { amount: loan.amount, status: loan.status, purpose: loan.purpose } });
+                      }}
+                    >
+                      <Download className="h-3 w-3" /> Download Summary
+                    </Button>
+                  </div>
               </div>
               </StaggerItem>
             );

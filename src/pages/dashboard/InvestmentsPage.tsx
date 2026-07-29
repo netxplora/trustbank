@@ -17,6 +17,7 @@ import {
   ShoppingBag,
   Building2,
   CheckCircle2,
+  Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +26,9 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { StaggerContainer, StaggerItem, FadeIn, SlideUp } from "@/components/public/Motion";
+import { generatePortfolioSummaryPDF } from "@/lib/pdf/domainDocuments";
+import { saveDocumentRecord } from "@/lib/pdf/documentService";
+import { fetchBrandPDFColors } from "@/lib/pdf/brandColorForPDF";
 
 interface InvestmentAccount {
   id: string;
@@ -736,6 +740,39 @@ export default function InvestmentsPage() {
                         </p>
                       </div>
                     </div>
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full mt-3 h-7 text-[10px] font-bold gap-1.5 rounded-lg"
+                      onClick={async () => {
+                        if (!user || !profile) return;
+                        const brandColors = await fetchBrandPDFColors();
+                        const invData = holdings.map(h => ({
+                          id: h.id,
+                          symbol: h.symbol,
+                          name: h.name,
+                          shares: h.quantity,
+                          purchase_price: h.avg_cost,
+                          current_price: livePrices[h.symbol] || h.current_price,
+                          purchase_date: new Date().toISOString(),
+                          sector: h.asset_class,
+                        }));
+                        const costBasis = holdings.reduce((sum, h) => sum + h.quantity * h.avg_cost, 0);
+                        const { pdf, referenceNumber, verificationCode } = generatePortfolioSummaryPDF(
+                          { name: profile.display_name || profile.first_name || "Valued Customer", accountNumber: profile.account_number || "", email: profile.email || "", phone: profile.phone || "" },
+                          invData,
+                          holdingsVal,
+                          costBasis,
+                          brandColors
+                        );
+                        pdf.save(`TrustBank_Portfolio_${new Date().toISOString().slice(0, 10)}.pdf`);
+                        await saveDocumentRecord({ userId: user.id, documentType: "portfolio_summary", documentCategory: "investments", referenceNumber, verificationCode, title: "Investment Portfolio Summary", metadata: { total_value: holdingsVal, holdings_count: holdings.length } });
+                      }}
+                      disabled={holdings.length === 0}
+                    >
+                      <Download className="h-3 w-3" /> Download Portfolio Report
+                    </Button>
                   </div>
                 </StaggerItem>
 

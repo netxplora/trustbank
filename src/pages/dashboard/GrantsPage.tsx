@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Award, Plus, CheckCircle2, Calendar, DollarSign, FileText, ArrowUpRight, Activity, Zap, FileSpreadsheet, Search, Filter, HelpCircle, ShieldCheck, Sparkles } from "lucide-react";
+import { Award, Plus, CheckCircle2, Calendar, DollarSign, FileText, ArrowUpRight, Activity, Zap, FileSpreadsheet, Search, Filter, HelpCircle, ShieldCheck, Sparkles, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,6 +12,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { StaggerContainer, StaggerItem, SlideUp } from "@/components/public/Motion";
 import { getGrantPrograms, getUserGrantApplications, submitGrantApplication, GrantProgram, GrantApplication } from "@/services/grantsService";
 import { supabase } from "@/integrations/supabase/client";
+import { generateGrantApplicationReceiptPDF } from "@/lib/pdf/domainDocuments";
+import { saveDocumentRecord } from "@/lib/pdf/documentService";
+import { fetchBrandPDFColors } from "@/lib/pdf/brandColorForPDF";
 
 const statusColor = (status: string) => {
   switch (status) {
@@ -424,6 +427,32 @@ export default function GrantsPage() {
                         </div>
                       </div>
                     )}
+
+                    {/* Download Receipt */}
+                    <div className="flex justify-end mt-2.5">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-7 text-[10px] font-bold gap-1.5 rounded-lg"
+                        onClick={async () => {
+                          if (!user || !profile) return;
+                          const brandColors = await fetchBrandPDFColors();
+                          const { pdf, referenceNumber, verificationCode } = generateGrantApplicationReceiptPDF(
+                            { name: profile.display_name || profile.first_name || "Valued Customer", accountNumber: profile.account_number || "", email: profile.email || "", phone: profile.phone || "" },
+                            { id: app.id || app.application_number, status: app.status, requested_amount: app.requested_amount, purpose: app.proposal_summary, business_name: app.business_name, business_type: app.business_type, created_at: app.created_at || new Date().toISOString(), program: app.grant_program ? { name: app.grant_program.title } : undefined },
+                            brandColors
+                          );
+                          const isApproved = ["approved","awarded"].includes(app.status);
+                          const isRejected = ["rejected","declined"].includes(app.status);
+                          const docType = isApproved ? "grant_approval" : isRejected ? "grant_rejection" : "grant_application";
+                          const docTitle = isApproved ? "Grant Approval Letter" : isRejected ? "Grant Rejection Notice" : "Grant Application Receipt";
+                          pdf.save(`TrustBank_Grant_${app.application_number}.pdf`);
+                          await saveDocumentRecord({ userId: user.id, documentType: docType, documentCategory: "grants", referenceNumber, verificationCode, title: docTitle, entityType: "grant_applications", entityId: app.id, metadata: { status: app.status, requested_amount: app.requested_amount, project_title: app.project_title } });
+                        }}
+                      >
+                        <Download className="h-3 w-3" /> Download Receipt
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
