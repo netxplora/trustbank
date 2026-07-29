@@ -255,7 +255,7 @@ export default function AdminGrantsPage() {
   const totalProgramFunding = programs.reduce((s, p) => s + p.funding_amount, 0);
   const activePrograms = programs.filter(p => p.status === "active").length;
   const pendingApps = applications.filter(a => a.status === "submitted" || a.status === "under_review").length;
-  const awardedApps = applications.filter(a => a.status === "approved" || a.status === "awarded").length;
+  const awardedApps = applications.filter(a => a.status === "approved" || (a.status as string) === "awarded").length;
 
   return (
     <div className="space-y-4 max-w-6xl mx-auto px-1 sm:px-4 py-2 font-sans">
@@ -277,7 +277,7 @@ export default function AdminGrantsPage() {
                 <Plus className="h-3.5 w-3.5" /> Create Grant Program
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[480px] rounded-xl font-sans">
+            <DialogContent className="w-[95vw] max-w-md sm:max-w-[420px] max-h-[85vh] overflow-y-auto rounded-xl font-sans p-4 sm:p-6">
               <DialogHeader>
                 <DialogTitle className="font-poppins text-base font-bold">Create New Grant Program</DialogTitle>
                 <DialogDescription className="text-xs">

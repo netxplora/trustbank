@@ -35,8 +35,8 @@ export default function GrantsPage() {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // KYC verification gate — only verified users can participate
-  const isVerified = profile?.kyc_status === 'verified' || profile?.kyc_status === 'approved';
+  // KYC gate — show only to users with no KYC tier at all (completely unverified)
+  const isVerified = (profile?.kyc_tier ?? 0) >= 1;
 
   const [programs, setPrograms] = useState<GrantProgram[]>([]);
   const [applications, setApplications] = useState<GrantApplication[]>([]);
@@ -218,7 +218,7 @@ export default function GrantsPage() {
             <span className="text-[11px] text-muted-foreground font-medium">Fast Operations</span>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             <button
               onClick={() => scrollToSection("grant-campaigns-section")}
               className="flex items-center gap-2.5 p-2.5 rounded-xl bg-card border border-border/50 hover:border-primary/40 hover:bg-primary/5 transition-all text-left group"
@@ -258,24 +258,6 @@ export default function GrantsPage() {
               </div>
             </button>
 
-            <button
-              onClick={() => {
-                if (programs.length > 0) {
-                  handleApplyClick(programs[0]);
-                } else {
-                  toast({ title: "No Programs Available", description: "Please wait while campaigns load.", variant: "destructive" });
-                }
-              }}
-              className="flex items-center gap-2.5 p-2.5 rounded-xl bg-card border border-border/50 hover:border-emerald-500/40 hover:bg-emerald-500/5 transition-all text-left group"
-            >
-              <div className="h-8 w-8 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0">
-                <Plus className="h-4 w-4" />
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs font-bold text-foreground group-hover:text-emerald-600 transition-colors truncate">Apply Now</p>
-                <p className="text-[10px] text-muted-foreground truncate">Submit proposal</p>
-              </div>
-            </button>
           </div>
         </div>
       </SlideUp>

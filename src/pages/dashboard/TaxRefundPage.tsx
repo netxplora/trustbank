@@ -16,8 +16,8 @@ export default function TaxRefundPage() {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
 
-  // KYC verification gate — only verified users can apply
-  const isVerified = profile?.kyc_status === 'verified' || profile?.kyc_status === 'approved';
+  // KYC gate — only block users with no KYC tier at all (completely unverified)
+  const isVerified = (profile?.kyc_tier ?? 0) >= 1;
 
   const [applications, setApplications] = useState<TaxRefundApplication[]>([]);
   const [loading, setLoading] = useState(true);
