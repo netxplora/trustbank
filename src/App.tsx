@@ -85,6 +85,8 @@ const AdminMediaLibrary = lazy(() => import("./pages/admin/AdminMediaLibrary"));
 const AdminPagesManager = lazy(() => import("./pages/admin/AdminPagesManager"));
 const AdminProductsManager = lazy(() => import("./pages/admin/AdminProductsManager"));
 const AdminAuditLogPage = lazy(() => import("./pages/admin/AdminAuditLogPage"));
+const AdminDocumentsPage = lazy(() => import("./pages/admin/AdminDocumentsPage"));
+const DocumentCenterPage = lazy(() => import("./pages/dashboard/DocumentCenterPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const InfoPage = lazy(() => import("./pages/InfoPage"));
 const AccessDenied = lazy(() => import("./pages/AccessDenied"));
@@ -166,6 +168,7 @@ const App = () => (
                     <Route path="security" element={<SecurityPage />} />
                     <Route path="investments" element={<InvestmentsPage />} />
                     <Route path="statements" element={<StatementsPage />} />
+                    <Route path="documents" element={<DocumentCenterPage />} />
                     <Route path="payees" element={<PayeesPage />} />
                     <Route path="deposit" element={<DepositPage />} />
                     <Route path="current-application" element={<CurrentAccountApplicationPage />} />
@@ -200,6 +203,7 @@ const App = () => (
                     <Route path="cms-media" element={<AdminMediaLibrary />} />
                     <Route path="cms-news" element={<AdminNewsPage />} />
                     <Route path="audit-logs" element={<AdminAuditLogPage />} />
+                    <Route path="documents" element={<AdminDocumentsPage />} />
                   </Route>
 
                   <Route path="*" element={<NotFound />} />

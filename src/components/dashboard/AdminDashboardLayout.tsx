@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Users, Wallet, ArrowRightLeft, TrendingUp, CreditCard, Bell, FileText, Settings, LogOut, Menu, X, User, ShieldCheck, Bitcoin, MessageCircle, LineChart, FileSpreadsheet, Paintbrush, Globe, Box, Image, ScrollText, Briefcase, ArrowDownCircle, Award, ChevronLeft, Landmark } from "lucide-react";
+import { LayoutDashboard, Users, Wallet, ArrowRightLeft, TrendingUp, CreditCard, Bell, FileText, Settings, LogOut, Menu, X, User, ShieldCheck, Bitcoin, MessageCircle, LineChart, FileSpreadsheet, Paintbrush, Globe, Box, Image, ScrollText, Briefcase, ArrowDownCircle, Award, ChevronLeft, Landmark, FolderOpen } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { NotificationPopover } from "./NotificationPopover";
@@ -36,6 +36,7 @@ const navGroups = [
       { icon: MessageCircle, label: "Support Chat", to: "/admin/chat", tooltip: "Respond to customer inquiries." },
       { icon: Bell, label: "Notifications", to: "/admin/notifications", tooltip: "Send and manage platform alerts." },
       { icon: FileText, label: "Reports", to: "/admin/reports", tooltip: "Generate and view financial reports." },
+      { icon: FolderOpen, label: "Document Management", to: "/admin/documents", tooltip: "View, verify, and manage all issued platform documents." },
     ]
   },
   {

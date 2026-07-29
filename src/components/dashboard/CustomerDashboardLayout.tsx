@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Wallet, ArrowRightLeft, Receipt, TrendingUp, CreditCard, Users, Bell, User, Settings, LogOut, Menu, X, ShieldCheck, Bitcoin, LineChart, FileText, Grid3X3, FileSpreadsheet, Award, PlusCircle, ChevronLeft } from "lucide-react";
+import { LayoutDashboard, Wallet, ArrowRightLeft, Receipt, TrendingUp, CreditCard, Users, Bell, User, Settings, LogOut, Menu, X, ShieldCheck, Bitcoin, LineChart, FileText, Grid3X3, FileSpreadsheet, Award, PlusCircle, ChevronLeft, FolderOpen } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { NotificationPopover } from "./NotificationPopover";
@@ -24,6 +24,7 @@ const navItems = [
   { icon: Award, label: "Grants", to: "/dashboard/grants", tooltip: "Apply for available government or institutional grant programs." },
   { icon: CreditCard, label: "Cards", to: "/dashboard/cards", tooltip: "Manage your physical and virtual cards." },
   { icon: FileText, label: "Statements", to: "/dashboard/statements", tooltip: "Download your monthly account statements." },
+  { icon: FolderOpen, label: "Document Centre", to: "/dashboard/documents", tooltip: "View and manage all your official documents and receipts." },
   { icon: ShieldCheck, label: "KYC Verification", to: "/dashboard/kyc", tooltip: "Complete identity verification to unlock limits." },
   { icon: Bell, label: "Notifications", to: "/dashboard/notifications", tooltip: "View your account alerts and messages." },
   { icon: User, label: "Profile", to: "/dashboard/profile", tooltip: "Update your personal information." },

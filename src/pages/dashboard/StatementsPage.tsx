@@ -133,7 +133,7 @@ export default function StatementsPage() {
 
     try {
       // 1. Fetch transactions for the period
-      const { data: txData } = await supabase
+      const { data: txData } = await (supabase as any)
         .from("transactions")
         .select("*")
         .eq("account_id", account.id)
@@ -141,11 +141,14 @@ export default function StatementsPage() {
         .lte("created_at", `${month.end}T23:59:59Z`)
         .order("created_at", { ascending: true });
 
-      const txList = txData || [];
+      const txList: Array<{ created_at: string; description: string | null; reference: string | null; amount: number; type: string }> = txData || [];
 
       // 2. Generate PDF using jsPDF
-      const customerName = profile?.display_name || profile?.first_name + " " + profile?.last_name || "Valued Customer";
-      const doc = generateStatementPDF(customerName, account, txList as any[], month.label);
+      const customerName = profile?.display_name || `${profile?.first_name || ""} ${profile?.last_name || ""}`.trim() || "Valued Customer";
+      const doc = generateStatementPDF(
+        { name: customerName, email: profile?.email || "", phone: profile?.phone || "", accountNumber: account.account_number },
+        account, txList as any[], month.label
+      );
 
       // 3. Trigger immediate local browser download
       doc.save(`TrustBank_Statement_${account.account_number.slice(-4)}_${month.label.replace(" ", "_")}.pdf`);
@@ -405,7 +408,7 @@ export default function StatementsPage() {
                                 const account = accounts.find((a) => a.id === selectedAccountId);
                                 if (!account) return;
                                 
-                                const { data: txData } = await supabase
+                                const { data: txData } = await (supabase as any)
                                   .from("transactions")
                                   .select("*")
                                   .eq("account_id", account.id)
@@ -414,7 +417,7 @@ export default function StatementsPage() {
 
                                 const customerName = profile?.display_name || "Valued Customer";
                                 const doc = generateStatementPDF(
-                                  customerName,
+                                  { name: customerName, email: profile?.email || "", phone: profile?.phone || "", accountNumber: account.account_number },
                                   account,
                                   (txData as any[]) || [],
                                   new Date(h.period_start).toLocaleDateString("en-US", { month: "long", year: "numeric" })
