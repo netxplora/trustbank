@@ -84,7 +84,7 @@ export async function getAllDocuments(filters?: {
 }) {
   let query = (supabase as any)
     .from("platform_documents")
-    .select("*, profiles!platform_documents_user_id_fkey(display_name, email, account_number)")
+    .select("*")
     .order("created_at", { ascending: false });
 
   if (filters?.category) {
@@ -109,7 +109,30 @@ export async function getAllDocuments(filters?: {
     return [];
   }
 
-  return data || [];
+  const docs = data || [];
+
+  if (docs.length > 0) {
+    const userIds = [...new Set(docs.map((d: any) => d.user_id).filter(Boolean))];
+    if (userIds.length > 0) {
+      const { data: profilesData } = await (supabase as any)
+        .from("profiles")
+        .select("id, display_name, email, account_number")
+        .in("id", userIds);
+
+      const profileMap = new Map();
+      if (profilesData) {
+        profilesData.forEach((p: any) => profileMap.set(p.id, p));
+      }
+
+      docs.forEach((d: any) => {
+        if (d.user_id) {
+          d.profiles = profileMap.get(d.user_id) || null;
+        }
+      });
+    }
+  }
+
+  return docs;
 }
 
 /**
