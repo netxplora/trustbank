@@ -13,7 +13,7 @@ export function HeroSection({ homePageData }: { homePageData?: any }) {
           alt="Modern bank building"
           width={1400}
           height={933}
-          fetchPriority="high"
+          fetchpriority="high"
           loading="eager"
           decoding="async"
           className="w-full h-full object-cover object-center opacity-60 lg:opacity-90"

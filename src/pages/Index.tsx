@@ -84,7 +84,7 @@ const Index = () => {
       try {
         const { data } = await (supabase as any)
           .from("cms_pages")
-          .select("slug, title, description, content")
+          .select("slug, title, description, content_blocks")
           .eq("slug", "home")
           .single();
         if (data) setHomePageData(data);
