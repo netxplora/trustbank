@@ -95,13 +95,13 @@ export default function AdminNewsPage() {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const { data, error } = await (supabase as unknown as any)
         .from("cms_posts")
-        .select("*")
+        .select("id, title, slug, summary, content, image_url, category, status, revision_history, published_at, created_at, updated_at")
         .order("published_at", { ascending: false });
         
       if (error && error.code === "42703") {
         console.warn("CMS schema is missing phase 3 columns. Please run the SQL migration.");
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const fallbackData = await (supabase as unknown as any).from("cms_posts").select("id, title, summary, content, image_url, category, published_at, created_at").order("published_at", { ascending: false });
+const fallbackData = await (supabase as unknown as any).from("cms_posts").select("id, title, summary, content, image_url, category, published_at, created_at").order("published_at", { ascending: false }).limit(500);
         setPosts((fallbackData.data || []).map((p: Record<string, unknown>) => ({ ...p, status: "published", revision_history: [] as Revision[] })));
       } else {
         setPosts((data as Post[]) || []);

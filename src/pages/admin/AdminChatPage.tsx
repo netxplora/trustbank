@@ -136,8 +136,9 @@ const AdminChatPage = () => {
     // 1. Fetch conversations
     const { data: convData, error: convError } = await supabase
       .from("conversations")
-      .select("*")
-      .order("updated_at", { ascending: false });
+      .select("id, user_id, subject, status, created_at, updated_at")
+      .order("updated_at", { ascending: false })
+      .limit(100);
 
     if (convError || !convData || convData.length === 0) {
       return setConversations([]);
@@ -177,7 +178,7 @@ const AdminChatPage = () => {
   };
 
   const fetchMessages = async (convId: string) => {
-    const { data } = await supabase.from("messages").select("*").eq("conversation_id", convId).order("created_at", { ascending: true });
+    const { data } = await supabase.from("messages").select("id, content, sender_id, sender_role, file_url, created_at, read").eq("conversation_id", convId).order("created_at", { ascending: true }).limit(500);
     setMessages((data as Message[]) || []);
     // Mark all user messages in this conversation as read
     await supabase.from("messages").update({ read: true }).eq("conversation_id", convId).eq("sender_role", "user").eq("read", false);

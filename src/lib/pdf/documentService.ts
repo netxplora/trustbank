@@ -61,7 +61,7 @@ export async function saveDocumentRecord(params: SaveDocumentParams): Promise<st
 export async function getUserDocuments(userId: string) {
   const { data, error } = await (supabase as any)
     .from("platform_documents")
-    .select("*")
+    .select("id, user_id, document_type, document_category, reference_number, verification_code, title, entity_type, entity_id, status, metadata, generated_by, created_at")
     .eq("user_id", userId)
     .order("created_at", { ascending: false });
 
@@ -118,7 +118,7 @@ export async function getAllDocuments(filters?: {
 export async function verifyDocument(verificationCode: string) {
   const { data, error } = await (supabase as any)
     .from("platform_documents")
-    .select("*")
+    .select("id, user_id, document_type, document_category, reference_number, verification_code, title, entity_type, entity_id, status, metadata, generated_by, created_at")
     .eq("verification_code", verificationCode)
     .single();
 

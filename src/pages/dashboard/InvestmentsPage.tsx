@@ -145,7 +145,7 @@ export default function InvestmentsPage() {
       try {
         const { data, error } = await (supabase as any)
           .from("available_stocks")
-          .select("*")
+          .select("symbol, name, category, asset_class, current_price, change_24h, change_percent_24h, market_cap, pe_ratio, dividend_yield, high_52w, low_52w, volume, analyst_rating, description, chart_data, use_live_price")
           .eq("is_active", true)
           .order("symbol");
 
@@ -210,7 +210,7 @@ export default function InvestmentsPage() {
     try {
       const { data: accountsData, error } = await (supabase as any)
         .from("investment_accounts")
-        .select("*")
+        .select("id, account_type, account_number, balance, cash_balance, status")
         .eq("user_id", user.id);
 
       if (error) throw error;
@@ -231,14 +231,14 @@ export default function InvestmentsPage() {
     try {
       const { data: hlds } = await (supabase as any)
         .from("investment_holdings")
-        .select("*")
+        .select("id, symbol, name, quantity, avg_cost, current_price, asset_class")
         .eq("account_id", accountId);
 
       setHoldings((hlds as Holding[]) || []);
 
       const { data: ords } = await (supabase as any)
         .from("investment_orders")
-        .select("*")
+        .select("id, symbol, side, quantity, order_type, limit_price, status, created_at")
         .eq("account_id", accountId)
         .order("created_at", { ascending: false });
 
@@ -338,7 +338,7 @@ export default function InvestmentsPage() {
 
   const handleOpenFundDialog = async () => {
     if (!user) return;
-    const { data } = await supabase.from("accounts").select("*").eq("user_id", user.id).eq("status", "active");
+    const { data } = await supabase.from("accounts").select("id, account_type, account_number, balance").eq("user_id", user.id).eq("status", "active");
     const accs = data || [];
     setCheckingAccounts(accs);
     if (accs.length > 0) setSelectedCheckingId(accs[0].id);

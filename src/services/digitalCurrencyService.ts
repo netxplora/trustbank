@@ -91,7 +91,7 @@ export async function getUserCryptoWallets(userId: string): Promise<UserCryptoWa
   try {
     const { data, error } = await supabase
       .from("digital_currency_wallets")
-      .select("*")
+      .select("id, user_id, asset_symbol, balance, wallet_address")
       .eq("user_id", userId);
 
     if (error || !data || data.length === 0) {

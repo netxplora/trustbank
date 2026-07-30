@@ -78,7 +78,7 @@ const AdminDepositSettingsPage = () => {
 
   
   const fetchFiatBanks = async () => {
-    const { data, error } = await supabase.from("fiat_banks" as any).select("*").order("created_at");
+    const { data, error } = await supabase.from("fiat_banks" as any).select("id, bank_name, account_name, account_number, routing_number, swift_code, is_active, created_at").order("created_at").limit(500);
     if (error) console.error("Error fetching fiat banks:", error);
     setFiatBanks((data as any[]) || []);
   };
@@ -91,7 +91,7 @@ const AdminDepositSettingsPage = () => {
   };
 
   const fetchWallets = async () => {
-    const { data, error } = await supabase.from("crypto_wallets").select("*").order("created_at");
+    const { data, error } = await supabase.from("crypto_wallets").select("id, wallet_name, cryptocurrency, network, wallet_address, enabled, logo_url, qr_code_url, min_deposit, confirmations_required, is_default, created_at").order("created_at").limit(500);
     if (error) console.error("Error fetching wallets:", error);
     setWallets((data as any[]) || []);
   };

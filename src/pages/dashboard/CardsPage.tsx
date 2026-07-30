@@ -418,7 +418,7 @@ const CardsPage = () => {
       return;
     }
     try {
-      const { data, error } = await supabase.from("cards").select("*").eq("user_id", user.id);
+      const { data, error } = await supabase.from("cards").select("id, card_type, card_number, expiry_date, cvv, cardholder_name, card_brand, status, is_frozen, spending_limit, online_enabled, international_enabled, is_physical, request_status, delivery_address").eq("user_id", user.id);
       
       if (error) {
         console.error("[Cards] Supabase error:", error.message);

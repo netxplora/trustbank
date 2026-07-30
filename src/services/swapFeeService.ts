@@ -5,7 +5,7 @@ export async function getSwapFeeConfig(): Promise<SwapFeeConfig> {
   try {
     const { data, error } = await supabase
       .from("swap_fee_settings")
-      .select("*")
+      .select("id, flat_fee, percentage_fee, min_fee, max_fee, promotional_discount")
       .limit(1)
       .single();
 

@@ -81,7 +81,7 @@ const AccountsPage = () => {
 
   const fetchAccounts = async () => {
     if (!user) return;
-    const { data: accs } = await supabase.from("accounts").select("*").eq("user_id", user.id);
+    const { data: accs } = await supabase.from("accounts").select("id, account_type, account_number, balance, currency, status").eq("user_id", user.id);
     const activeAccs = (accs as Account[]) || [];
     setAccounts(activeAccs);
 
@@ -100,7 +100,7 @@ const AccountsPage = () => {
 
   const fetchTransactions = async () => {
     if (!user) return;
-    const { data } = await supabase.from("transactions").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(20);
+    const { data } = await supabase.from("transactions").select("id, account_id, description, amount, type, created_at, reference").eq("user_id", user.id).order("created_at", { ascending: false }).limit(20);
     setTransactions((data as Transaction[]) || []);
   };
 

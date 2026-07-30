@@ -81,7 +81,7 @@ export default function StatementsPage() {
     try {
       const { data } = await supabase
         .from("accounts")
-        .select("*")
+        .select("id, account_type, account_number, balance, currency")
         .eq("user_id", user?.id || "")
         .eq("status", "active");
 
@@ -101,7 +101,7 @@ export default function StatementsPage() {
     try {
       const { data } = await (supabase as any)
         .from("tax_documents")
-        .select("*")
+        .select("id, year, form_type, file_path, created_at")
         .eq("user_id", user?.id || "")
         .order("year", { ascending: false });
 
@@ -115,7 +115,7 @@ export default function StatementsPage() {
     try {
       const { data } = await (supabase as any)
         .from("account_statements")
-        .select("*")
+        .select("id, period_start, period_end, generated_at, opening_balance, closing_balance")
         .eq("account_id", acctId)
         .order("generated_at", { ascending: false });
 
@@ -136,7 +136,7 @@ export default function StatementsPage() {
       // 1. Fetch transactions for the period
       const { data: txData } = await (supabase as any)
         .from("transactions")
-        .select("*")
+        .select("created_at, description, reference, amount, type")
         .eq("account_id", account.id)
         .gte("created_at", `${month.start}T00:00:00Z`)
         .lte("created_at", `${month.end}T23:59:59Z`)
@@ -412,7 +412,7 @@ export default function StatementsPage() {
                                 
                                 const { data: txData } = await (supabase as any)
                                   .from("transactions")
-                                  .select("*")
+                                  .select("created_at, description, reference, amount, type")
                                   .eq("account_id", account.id)
                                   .gte("created_at", `${h.period_start}T00:00:00Z`)
                                   .lte("created_at", `${h.period_end}T23:59:59Z`);

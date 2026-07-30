@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { BadgeDollarSign, ShieldAlert, Check, X, ClipboardList, Plus, Pencil, Trash2, Users, BarChart3, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -91,7 +91,7 @@ export default function AdminInvestmentsPage() {
   // ═══════════════════════════════════════════════════════════
   const fetchStocks = async () => {
     try {
-      const { data, error } = await (supabase as any).from("available_stocks").select("*").order("symbol");
+      const { data, error } = await (supabase as any).from("available_stocks").select("id, symbol, name, asset_class, current_price, is_active, use_live_price, category, description, created_at").order("symbol");
       if (error) throw error;
       setStocks((data as AvailableStock[]) || []);
     } catch (e: any) {
@@ -196,7 +196,7 @@ export default function AdminInvestmentsPage() {
   // ═══════════════════════════════════════════════════════════
   const fetchInvestmentAccounts = async () => {
     try {
-      const { data, error } = await (supabase as any).from("investment_accounts").select("*").order("created_at", { ascending: false });
+      const { data, error } = await (supabase as any).from("investment_accounts").select("id, user_id, account_type, account_number, balance, cash_balance, status, created_at").order("created_at", { ascending: false }).limit(500);
       if (error) throw error;
 
       const rows = (data as any[]) || [];
@@ -293,7 +293,8 @@ export default function AdminInvestmentsPage() {
             cash_balance
           )
         `)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(500);
 
       if (ordersError) throw ordersError;
 
@@ -372,8 +373,8 @@ export default function AdminInvestmentsPage() {
     }
   };
 
-  const pendingOrders = orders.filter((o) => o.status === "pending");
-  const processedOrders = orders.filter((o) => o.status !== "pending");
+  const pendingOrders = useMemo(() => orders.filter((o) => o.status === "pending"), [orders]);
+  const processedOrders = useMemo(() => orders.filter((o) => o.status !== "pending"), [orders]);
 
   // ─── Tab Config ────────────────────────────────────────────
   const tabs: { id: TabId; label: string; icon: React.ReactNode; count?: number }[] = [

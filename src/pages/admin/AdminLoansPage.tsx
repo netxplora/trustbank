@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { CheckCircle, XCircle, Clock, Eye, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -39,8 +39,9 @@ const AdminLoansPage = () => {
   const fetchLoans = async () => {
     const { data: loansData } = await supabase
       .from("loans")
-      .select("*")
-      .order("created_at", { ascending: false });
+      .select("id, user_id, amount, tenure_months, interest_rate, monthly_payment, status, purpose, outstanding_balance, created_at")
+      .order("created_at", { ascending: false })
+      .limit(100);
 
     const { data: profilesData } = await supabase
       .from("profiles")
@@ -142,12 +143,16 @@ const AdminLoansPage = () => {
     fetchLoans();
   };
 
-  const filtered = loans.filter(l => filter === "all" || l.status.toLowerCase() === filter);
+  const filtered = useMemo(() => loans.filter(l => filter === "all" || l.status.toLowerCase() === filter), [loans, filter]);
 
-  const totalBookValue = loans.reduce((sum, l) => sum + Number(l.amount), 0);
-  const activeFacilities = loans.filter(l => l.status === "approved" || l.status === "active").length;
-  const pendingUnderwriting = loans.filter(l => l.status === "pending").length;
-  const outstandingCapital = loans.reduce((sum, l) => sum + Number(l.outstanding_balance || 0), 0);
+  const { totalBookValue, activeFacilities, pendingUnderwriting, outstandingCapital } = useMemo(() => {
+    return {
+      totalBookValue: loans.reduce((sum, l) => sum + Number(l.amount), 0),
+      activeFacilities: loans.filter(l => l.status === "approved" || l.status === "active").length,
+      pendingUnderwriting: loans.filter(l => l.status === "pending").length,
+      outstandingCapital: loans.reduce((sum, l) => sum + Number(l.outstanding_balance || 0), 0)
+    };
+  }, [loans]);
 
   if (loading) return <div className="flex items-center justify-center py-20"><div className="h-6 w-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" /></div>;
 

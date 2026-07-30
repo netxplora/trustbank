@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Search, Eye, CheckCircle, XCircle, Edit, Trash2, Save, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -57,11 +57,11 @@ const AdminCustomersPage = () => {
   const fetchCustomers = async () => {
     try {
       // Fetch profiles
-      const { data: profilesData, error: profilesError } = await (supabase as any).from("profiles").select("*").order("created_at", { ascending: false });
+      const { data: profilesData, error: profilesError } = await (supabase as any).from("profiles").select("id, user_id, display_name, first_name, last_name, date_of_birth, gender, nationality, mailing_address, city, state_province, postal_code, country, occupation, employer_name, annual_income_range, source_of_funds, tax_id, gov_id_type, gov_id_number, preferred_language, preferred_currency, email, phone, account_status, kyc_status, kyc_tier, account_number, role, created_at, loan_limit").order("created_at", { ascending: false }).limit(100);
       if (profilesError) throw profilesError;
       
       // Fetch user_roles
-      const { data: rolesData, error: rolesError } = await (supabase as any).from("user_roles").select("*");
+      const { data: rolesData, error: rolesError } = await (supabase as any).from("user_roles").select("user_id, role");
       if (rolesError) throw rolesError;
       
       const roleMap = new Map();
@@ -177,10 +177,12 @@ const AdminCustomersPage = () => {
     }
   };
 
-  const filtered = customers.filter(c => {
-    const term = search.toLowerCase();
-    return (c.display_name || "").toLowerCase().includes(term) || (c.email || "").toLowerCase().includes(term) || (c.account_number || "").includes(term);
-  });
+  const filtered = useMemo(() => {
+    return customers.filter(c => {
+      const term = search.toLowerCase();
+      return (c.display_name || "").toLowerCase().includes(term) || (c.email || "").toLowerCase().includes(term) || (c.account_number || "").includes(term);
+    });
+  }, [customers, search]);
 
   if (loading) return <div className="flex items-center justify-center py-20"><div className="h-6 w-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" /></div>;
 

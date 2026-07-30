@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { SlideUp } from "@/components/public/Motion";
@@ -181,10 +181,12 @@ export default function TransactionsPage() {
     }
   };
 
-  const filteredTxs = transactions.filter(tx => 
-    tx.description?.toLowerCase().includes(debouncedSearch.toLowerCase()) || 
-    tx.reference?.toLowerCase().includes(debouncedSearch.toLowerCase())
-  );
+  const filteredTxs = useMemo(() => {
+    return transactions.filter(tx => 
+      tx.description?.toLowerCase().includes(debouncedSearch.toLowerCase()) || 
+      tx.reference?.toLowerCase().includes(debouncedSearch.toLowerCase())
+    );
+  }, [transactions, debouncedSearch]);
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto px-1">

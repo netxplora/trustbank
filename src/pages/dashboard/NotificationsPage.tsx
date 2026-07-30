@@ -41,7 +41,7 @@ const NotificationsPage = () => {
 
   const fetchNotifications = async () => {
     if (!user) return;
-    const { data } = await supabase.from("notifications").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
+    const { data } = await supabase.from("notifications").select("id, type, title, message, read, created_at").eq("user_id", user.id).order("created_at", { ascending: false });
     setNotifications((data as Notification[]) || []);
     setLoading(false);
   };

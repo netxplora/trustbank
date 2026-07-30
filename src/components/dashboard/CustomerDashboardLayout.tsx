@@ -1,6 +1,6 @@
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { LayoutDashboard, Wallet, ArrowRightLeft, Receipt, TrendingUp, CreditCard, Users, Bell, User, Settings, LogOut, Menu, X, ShieldCheck, Bitcoin, LineChart, FileText, Grid3X3, FileSpreadsheet, Award, PlusCircle, ChevronLeft, FolderOpen } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { NotificationPopover } from "./NotificationPopover";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -9,7 +9,7 @@ import { PageTransition } from "@/components/PageTransition";
 import { AnimatePresence } from "framer-motion";
 import logo from "@/assets/logo.png";
 import { supabase } from "@/integrations/supabase/client";
-import { LiveChatWidget } from "./LiveChatWidget";
+const LiveChatWidget = lazy(() => import("./LiveChatWidget").then(m => ({ default: m.LiveChatWidget })));
 import { ActionTooltip } from "@/components/ui/action-tooltip";
 
 const navItems = [
@@ -213,7 +213,9 @@ export default function CustomerDashboardLayout() {
       </div>
 
       {/* Floating Live Chat Widget */}
-      <LiveChatWidget />
+      <Suspense fallback={null}>
+        <LiveChatWidget />
+      </Suspense>
 
       {/* Mobile Bottom Navigation */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 h-[56px] bg-background border-t border-border flex items-center justify-around z-50 pb-safe px-1">

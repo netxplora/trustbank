@@ -23,7 +23,7 @@ const BeneficiariesPage = () => {
 
   const fetchBeneficiaries = async () => {
     if (!user) return;
-    const { data } = await supabase.from("beneficiaries").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
+    const { data } = await supabase.from("beneficiaries").select("id, name, bank, account_number, nickname").eq("user_id", user.id).order("created_at", { ascending: false });
     setBeneficiaries((data as Beneficiary[]) || []);
     setLoading(false);
   };

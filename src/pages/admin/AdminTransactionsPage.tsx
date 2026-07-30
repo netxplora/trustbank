@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Search, ArrowUpRight, ArrowDownLeft, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,8 +20,9 @@ const AdminTransactionsPage = () => {
   const fetchTransactions = async () => {
     const { data: txData } = await supabase
       .from("transactions")
-      .select("*")
-      .order("created_at", { ascending: false });
+      .select("id, user_id, type, recipient_name, amount, status, created_at")
+      .order("created_at", { ascending: false })
+      .limit(100);
       
     const { data: profilesData } = await supabase
       .from("profiles")
@@ -53,11 +54,13 @@ const AdminTransactionsPage = () => {
     setLoading(false);
   };
 
-  const filtered = transactions.filter(t => {
-    const matchesSearch = t.from.toLowerCase().includes(search.toLowerCase()) || t.to.toLowerCase().includes(search.toLowerCase()) || t.id.toLowerCase().includes(search.toLowerCase());
-    const matchesFilter = filter === "all" || t.status.toLowerCase() === filter;
-    return matchesSearch && matchesFilter;
-  });
+  const filtered = useMemo(() => {
+    return transactions.filter(t => {
+      const matchesSearch = t.from.toLowerCase().includes(search.toLowerCase()) || t.to.toLowerCase().includes(search.toLowerCase()) || t.id.toLowerCase().includes(search.toLowerCase());
+      const matchesFilter = filter === "all" || t.status.toLowerCase() === filter;
+      return matchesSearch && matchesFilter;
+    });
+  }, [transactions, search, filter]);
 
   return (
     <div className="space-y-4 max-w-6xl mx-auto px-1 sm:px-4 py-2 font-sans">

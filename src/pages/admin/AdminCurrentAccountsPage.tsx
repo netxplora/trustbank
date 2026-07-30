@@ -45,8 +45,9 @@ export default function AdminCurrentAccountsPage() {
     setLoading(true);
     const { data, error } = await supabase
       .from("current_account_applications")
-      .select("*")
-      .order("created_at", { ascending: false });
+      .select("id, user_id, full_name, email, phone, occupation, employer, business_name, income_range, id_document_url, utility_bill_url, status, rejection_reason, created_at")
+      .order("created_at", { ascending: false })
+      .limit(100);
     
     if (error) {
       console.error(error);

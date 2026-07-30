@@ -101,10 +101,10 @@ export default function DepositPage() {
     try {
       const [accRes, walletsRes, fiatRes, cryptoRes, fiatBanksRes, fiatStatusRes] = await Promise.all([
         supabase.from("accounts").select("id, account_type, account_number, balance").eq("user_id", user.id).eq("status", "active"),
-        supabase.from("crypto_wallets").select("*").eq("enabled", true),
+        supabase.from("crypto_wallets").select("id, cryptocurrency, network, wallet_address, logo_url, wallet_name, min_deposit, confirmations_required, qr_code_url").eq("enabled", true),
         supabase.from("payment_sessions").select("id, amount, reference, status, created_at").eq("user_id", user.id).in("status", ["pending_payment", "under_review"]),
         supabase.from("crypto_deposits").select("id, status, tx_hash, created_at, crypto_wallets(cryptocurrency)").eq("user_id", user.id).eq("status", "pending"),
-        supabase.from("fiat_banks" as any).select("*").eq("is_active", true),
+        supabase.from("fiat_banks" as any).select("id, bank_name, account_name, account_number, routing_number, swift_code").eq("is_active", true),
         supabase.from("cms_site_settings").select("value").eq("key", "fiat_network_status").single()
       ]);
 

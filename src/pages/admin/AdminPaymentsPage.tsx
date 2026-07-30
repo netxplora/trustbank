@@ -61,8 +61,9 @@ export default function AdminPaymentsPage() {
     // In a real app, a secure view or RPC would return user details.
     const { data, error } = await supabase
       .from("payment_sessions")
-      .select("*")
-      .order("created_at", { ascending: false });
+      .select("id, user_id, amount, method, reference, status, account_id, transaction_hash, proof_url, notes, created_at")
+      .order("created_at", { ascending: false })
+      .limit(100);
     
     if (error) {
       console.error(error);

@@ -83,7 +83,7 @@ export async function getGrantPrograms(): Promise<GrantProgram[]> {
   try {
     const { data, error } = await supabase
       .from("grant_programs")
-      .select("*")
+      .select("id, title, category, description, funding_amount, eligibility_criteria, deadline, status, image_url, created_at")
       .order("created_at", { ascending: false });
 
     if (error) {

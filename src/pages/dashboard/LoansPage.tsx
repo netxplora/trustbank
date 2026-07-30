@@ -83,7 +83,7 @@ const LoansPage = () => {
 
   const fetchLoans = async () => {
     if (!user) return;
-    const { data } = await (supabase as any).from("loans").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
+    const { data } = await (supabase as any).from("loans").select("id, amount, tenure_months, interest_rate, status, purpose, outstanding_balance, total_repaid, monthly_payment, created_at, approved_at").eq("user_id", user.id).order("created_at", { ascending: false });
     setLoans((data as unknown as Loan[]) || []);
     setFetchLoading(false);
   };

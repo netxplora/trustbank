@@ -100,7 +100,7 @@ export default function AdminPagesManager() {
   const fetchPages = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.from("cms_pages").select("*").order("slug");
+      const { data, error } = await supabase.from("cms_pages").select("id, slug, title, description, content_blocks, seo_metadata, is_published, created_at, updated_at").order("slug").limit(500);
       if (error) throw error;
       setPages(data as Page[]);
     } catch (err: any) {

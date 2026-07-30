@@ -61,7 +61,7 @@ export default function PayeesPage() {
     try {
       const { data, error } = await supabase
         .from("payees")
-        .select("*")
+        .select("id, nickname, payee_name, category, account_number_masked, payment_method, is_verified")
         .eq("user_id", user?.id || "");
       
       if (error) throw error;

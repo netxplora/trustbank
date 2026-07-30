@@ -61,7 +61,7 @@ export default function PaymentsPage() {
 
   const fetchPayees = async () => {
     try {
-      const { data } = await supabase.from("payees").select("*").eq("user_id", user?.id || "");
+      const { data } = await supabase.from("payees").select("id, payee_name, category, account_number_masked, payment_method").eq("user_id", user?.id || "");
       const list = (data as Payee[]) || [];
       setPayees(list);
       if (list.length > 0) setSelectedPayeeId(list[0].id);
@@ -70,7 +70,7 @@ export default function PaymentsPage() {
 
   const fetchAccounts = async () => {
     try {
-      const { data } = await supabase.from("accounts").select("*").eq("user_id", user?.id || "").eq("status", "active");
+      const { data } = await supabase.from("accounts").select("id, account_type, account_number, balance, currency").eq("user_id", user?.id || "").eq("status", "active");
       const list = (data as Account[]) || [];
       setAccounts(list);
       if (list.length > 0) setSelectedAccountId(list[0].id);
@@ -79,7 +79,7 @@ export default function PaymentsPage() {
 
   const fetchPayments = async () => {
     try {
-      const { data } = await supabase.from("payments").select("*").eq("user_id", user?.id || "").order("created_at", { ascending: false }).limit(8);
+      const { data } = await supabase.from("payments").select("id, payment_type, provider, amount, status, created_at").eq("user_id", user?.id || "").order("created_at", { ascending: false }).limit(8);
       setPayments((data as Payment[]) || []);
     } catch (e) { console.error(e); }
   };

@@ -42,7 +42,7 @@ export default function TransfersPage() {
 
   const fetchAccounts = async () => {
     if (!user) return;
-    const { data } = await supabase.from("accounts").select("*").eq("user_id", user.id).eq("status", "active");
+    const { data } = await supabase.from("accounts").select("id, account_type, account_number, balance").eq("user_id", user.id).eq("status", "active");
     const accs = (data as Account[]) || [];
     setAccounts(accs);
     if (accs.length > 0) {
@@ -53,7 +53,7 @@ export default function TransfersPage() {
 
   const fetchTransfers = async () => {
     if (!user) return;
-    const { data } = await supabase.from("transfers").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(20);
+    const { data } = await supabase.from("transfers").select("id, to_name, to_bank, to_account_number, amount, status, created_at, reference, target_currency, destination_amount, transfer_type").eq("user_id", user.id).order("created_at", { ascending: false }).limit(20);
     const txs = (data as Transfer[]) || [];
     setTransfers(txs);
 

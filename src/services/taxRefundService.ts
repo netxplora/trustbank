@@ -27,7 +27,7 @@ export async function getUserTaxRefundApplications(userId: string): Promise<TaxR
   try {
     const { data, error } = await supabase
       .from("tax_refund_applications")
-      .select("*")
+      .select("id, user_id, application_number, tax_refund_program, tax_year, filing_status, estimated_refund_amount, requested_amount, refund_reason, claim_description, refund_method, ssn_tin, status, documents, user_notes, admin_notes, created_at, updated_at")
       .eq("user_id", userId)
       .order("created_at", { ascending: false });
 
@@ -66,7 +66,7 @@ export async function getAllTaxRefundApplications(): Promise<TaxRefundApplicatio
   try {
     const { data: apps, error } = await supabase
       .from("tax_refund_applications")
-      .select("*")
+      .select("id, user_id, application_number, tax_refund_program, tax_year, filing_status, estimated_refund_amount, requested_amount, refund_reason, claim_description, refund_method, ssn_tin, status, documents, user_notes, admin_notes, created_at, updated_at")
       .order("created_at", { ascending: false });
 
     if (error || !apps) {

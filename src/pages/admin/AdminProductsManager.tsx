@@ -47,7 +47,7 @@ export default function AdminProductsManager() {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.from("cms_products").select("*").order("display_order");
+      const { data, error } = await supabase.from("cms_products").select("id, category, name, description, features, interest_rate, fee, display_order, is_active, image_url").order("display_order").limit(500);
       if (error) throw error;
       setProducts(data as Product[]);
     } catch (err: any) {
