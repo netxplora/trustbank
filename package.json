@@ -89,7 +89,7 @@
     "@types/ua-parser-js": "^0.7.39",
     "@vitejs/plugin-react": "^6.0.4",
     "autoprefixer": "^10.4.21",
-    "eslint": "^9.0.0",
+    "eslint": "^10.8.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^15.15.0",
