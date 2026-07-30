@@ -124,7 +124,7 @@ export default function CustomerDashboardHome() {
     try {
       const { data } = await supabase
         .from("accounts")
-        .select("id, account_number, account_type, balance, ledger_balance, status, currency")
+        .select("id, account_number, account_type, balance, status, currency")
         .eq("user_id", user?.id || "")
         .eq("status", "active");
 
