@@ -96,16 +96,24 @@ const ServerErrorPage = lazy(() => import("./pages/ServerErrorPage"));
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      // Default to 30 seconds stale time to prevent redundant fetches on rapid navigation
-      staleTime: 1000 * 30,
-      // Keep unused data in memory for 5 minutes before garbage collection
-      gcTime: 1000 * 60 * 5, 
-      refetchOnWindowFocus: true,
+      // 5-minute stale time: prevents redundant refetches on rapid navigation
+      staleTime: 1000 * 60 * 5,
+      // Keep unused data in memory for 10 minutes before garbage collection
+      gcTime: 1000 * 60 * 10,
+      // Disable window focus refetch — avoids wasted network on tab switch
+      refetchOnWindowFocus: false,
+      // Only retry on actual server errors, not auth errors
       retry: (failureCount, error: any) => {
-        // Do not retry 401s or 403s
-        if (error?.status === 401 || error?.status === 403) return false;
-        return failureCount < 2;
-      }
+        if (error?.status === 401 || error?.status === 403 || error?.status === 404) return false;
+        return failureCount < 1;
+      },
+      // Pause background fetches when the user is offline
+      networkMode: 'online',
+    },
+    mutations: {
+      // Mutations retry once on network failure
+      retry: 1,
+      networkMode: 'online',
     },
   },
 });

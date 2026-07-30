@@ -6,12 +6,17 @@ import { FadeIn, SlideUp, StaggerContainer, StaggerItem } from "./Motion";
 export function HeroSection({ homePageData }: { homePageData?: any }) {
   return (
     <section className="relative min-h-[calc(100vh-4rem)] flex items-center py-20 lg:py-32 overflow-hidden bg-white dark:bg-slate-950 text-foreground dark:text-white">
-      {/* Dynamic Background Photography */}
+      {/* Dynamic Background Photography — LCP element, prioritised */}
       <div className="absolute right-0 top-0 w-full lg:w-3/5 h-full z-0 select-none">
         <img
-          src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2070&auto=format&fit=crop"
+          src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=75&w=1400&auto=format&fit=crop&fm=webp"
           alt="Modern bank building"
-          className="w-full h-full object-cover object-center opacity-60 lg:opacity-90 transition-opacity duration-1000"
+          width={1400}
+          height={933}
+          fetchPriority="high"
+          loading="eager"
+          decoding="async"
+          className="w-full h-full object-cover object-center opacity-60 lg:opacity-90"
         />
         {/* Gentle fade overlay: left-side fade for text readability, bottom fade */}
         <div className="absolute inset-0 bg-gradient-to-t from-white via-white/60 to-transparent dark:from-slate-950 dark:via-slate-950/60 dark:to-transparent lg:bg-gradient-to-r lg:from-white lg:via-white/30 lg:to-transparent dark:lg:from-slate-950 dark:lg:via-slate-950/30 dark:lg:to-transparent z-10" />

@@ -4,35 +4,76 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="manifest" href="/manifest.json" />
-    <meta name="theme-color" content="#1E293B" />
-    <title>TrustyBank Premium</title>
-    <meta name="description" content="Premium Digital Banking & Asset Management" />
-    <meta name="author" content="TrustyBank" />
+    <meta name="theme-color" content="#1E3A8A" />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700;800&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Primary SEO -->
+    <title>TrustBank | Premium Banking & Wealth Management</title>
+    <meta name="description" content="Secure digital banking and asset management for individuals, families, and businesses. FDIC insured with bank-grade security." />
+    <meta name="author" content="TrustBank" />
+    <meta name="robots" content="index, follow" />
 
-    <meta property="og:title" content="TrustyBank Premium" />
-    <meta property="og:description" content="Premium Digital Banking & Asset Management" />
+    <!-- Open Graph -->
+    <meta property="og:title" content="TrustBank | Premium Banking & Wealth Management" />
+    <meta property="og:description" content="Secure digital banking and asset management for individuals, families, and businesses." />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="/logo.png" />
 
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@TrustyBank" />
+    <meta name="twitter:site" content="@TrustBank" />
     <meta name="twitter:image" content="/logo.png" />
+
+    <!--
+      Google Fonts: preconnect first for DNS resolution,
+      then load with display=swap to prevent render-blocking.
+      Only load the weights we actually use.
+    -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!--
+      Load fonts asynchronously via media="print" trick, then swap to all.
+      This completely removes the render-blocking font request.
+    -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <!-- Fallback for no-JS -->
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700;800&display=swap"
+      />
+    </noscript>
+
+    <!--
+      Preload the LCP hero image so the browser discovers it
+      before the JS parses and renders the React tree.
+    -->
+    <link
+      rel="preload"
+      as="image"
+      fetchpriority="high"
+      href="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=75&w=1400&auto=format&fit=crop&fm=webp"
+      imagesrcset="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=75&w=800&auto=format&fit=crop&fm=webp 800w, https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=75&w=1400&auto=format&fit=crop&fm=webp 1400w"
+      imagesizes="(max-width: 1024px) 100vw, 60vw"
+    />
+
+    <!-- DNS prefetch for Supabase -->
+    <link rel="dns-prefetch" href="https://supabase.co" />
   </head>
 
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     <script>
+      // Register service worker after page load to avoid blocking initial render
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js').then(registration => {
-            console.log('SW registered: ', registration);
-          }).catch(registrationError => {
-            console.log('SW registration failed: ', registrationError);
+          navigator.serviceWorker.register('/sw.js').catch(() => {
+            // SW registration failure is non-fatal — silently ignore
           });
         });
       }

@@ -1,6 +1,4 @@
-
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+/* Google Fonts are loaded non-blocking from index.html */
 
 @tailwind base;
 @tailwind components;
@@ -170,3 +168,25 @@
 .preserve-3d { transform-style: preserve-3d; }
 .backface-hidden { backface-visibility: hidden; }
 .rotate-y-180 { transform: rotateY(180deg); }
+
+/* Accessibility: respect OS-level reduced-motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Disable marquee-style auto-play animations */
+  .animate-marquee {
+    animation: none !important;
+  }
+
+  /* Disable any will-change hints that promote GPU layers unnecessarily */
+  .will-change-transform {
+    will-change: auto !important;
+  }
+}

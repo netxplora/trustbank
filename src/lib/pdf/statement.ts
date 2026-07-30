@@ -29,7 +29,7 @@ export interface StatementCustomer {
   accountNumber?: string;
 }
 
-export function generateStatementPDF(
+export async function generateStatementPDF(
   customer: StatementCustomer,
   account: StatementAccount,
   transactions: StatementTransaction[],
@@ -143,7 +143,7 @@ export function generateStatementPDF(
         },
   ];
 
-  return generateDocument({
+  return await generateDocument({
     config: {
       title: "Official Account Statement",
       documentType: "account_statement",

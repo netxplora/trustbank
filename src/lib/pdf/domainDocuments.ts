@@ -50,7 +50,7 @@ export interface LoanData {
   approved_at?: string | null;
 }
 
-export function generateLoanSummaryPDF(customer: CustomerData, loan: LoanData, brandColors?: PDFBrandColors) {
+export async function generateLoanSummaryPDF(customer: CustomerData, loan: LoanData, brandColors?: PDFBrandColors) {
   const refNum = generateReferenceNumber("loan_application");
   const verCode = generateVerificationCode();
   const rate = loan.interest_rate || 5.0;
@@ -119,7 +119,7 @@ export function generateLoanSummaryPDF(customer: CustomerData, loan: LoanData, b
   ];
 
   return {
-    pdf: generateDocument({
+    pdf: await generateDocument({
       config: {
         title: "Credit Facility Summary",
         documentType: "loan_application",
@@ -152,7 +152,7 @@ export interface InvestmentData {
   sector?: string | null;
 }
 
-export function generateInvestmentReceiptPDF(
+export async function generateInvestmentReceiptPDF(
   customer: CustomerData,
   investment: InvestmentData,
   actionType: "buy" | "sell" = "buy",
@@ -204,7 +204,7 @@ export function generateInvestmentReceiptPDF(
   ];
 
   return {
-    pdf: generateDocument({
+    pdf: await generateDocument({
       config: {
         title: `Investment ${titleCase(actionType)} Receipt`,
         documentType: "investment_purchase",
@@ -222,7 +222,7 @@ export function generateInvestmentReceiptPDF(
   };
 }
 
-export function generatePortfolioSummaryPDF(
+export async function generatePortfolioSummaryPDF(
   customer: CustomerData,
   investments: InvestmentData[],
   totalValue: number,
@@ -283,7 +283,7 @@ export function generatePortfolioSummaryPDF(
   ];
 
   return {
-    pdf: generateDocument({
+    pdf: await generateDocument({
       config: {
         title: "Investment Portfolio Summary",
         documentType: "portfolio_summary",
@@ -319,7 +319,7 @@ export interface GrantApplicationData {
   program?: { name?: string; description?: string } | null;
 }
 
-export function generateGrantApplicationReceiptPDF(
+export async function generateGrantApplicationReceiptPDF(
   customer: CustomerData,
   grant: GrantApplicationData,
   brandColors?: PDFBrandColors
@@ -371,7 +371,7 @@ export function generateGrantApplicationReceiptPDF(
     : "Grant Application Receipt";
 
   return {
-    pdf: generateDocument({
+    pdf: await generateDocument({
       config: {
         title: docTitle,
         documentType: docType,
@@ -404,7 +404,7 @@ export interface TaxRefundData {
   created_at: string;
 }
 
-export function generateTaxRefundReceiptPDF(
+export async function generateTaxRefundReceiptPDF(
   customer: CustomerData,
   taxRefund: TaxRefundData,
   brandColors?: PDFBrandColors
@@ -449,7 +449,7 @@ export function generateTaxRefundReceiptPDF(
   const docTitle = isApproved ? "Tax Refund Approval Letter" : "Tax Refund Application Receipt";
 
   return {
-    pdf: generateDocument({
+    pdf: await generateDocument({
       config: {
         title: docTitle,
         documentType: docType,
@@ -481,7 +481,7 @@ export interface KYCData {
   created_at: string;
 }
 
-export function generateKYCReceiptPDF(customer: CustomerData, kyc: KYCData, brandColors?: PDFBrandColors) {
+export async function generateKYCReceiptPDF(customer: CustomerData, kyc: KYCData, brandColors?: PDFBrandColors) {
   const refNum = generateReferenceNumber("kyc_submission");
   const verCode = generateVerificationCode();
   const isApproved = ["approved", "verified"].includes(kyc.status.toLowerCase());
@@ -522,7 +522,7 @@ export function generateKYCReceiptPDF(customer: CustomerData, kyc: KYCData, bran
   const docTitle = isApproved ? "KYC Approval Letter" : isRejected ? "KYC Rejection Notice" : "KYC Submission Receipt";
 
   return {
-    pdf: generateDocument({
+    pdf: await generateDocument({
       config: {
         title: docTitle,
         documentType: docType,

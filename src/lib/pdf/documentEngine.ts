@@ -16,7 +16,8 @@
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { encode } from "uqr";
-import { LOGO_BASE64 } from "./logoBase64";
+// Logo is fetched at runtime to avoid embedding 169KB base64 in the JS bundle
+import { getLogoBase64 } from "./logoBase64";
 import type { PDFBrandColors } from "./brandColorForPDF";
 
 // ─── Types ───────────────────────────────────────────────────────
@@ -168,7 +169,7 @@ function generateQRBase64(value: string, size: number = 80): string {
 
 // ─── Main Generator ─────────────────────────────────────────────
 
-export function generateDocument(options: DocumentOptions): jsPDF {
+export async function generateDocument(options: DocumentOptions): Promise<jsPDF> {
   const { config, customer, content, institution, additionalDisclaimer, skipQR, brandColors } = options;
   const inst = { ...DEFAULT_INSTITUTION, ...institution };
   const doc = new jsPDF({ unit: "mm", format: "a4" });
@@ -191,9 +192,14 @@ export function generateDocument(options: DocumentOptions): jsPDF {
   doc.setFillColor(...COLORS.primary);
   doc.rect(0, 0, PAGE_WIDTH, 3, "F");
 
-  // Logo
+  // Logo — fetched at runtime so the 169KB base64 is never in the JS bundle
+  const logoBase64 = await getLogoBase64();
   try {
-    doc.addImage(LOGO_BASE64, "PNG", MARGIN_LEFT, y + 2, 12, 12);
+    if (logoBase64) {
+      doc.addImage(logoBase64, "PNG", MARGIN_LEFT, y + 2, 12, 12);
+    } else {
+      throw new Error("Logo not loaded");
+    }
   } catch {
     // Fallback: draw a small box if logo fails
     doc.setFillColor(...COLORS.primary);

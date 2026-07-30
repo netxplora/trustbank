@@ -4,21 +4,24 @@ import { supabase } from "@/integrations/supabase/client";
 import { PageHero } from "@/components/public/PageHero";
 import { FadeIn, SlideUp, StaggerContainer, StaggerItem } from "@/components/public/Motion";
 import { SectionHeader } from "@/components/public/SectionHeader";
-import { infoPagesData, InfoPageContent } from "@/data/infoPages";
+import type { InfoPageContent } from "@/data/infoPages";
 import NotFound from "./NotFound";
 import { CheckCircle2, FileText, ArrowRight, ShieldCheck, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
-// Premium Local Hero Images
-import HeroDigital from "@/assets/hero-digital.jpg";
-import HeroLoans from "@/assets/hero-loans.jpg";
-import HeroChecking from "@/assets/hero-checking.png";
-import HeroSavings from "@/assets/hero-savings.jpg";
-import HeroServices from "@/assets/hero-services.jpg";
-import HeroAbout from "@/assets/hero-about.jpg";
-import HeroContact from "@/assets/hero-contact.jpg";
-import HeroFaq from "@/assets/hero-faq.jpg";
+// Hero images referenced as URL strings — Vite copies them to /assets/ and serves them separately.
+// This prevents them from being inlined into the JS chunk (which caused the 179KB chunk size).
+const HERO_IMAGES: Record<string, string> = {
+  digital: new URL("@/assets/hero-digital.jpg", import.meta.url).href,
+  loans: new URL("@/assets/hero-loans.jpg", import.meta.url).href,
+  checking: new URL("@/assets/hero-checking.png", import.meta.url).href,
+  savings: new URL("@/assets/hero-savings.jpg", import.meta.url).href,
+  services: new URL("@/assets/hero-services.jpg", import.meta.url).href,
+  about: new URL("@/assets/hero-about.jpg", import.meta.url).href,
+  contact: new URL("@/assets/hero-contact.jpg", import.meta.url).href,
+  faq: new URL("@/assets/hero-faq.jpg", import.meta.url).href,
+};
 
 interface CmsPage {
   id: string;
@@ -32,39 +35,33 @@ interface CmsPage {
 export default function InfoPage() {
   const { slug } = useParams<{ slug: string }>();
   const [cmsPage, setCmsPage] = useState<CmsPage | null>(null);
+  const [localData, setLocalData] = useState<InfoPageContent | null>(null);
   const [loading, setLoading] = useState(true);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   useEffect(() => {
-    if (slug) {
-      fetchCmsPage();
-    }
-  }, [slug]);
-
-  const fetchCmsPage = async () => {
+    if (!slug) return;
     setLoading(true);
-    try {
-      const { data } = await (supabase as any)
+
+    // Load CMS data and local page data concurrently
+    Promise.all([
+      // CMS fetch
+      (supabase as any)
         .from("cms_pages")
-        .select("*")
+        .select("id, slug, title, description, content_blocks, is_published")
         .eq("slug", slug)
         .eq("is_published", true)
-        .maybeSingle();
+        .maybeSingle()
+        .then(({ data }: { data: CmsPage | null }) => setCmsPage(data ?? null))
+        .catch(() => setCmsPage(null)),
+      // Dynamic import of 204KB data file — loaded only when user visits an info page
+      import("@/data/infoPages")
+        .then((m) => setLocalData(m.infoPagesData[slug] ?? null))
+        .catch(() => setLocalData(null)),
+    ]).finally(() => setLoading(false));
+  }, [slug]);
 
-      if (data) {
-        setCmsPage(data as CmsPage);
-      } else {
-        setCmsPage(null);
-      }
-    } catch (e) {
-      console.error("Error fetching CMS page:", e);
-      setCmsPage(null);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const localData = slug ? infoPagesData[slug] : null;
+  // Kept for line-count parity — localData is now managed by state above
 
   if (loading) {
     return (
@@ -84,7 +81,7 @@ export default function InfoPage() {
   const description = cmsPage?.description || localData?.description || "";
   
   // Intelligent Image Selection using premium local assets
-  let finalImage = HeroDigital; // Default fallback
+  let finalImage: string = HERO_IMAGES.digital; // Default fallback
   const s = slug || "";
   
   if (localData?.image && !localData.image.includes('unsplash.com')) {
@@ -92,21 +89,21 @@ export default function InfoPage() {
   } else {
     // Map slugs to local premium assets
     if (s.includes('loan') || s.includes('mortgage') || s.includes('finance')) {
-      finalImage = HeroLoans;
+      finalImage = HERO_IMAGES.loans;
     } else if (s.includes('card') || s.includes('checking') || s.includes('personal')) {
-      finalImage = HeroChecking;
+      finalImage = HERO_IMAGES.checking;
     } else if (s.includes('youth') || s.includes('student') || s.includes('saving') || s.includes('invest')) {
-      finalImage = HeroSavings;
+      finalImage = HERO_IMAGES.savings;
     } else if (s.includes('business') || s.includes('corporate') || s.includes('merchant') || s.includes('payroll')) {
-      finalImage = HeroServices;
+      finalImage = HERO_IMAGES.services;
     } else if (s.includes('about') || s.includes('leader') || s.includes('govern')) {
-      finalImage = HeroAbout;
+      finalImage = HERO_IMAGES.about;
     } else if (s.includes('support') || s.includes('contact') || s.includes('help')) {
-      finalImage = HeroContact;
+      finalImage = HERO_IMAGES.contact;
     } else if (s.includes('faq') || s.includes('complaint') || s.includes('security')) {
-      finalImage = HeroFaq;
+      finalImage = HERO_IMAGES.faq;
     } else if (s.includes('digital') || s.includes('mobile') || s.includes('online')) {
-      finalImage = HeroDigital;
+      finalImage = HERO_IMAGES.digital;
     }
   }
 

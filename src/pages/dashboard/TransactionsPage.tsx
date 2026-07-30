@@ -30,28 +30,52 @@ export default function TransactionsPage() {
   const { user, profile } = useAuth();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
+
+  const PAGE_SIZE = 25;
+  const offsetRef = React.useRef(0);
+
+  // Debounce search — 300ms delay prevents filter on every keystroke
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(timer);
+  }, [search]);
 
   useEffect(() => {
     if (user?.id) {
-      fetchTransactions();
+      offsetRef.current = 0;
+      setTransactions([]);
+      setHasMore(true);
+      fetchTransactions(0);
     }
   }, [user]);
 
-  const fetchTransactions = async () => {
-    setLoading(true);
-    const { data, error } = await (supabase as any)
+  const fetchTransactions = async (offset: number) => {
+    if (offset === 0) setLoading(true);
+    else setLoadingMore(true);
+
+    const { data } = await (supabase as any)
       .from('transactions')
-      .select('*')
+      .select('id, type, amount, balance_after, description, reference, recipient_name, recipient_account, recipient_bank, status, created_at')
       .eq('user_id', user!.id)
-      .order('created_at', { ascending: false });
-      
+      .order('created_at', { ascending: false })
+      .range(offset, offset + PAGE_SIZE - 1);
+
     if (data) {
-      setTransactions(data as unknown as Transaction[]);
+      const rows = data as unknown as Transaction[];
+      setTransactions(prev => offset === 0 ? rows : [...prev, ...rows]);
+      setHasMore(rows.length === PAGE_SIZE);
+      offsetRef.current = offset + rows.length;
     }
     setLoading(false);
+    setLoadingMore(false);
   };
+
+  const handleLoadMore = () => fetchTransactions(offsetRef.current);
 
   const handleDownloadReceipt = async () => {
     if (!selectedTx || !user) return;
@@ -100,7 +124,7 @@ export default function TransactionsPage() {
 
     // Generate PDF
     const brandColors = await fetchBrandPDFColors();
-    const pdf = generateDocument({
+    const pdf = await generateDocument({
       config: {
         title: `${txTypeLabel} Receipt`,
         documentType: docType,
@@ -158,8 +182,8 @@ export default function TransactionsPage() {
   };
 
   const filteredTxs = transactions.filter(tx => 
-    tx.description?.toLowerCase().includes(search.toLowerCase()) || 
-    tx.reference?.toLowerCase().includes(search.toLowerCase())
+    tx.description?.toLowerCase().includes(debouncedSearch.toLowerCase()) || 
+    tx.reference?.toLowerCase().includes(debouncedSearch.toLowerCase())
   );
 
   return (
@@ -251,6 +275,25 @@ export default function TransactionsPage() {
           </div>
         )}
       </SlideUp>
+
+      {/* Load More Button */}
+      {!loading && hasMore && filteredTxs.length >= PAGE_SIZE && (
+        <div className="flex justify-center pt-2">
+          <Button
+            variant="outline"
+            className="h-10 px-6 rounded-xl text-xs font-bold"
+            onClick={handleLoadMore}
+            disabled={loadingMore}
+          >
+            {loadingMore ? (
+              <span className="flex items-center gap-2">
+                <span className="h-3.5 w-3.5 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                Loading…
+              </span>
+            ) : "Load More Transactions"}
+          </Button>
+        </div>
+      )}
 
       {/* Dedicated Transaction Detail View Modal */}
       <Dialog open={!!selectedTx} onOpenChange={(open) => !open && setSelectedTx(null)}>

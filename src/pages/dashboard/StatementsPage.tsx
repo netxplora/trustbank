@@ -147,7 +147,7 @@ export default function StatementsPage() {
       // 2. Generate PDF using jsPDF
       const customerName = profile?.display_name || `${profile?.first_name || ""} ${profile?.last_name || ""}`.trim() || "Valued Customer";
       const brandColors = await fetchBrandPDFColors();
-      const doc = generateStatementPDF(
+      const doc = await generateStatementPDF(
         { name: customerName, email: profile?.email || "", phone: profile?.phone || "", accountNumber: account.account_number },
         account, txList as any[], month.label, brandColors
       );
@@ -418,7 +418,7 @@ export default function StatementsPage() {
                                   .lte("created_at", `${h.period_end}T23:59:59Z`);
 
                                 const customerName = profile?.display_name || "Valued Customer";
-                                const doc = generateStatementPDF(
+                                const doc = await generateStatementPDF(
                                   { name: customerName, email: profile?.email || "", phone: profile?.phone || "", accountNumber: account.account_number },
                                   account,
                                   (txData as any[]) || [],

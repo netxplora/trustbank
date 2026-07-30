@@ -1,13 +1,28 @@
-import React from "react";
-import { motion, HTMLMotionProps } from "framer-motion";
+import React, { useReducer, useEffect, useState } from "react";
+import { motion, HTMLMotionProps, useReducedMotion } from "framer-motion";
 
-export const FadeIn = ({ children, delay = 0, className, ...props }: HTMLMotionProps<"div"> & { delay?: number }) => {
+// Shared hook: respects OS prefers-reduced-motion
+function usePrefersReducedMotion() {
+  const shouldReduceMotion = useReducedMotion();
+  return shouldReduceMotion ?? false;
+}
+
+export const FadeIn = ({
+  children,
+  delay = 0,
+  className,
+  ...props
+}: HTMLMotionProps<"div"> & { delay?: number }) => {
+  const reduced = usePrefersReducedMotion();
+  if (reduced) {
+    return <div className={className}>{children}</div>;
+  }
   return (
     <motion.div
       initial={{ opacity: 0, y: 15 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.5, delay, ease: "easeOut" }}
+      transition={{ duration: 0.45, delay, ease: "easeOut" }}
       className={className}
       {...props}
     >
@@ -16,13 +31,22 @@ export const FadeIn = ({ children, delay = 0, className, ...props }: HTMLMotionP
   );
 };
 
-export const SlideUp = ({ children, delay = 0, className, ...props }: HTMLMotionProps<"div"> & { delay?: number }) => {
+export const SlideUp = ({
+  children,
+  delay = 0,
+  className,
+  ...props
+}: HTMLMotionProps<"div"> & { delay?: number }) => {
+  const reduced = usePrefersReducedMotion();
+  if (reduced) {
+    return <div className={className}>{children}</div>;
+  }
   return (
     <motion.div
-      initial={{ opacity: 0, y: 30 }}
+      initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.5, delay, ease: [0.22, 1, 0.36, 1] }}
       className={className}
       {...props}
     >
@@ -31,19 +55,29 @@ export const SlideUp = ({ children, delay = 0, className, ...props }: HTMLMotion
   );
 };
 
-export const StaggerContainer = ({ children, className, ...props }: HTMLMotionProps<"div">) => {
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.08 },
+  },
+};
+
+export const StaggerContainer = ({
+  children,
+  className,
+  ...props
+}: HTMLMotionProps<"div">) => {
+  const reduced = usePrefersReducedMotion();
+  if (reduced) {
+    return <div className={className}>{children}</div>;
+  }
   return (
     <motion.div
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, margin: "-50px" }}
-      variants={{
-        hidden: { opacity: 0 },
-        visible: {
-          opacity: 1,
-          transition: { staggerChildren: 0.1 },
-        },
-      }}
+      variants={containerVariants}
       className={className}
       {...props}
     >
@@ -52,19 +86,23 @@ export const StaggerContainer = ({ children, className, ...props }: HTMLMotionPr
   );
 };
 
-export const StaggerItem = ({ children, className, ...props }: HTMLMotionProps<"div">) => {
+const itemVariants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
+};
+
+export const StaggerItem = ({
+  children,
+  className,
+  ...props
+}: HTMLMotionProps<"div">) => {
+  const reduced = usePrefersReducedMotion();
+  if (reduced) {
+    return <div className={className}>{children}</div>;
+  }
   return (
-    <motion.div
-      variants={{
-        hidden: { opacity: 0, y: 20 },
-        visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
-      }}
-      className={className}
-      {...props}
-    >
+    <motion.div variants={itemVariants} className={className} {...props}>
       {children}
     </motion.div>
   );
 };
-
-

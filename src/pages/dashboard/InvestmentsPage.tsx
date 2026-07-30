@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, AreaChart, Area, XAxis, YAxis } from "recharts";
 import {
   TrendingUp,
@@ -374,57 +374,63 @@ export default function InvestmentsPage() {
   const cashVal = selectedAccount ? Number(selectedAccount.cash_balance) : 0;
   const totalVal = holdingsVal + cashVal;
 
-  // Multi-field search & category filtering logic
-  let filteredStocks = dbStocks.filter((s) => {
+  // Memoised filtering & sorting — only recomputes when deps change
+  // (prevents expensive re-computation on every live-price tick)
+  const filteredStocks = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
-    const matchesSearch =
-      q === "" ||
-      s.symbol.toLowerCase().includes(q) ||
-      s.name.toLowerCase().includes(q) ||
-      s.asset_class.toLowerCase().includes(q) ||
-      s.category.toLowerCase().includes(q);
+    let result = dbStocks.filter((s) => {
+      const matchesSearch =
+        q === "" ||
+        s.symbol.toLowerCase().includes(q) ||
+        s.name.toLowerCase().includes(q) ||
+        s.asset_class.toLowerCase().includes(q) ||
+        s.category.toLowerCase().includes(q);
 
-    const matchesCat =
-      categoryFilter === "all"
-        ? true
-        : categoryFilter === "etf"
-        ? s.asset_class === "etf"
-        : s.category === categoryFilter;
+      const matchesCat =
+        categoryFilter === "all"
+          ? true
+          : categoryFilter === "etf"
+          ? s.asset_class === "etf"
+          : s.category === categoryFilter;
 
-    return matchesSearch && matchesCat;
-  });
-
-  // Sorting logic
-  if (sortBy === "price_asc") {
-    filteredStocks = [...filteredStocks].sort((a, b) => (livePrices[a.symbol] || a.current_price) - (livePrices[b.symbol] || b.current_price));
-  } else if (sortBy === "price_desc") {
-    filteredStocks = [...filteredStocks].sort((a, b) => (livePrices[b.symbol] || b.current_price) - (livePrices[a.symbol] || a.current_price));
-  } else if (sortBy === "gainers") {
-    filteredStocks = [...filteredStocks].sort((a, b) => b.change_percent_24h - a.change_percent_24h);
-  } else if (sortBy === "symbol") {
-    filteredStocks = [...filteredStocks].sort((a, b) => a.symbol.localeCompare(b.symbol));
-  }
-
-  const allocationData = Object.keys(ASSET_COLORS)
-    .map((key) => {
-      const value = holdings
-        .filter((h) => h.asset_class === key)
-        .reduce((sum, h) => sum + h.quantity * h.current_price, 0);
-      return {
-        name: key.toUpperCase(),
-        value: value || 0,
-        color: ASSET_COLORS[key as keyof typeof ASSET_COLORS],
-      };
-    })
-    .filter((d) => d.value > 0);
-
-  if (cashVal > 0) {
-    allocationData.push({
-      name: "LIQUID CASH",
-      value: cashVal,
-      color: "hsl(220, 10%, 70%)",
+      return matchesSearch && matchesCat;
     });
-  }
+
+    if (sortBy === "price_asc") {
+      result = [...result].sort((a, b) => (livePrices[a.symbol] || a.current_price) - (livePrices[b.symbol] || b.current_price));
+    } else if (sortBy === "price_desc") {
+      result = [...result].sort((a, b) => (livePrices[b.symbol] || b.current_price) - (livePrices[a.symbol] || a.current_price));
+    } else if (sortBy === "gainers") {
+      result = [...result].sort((a, b) => b.change_percent_24h - a.change_percent_24h);
+    } else if (sortBy === "symbol") {
+      result = [...result].sort((a, b) => a.symbol.localeCompare(b.symbol));
+    }
+    return result;
+  }, [dbStocks, livePrices, searchQuery, categoryFilter, sortBy]);
+
+  const allocationData = useMemo(() => {
+    const data = Object.keys(ASSET_COLORS)
+      .map((key) => {
+        const value = holdings
+          .filter((h) => h.asset_class === key)
+          .reduce((sum, h) => sum + h.quantity * h.current_price, 0);
+        return {
+          name: key.toUpperCase(),
+          value: value || 0,
+          color: ASSET_COLORS[key as keyof typeof ASSET_COLORS],
+        };
+      })
+      .filter((d) => d.value > 0);
+
+    if (cashVal > 0) {
+      data.push({
+        name: "LIQUID CASH",
+        value: cashVal,
+        color: "hsl(220, 10%, 70%)",
+      });
+    }
+    return data;
+  }, [holdings, cashVal]);
 
   return (
     <div className="space-y-4 max-w-6xl mx-auto px-1 sm:px-4 py-2 font-sans">

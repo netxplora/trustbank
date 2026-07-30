@@ -107,7 +107,7 @@ export default function CustomerDashboardHome() {
     if (!user?.id) return;
     const { data } = await (supabase as any)
       .from('transactions')
-      .select('*')
+      .select('id, type, amount, description, reference, status, created_at')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
       .limit(2);
@@ -124,7 +124,7 @@ export default function CustomerDashboardHome() {
     try {
       const { data } = await supabase
         .from("accounts")
-        .select("*")
+        .select("id, account_number, account_type, balance, ledger_balance, status, currency")
         .eq("user_id", user?.id || "")
         .eq("status", "active");
 
