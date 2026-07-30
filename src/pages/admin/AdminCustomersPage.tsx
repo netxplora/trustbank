@@ -57,7 +57,7 @@ const AdminCustomersPage = () => {
   const fetchCustomers = async () => {
     try {
       // Fetch profiles
-      const { data: profilesData, error: profilesError } = await (supabase as any).from("profiles").select("id, user_id, display_name, first_name, last_name, date_of_birth, gender, nationality, mailing_address, city, state_province, postal_code, country, occupation, employer_name, annual_income_range, source_of_funds, tax_id, gov_id_type, gov_id_number, preferred_language, preferred_currency, email, phone, account_status, kyc_status, kyc_tier, account_number, role, created_at, loan_limit").order("created_at", { ascending: false }).limit(100);
+      const { data: profilesData, error: profilesError } = await (supabase as any).from("profiles").select("id, user_id, display_name, first_name, last_name, date_of_birth, gender, nationality, mailing_address, city, state_province, postal_code, country, occupation, employer_name, annual_income_range, source_of_funds, tax_id, gov_id_type, gov_id_number, preferred_language, preferred_currency, email, phone, account_status, kyc_status, kyc_tier, account_number, role, created_at").order("created_at", { ascending: false }).limit(100);
       if (profilesError) throw profilesError;
       
       // Fetch user_roles
