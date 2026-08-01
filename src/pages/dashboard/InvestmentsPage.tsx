@@ -135,6 +135,7 @@ export default function InvestmentsPage() {
   const [fundAmount, setFundAmount] = useState("");
   const [checkingAccounts, setCheckingAccounts] = useState<any[]>([]);
   const [selectedCheckingId, setSelectedCheckingId] = useState("");
+  const [downloadingPdf, setDownloadingPdf] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -753,31 +754,40 @@ export default function InvestmentsPage() {
                       className="w-full mt-3 h-7 text-[10px] font-bold gap-1.5 rounded-lg"
                       onClick={async () => {
                         if (!user || !profile) return;
-                        const brandColors = await fetchBrandPDFColors();
-                        const invData = holdings.map(h => ({
-                          id: h.id,
-                          symbol: h.symbol,
-                          name: h.name,
-                          shares: h.quantity,
-                          purchase_price: h.avg_cost,
-                          current_price: livePrices[h.symbol] || h.current_price,
-                          purchase_date: new Date().toISOString(),
-                          sector: h.asset_class,
-                        }));
-                        const costBasis = holdings.reduce((sum, h) => sum + h.quantity * h.avg_cost, 0);
-                        const { pdf, referenceNumber, verificationCode } = generatePortfolioSummaryPDF(
-                          { name: profile.display_name || profile.first_name || "Valued Customer", accountNumber: profile.account_number || "", email: profile.email || "", phone: profile.phone || "" },
-                          invData,
-                          holdingsVal,
-                          costBasis,
-                          brandColors
-                        );
-                        pdf.save(`TrustBank_Portfolio_${new Date().toISOString().slice(0, 10)}.pdf`);
-                        await saveDocumentRecord({ userId: user.id, documentType: "portfolio_summary", documentCategory: "investments", referenceNumber, verificationCode, title: "Investment Portfolio Summary", metadata: { total_value: holdingsVal, holdings_count: holdings.length } });
+                        setDownloadingPdf(true);
+                        try {
+                          const brandColors = await fetchBrandPDFColors();
+                          const invData = holdings.map(h => ({
+                            id: h.id,
+                            symbol: h.symbol,
+                            name: h.name,
+                            shares: h.quantity,
+                            purchase_price: h.avg_cost,
+                            current_price: livePrices[h.symbol] || h.current_price,
+                            purchase_date: new Date().toISOString(),
+                            sector: h.asset_class,
+                          }));
+                          const costBasis = holdings.reduce((sum, h) => sum + h.quantity * h.avg_cost, 0);
+                          const result = await generatePortfolioSummaryPDF(
+                            { name: profile.display_name || profile.first_name || "Valued Customer", accountNumber: (profile as any).account_number || "", email: (profile as any).email || "", phone: (profile as any).phone || "" },
+                            invData,
+                            holdingsVal,
+                            costBasis,
+                            brandColors
+                          );
+                          result.pdf.save(`TrustBank_Portfolio_${new Date().toISOString().slice(0, 10)}.pdf`);
+                          await saveDocumentRecord({ userId: user.id, documentType: "portfolio_summary", documentCategory: "investments", referenceNumber: result.referenceNumber, verificationCode: result.verificationCode, title: "Investment Portfolio Summary", metadata: { total_value: holdingsVal, holdings_count: holdings.length } });
+                          toast({ title: "Report Downloaded", description: "Your portfolio report has been saved." });
+                        } catch (err: any) {
+                          console.error("PDF generation error:", err);
+                          toast({ title: "Download Failed", description: err?.message || "Could not generate the report. Please try again.", variant: "destructive" });
+                        } finally {
+                          setDownloadingPdf(false);
+                        }
                       }}
-                      disabled={holdings.length === 0}
+                      disabled={holdings.length === 0 || downloadingPdf}
                     >
-                      <Download className="h-3 w-3" /> Download Portfolio Report
+                      {downloadingPdf ? <><span className="h-3 w-3 border border-current border-t-transparent rounded-full animate-spin" /> Generating...</> : <><Download className="h-3 w-3" /> Download Portfolio Report</>}
                     </Button>
                   </div>
                 </StaggerItem>
