@@ -195,9 +195,4 @@ export default defineConfig(({ mode }) => ({
       },
     },
   },
-  esbuild: {
-    // Drop console and debugger only in production
-    drop: mode === "production" ? ["console", "debugger"] : [],
-    legalComments: 'none',
-  },
 }));
