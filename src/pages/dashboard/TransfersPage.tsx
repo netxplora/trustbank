@@ -5,8 +5,11 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { TransactionPinDialog } from "@/components/dashboard/TransactionPinDialog";
 import { StaggerContainer, StaggerItem, FadeIn, SlideUp } from "@/components/public/Motion";
 import { sanitizeInput } from "@/utils/security";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface Account { id: string; account_type: string; account_number: string; balance: number; }
 interface Transfer { id: string; to_name: string | null; to_bank: string | null; to_account_number: string; amount: number; status: string; created_at: string; reference: string | null; target_currency?: string; destination_amount?: number; transfer_type?: string; }
@@ -31,8 +34,11 @@ export default function TransfersPage() {
   const [recentBeneficiaries, setRecentBeneficiaries] = useState<Beneficiary[]>([]);
   
   // Forms
-  const [form, setForm] = useState({ fromAccountId: "", toAccount: "", toName: "", toBank: "", amount: "", narration: "" });
-  const [intlForm, setIntlForm] = useState({ fromAccountId: "", toName: "", toAccount: "", swiftCode: "", iban: "", bankName: "", targetCurrency: "EUR", amountUsd: "", narration: "" });
+  const [form, setForm] = useState({ fromAccountId: "", toAccount: "", toName: "", toBank: "", amount: "", narration: "", saveBeneficiary: false });
+  const [intlForm, setIntlForm] = useState({ fromAccountId: "", toName: "", toAccount: "", swiftCode: "", iban: "", bankName: "", targetCurrency: "EUR", amountUsd: "", narration: "", saveBeneficiary: false });
+  
+  const [pinDialogOpen, setPinDialogOpen] = useState(false);
+  const [pendingTransfer, setPendingTransfer] = useState<"local" | "intl" | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -57,13 +63,22 @@ export default function TransfersPage() {
     const txs = (data as Transfer[]) || [];
     setTransfers(txs);
 
-    // Extract unique recent beneficiaries
+    const { data: bData } = await supabase.from("beneficiaries").select("name, bank, account_number").eq("user_id", user.id);
+    const savedBens = (bData || []).map(b => ({
+      name: b.name,
+      account: b.account_number,
+      bank: b.bank,
+      color: "bg-primary/20 text-primary border border-primary/30",
+      initial: b.name.charAt(0).toUpperCase()
+    }));
+
+    // Extract unique recent beneficiaries not already in saved
     const beneficiariesMap: Record<string, Beneficiary> = {};
     const colors = ["bg-blue-500", "bg-purple-500", "bg-teal-500", "bg-orange-500", "bg-pink-500", "bg-indigo-500"];
     let colorIdx = 0;
 
     txs.forEach(tx => {
-      if (tx.to_name && tx.to_account_number && !beneficiariesMap[tx.to_account_number]) {
+      if (tx.to_name && tx.to_account_number && !beneficiariesMap[tx.to_account_number] && !savedBens.find(b => b.account === tx.to_account_number)) {
         beneficiariesMap[tx.to_account_number] = {
           name: tx.to_name,
           account: tx.to_account_number,
@@ -75,7 +90,7 @@ export default function TransfersPage() {
       }
     });
 
-    setRecentBeneficiaries(Object.values(beneficiariesMap).slice(0, 8));
+    setRecentBeneficiaries([...savedBens, ...Object.values(beneficiariesMap)].slice(0, 10));
   };
 
   const handleSelectBeneficiary = (b: Beneficiary) => {
@@ -103,24 +118,8 @@ export default function TransfersPage() {
     const amount = parseFloat(form.amount);
     if (!checkLimits(amount, tier)) return;
 
-    setLoading(true);
-    const { data, error } = await (supabase.rpc as any)("process_transfer", {
-      p_user_id: user.id,
-      p_from_account_id: form.fromAccountId,
-      p_to_account_number: sanitizeInput(form.toAccount),
-      p_amount: amount,
-      p_narration: form.narration ? sanitizeInput(form.narration) : null,
-      p_to_name: form.toName ? sanitizeInput(form.toName) : null,
-      p_to_bank: tab === "other" ? sanitizeInput(form.toBank) : "TrustBank"
-    });
-
-    if (error) { toast({ title: "Transfer Failed", description: error.message, variant: "destructive" }); setLoading(false); return; }
-
-    toast({ title: "Transfer Successful!", description: `$${amount.toLocaleString()} sent successfully.` });
-    setForm(f => ({ ...f, toAccount: "", toName: "", toBank: "", amount: "", narration: "" }));
-    setLoading(false);
-    fetchTransfers();
-    fetchAccounts();
+    setPendingTransfer("local");
+    setPinDialogOpen(true);
   };
 
   const handleIntlTransfer = async (e: React.FormEvent) => {
@@ -130,21 +129,89 @@ export default function TransfersPage() {
     const amountUsd = parseFloat(intlForm.amountUsd);
     if (!checkLimits(amountUsd, tier)) return;
 
+    setPendingTransfer("intl");
+    setPinDialogOpen(true);
+  };
+
+  const executeTransfer = async (pin: string) => {
+    if (pendingTransfer === "local") {
+      await executeLocal(pin);
+    } else if (pendingTransfer === "intl") {
+      await executeIntl(pin);
+    }
+  };
+
+  const executeLocal = async (pin: string) => {
+    setLoading(true);
+    const amount = parseFloat(form.amount);
+    const { data, error } = await (supabase.rpc as any)("process_transfer", {
+      p_user_id: user?.id,
+      p_from_account_id: form.fromAccountId,
+      p_to_account_number: sanitizeInput(form.toAccount),
+      p_amount: amount,
+      p_narration: form.narration ? sanitizeInput(form.narration) : null,
+      p_to_name: form.toName ? sanitizeInput(form.toName) : null,
+      p_to_bank: tab === "other" ? sanitizeInput(form.toBank) : "TrustBank",
+      p_pin: pin
+    });
+
+    if (error) { toast({ title: "Transfer Failed", description: error.message, variant: "destructive" }); setLoading(false); setPinDialogOpen(false); return; }
+
+    toast({ title: "Transfer Successful!", description: `$${amount.toLocaleString()} sent successfully.` });
+    
+    if (form.saveBeneficiary) {
+      const { data: existing } = await supabase.from("beneficiaries").select("id").eq("user_id", user.id).eq("account_number", sanitizeInput(form.toAccount)).maybeSingle();
+      if (!existing) {
+        await supabase.from("beneficiaries").insert({
+          user_id: user.id,
+          name: sanitizeInput(form.toName || "Saved Beneficiary"),
+          bank: tab === "other" ? sanitizeInput(form.toBank) : "TrustBank",
+          account_number: sanitizeInput(form.toAccount)
+        });
+        toast({ title: "Beneficiary Saved", description: `${form.toName} has been saved for future transfers.` });
+      }
+    }
+
+    setForm(f => ({ ...f, toAccount: "", toName: "", toBank: "", amount: "", narration: "", saveBeneficiary: false }));
+    setLoading(false);
+    setPinDialogOpen(false);
+    fetchTransfers();
+    fetchAccounts();
+  };
+
+  const executeIntl = async (pin: string) => {
+    setLoading(true);
+    const amountUsd = parseFloat(intlForm.amountUsd);
     const selectedCurrency = CURRENCIES.find(c => c.code === intlForm.targetCurrency) || CURRENCIES[0];
     const destinationAmount = amountUsd * selectedCurrency.rate;
 
-    setLoading(true);
     const { data, error } = await (supabase.rpc as any)("process_international_wire", {
-      p_user_id: user.id, p_from_account_id: intlForm.fromAccountId, p_to_account_number: sanitizeInput(intlForm.toAccount), p_to_name: sanitizeInput(intlForm.toName),
+      p_user_id: user?.id, p_from_account_id: intlForm.fromAccountId, p_to_account_number: sanitizeInput(intlForm.toAccount), p_to_name: sanitizeInput(intlForm.toName),
       p_to_bank: sanitizeInput(intlForm.bankName), p_swift_code: sanitizeInput(intlForm.swiftCode), p_iban: sanitizeInput(intlForm.iban), p_target_currency: selectedCurrency.code,
       p_exchange_rate: selectedCurrency.rate, p_amount_usd: amountUsd, p_destination_amount: destinationAmount, p_narration: intlForm.narration ? sanitizeInput(intlForm.narration) : null,
+      p_pin: pin
     });
 
-    if (error) { toast({ title: "Wire Failed", description: error.message, variant: "destructive" }); setLoading(false); return; }
+    if (error) { toast({ title: "Wire Failed", description: error.message, variant: "destructive" }); setLoading(false); setPinDialogOpen(false); return; }
 
     toast({ title: "SWIFT Wire Initiated!", description: `$${amountUsd.toLocaleString()} sent successfully. Reference: ${data?.reference}` });
-    setIntlForm(f => ({ ...f, toAccount: "", toName: "", swiftCode: "", iban: "", bankName: "", amountUsd: "", narration: "" }));
+    
+    if (intlForm.saveBeneficiary) {
+      const { data: existing } = await supabase.from("beneficiaries").select("id").eq("user_id", user.id).eq("account_number", sanitizeInput(intlForm.toAccount)).maybeSingle();
+      if (!existing) {
+        await supabase.from("beneficiaries").insert({
+          user_id: user.id,
+          name: sanitizeInput(intlForm.toName),
+          bank: sanitizeInput(intlForm.bankName),
+          account_number: sanitizeInput(intlForm.toAccount)
+        });
+        toast({ title: "Beneficiary Saved", description: `${intlForm.toName} has been saved for future transfers.` });
+      }
+    }
+
+    setIntlForm(f => ({ ...f, toAccount: "", toName: "", swiftCode: "", iban: "", bankName: "", amountUsd: "", narration: "", saveBeneficiary: false }));
     setLoading(false);
+    setPinDialogOpen(false);
     fetchTransfers();
     fetchAccounts();
   };
@@ -197,7 +264,7 @@ export default function TransfersPage() {
               {/* Recent Beneficiaries Quick Select */}
               {recentBeneficiaries.length > 0 && tab !== "intl" && (
                 <div className="mb-4 border-b pb-3">
-                  <h3 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2">Recent Payees</h3>
+                  <h3 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2">Saved & Recent Payees</h3>
                   <div className="flex gap-3 overflow-x-auto pb-1 hide-scrollbar">
                     {recentBeneficiaries.map((b, i) => (
                       <div key={i} onClick={() => handleSelectBeneficiary(b)} className="flex flex-col items-center gap-1 cursor-pointer group shrink-0">
@@ -216,11 +283,18 @@ export default function TransfersPage() {
                 <form onSubmit={handleTransfer} className="space-y-3">
                   <div className="bg-muted/20 rounded-lg p-2.5 border border-border/40 mb-2">
                     <label className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5 block">Debit From Account</label>
-                    <select className="w-full bg-transparent font-bold text-xs text-foreground focus:outline-none appearance-none" value={form.fromAccountId} onChange={(e) => setForm(f => ({ ...f, fromAccountId: e.target.value }))}>
-                      {accounts.map((a) => (
-                        <option key={a.id} value={a.id}>{a.account_type.toUpperCase()} - ****{a.account_number.slice(-4)} (${Number(a.balance).toLocaleString()})</option>
-                      ))}
-                    </select>
+                    <Select value={form.fromAccountId} onValueChange={(val) => setForm(f => ({ ...f, fromAccountId: val }))}>
+                      <SelectTrigger className="w-full h-8 bg-transparent border-0 shadow-none px-0 focus:ring-0 font-bold text-xs text-foreground data-[state=open]:text-primary transition-colors">
+                        <SelectValue placeholder="Select Account" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {accounts.map((a) => (
+                          <SelectItem key={a.id} value={a.id}>
+                            {a.account_type.toUpperCase()} - ****{a.account_number.slice(-4)} (${Number(a.balance).toLocaleString()})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="space-y-2.5 text-xs">
@@ -260,19 +334,35 @@ export default function TransfersPage() {
                     </div>
                   </div>
 
-                  <Button type="submit" className="w-full h-9 rounded-lg text-xs font-bold mt-2 shadow-sm" disabled={loading}>
-                    {loading ? "Processing..." : <><Send className="h-3.5 w-3.5 mr-1.5" /> Send Money Now</>}
-                  </Button>
+                  <div className="flex items-center space-x-2 pt-1 pb-1">
+                    <Checkbox id="save-beneficiary" checked={form.saveBeneficiary} onCheckedChange={(checked) => setForm(f => ({ ...f, saveBeneficiary: checked === true }))} />
+                    <label htmlFor="save-beneficiary" className="text-[10px] font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                      Save this recipient as a beneficiary
+                    </label>
+                  </div>
+
+                  <div className="flex justify-center pt-2">
+                    <Button type="submit" className="w-full max-w-[220px] h-10 rounded-xl text-xs font-bold shadow-md" disabled={loading}>
+                      {loading ? "Processing..." : <><Send className="h-3.5 w-3.5 mr-1.5" /> Send Money Now</>}
+                    </Button>
+                  </div>
                 </form>
               ) : (
                 <form onSubmit={handleIntlTransfer} className="space-y-3">
                   <div className="bg-muted/20 rounded-lg p-2.5 border border-border/40 mb-2">
                     <label className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5 block">Debit From Account</label>
-                    <select className="w-full bg-transparent font-bold text-xs text-foreground focus:outline-none appearance-none" value={intlForm.fromAccountId} onChange={(e) => setIntlForm(f => ({ ...f, fromAccountId: e.target.value }))}>
-                      {accounts.map((a) => (
-                        <option key={a.id} value={a.id}>{a.account_type.toUpperCase()} - ****{a.account_number.slice(-4)} (${Number(a.balance).toLocaleString()})</option>
-                      ))}
-                    </select>
+                    <Select value={intlForm.fromAccountId} onValueChange={(val) => setIntlForm(f => ({ ...f, fromAccountId: val }))}>
+                      <SelectTrigger className="w-full h-8 bg-transparent border-0 shadow-none px-0 focus:ring-0 font-bold text-xs text-foreground data-[state=open]:text-primary transition-colors">
+                        <SelectValue placeholder="Select Account" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {accounts.map((a) => (
+                          <SelectItem key={a.id} value={a.id}>
+                            {a.account_type.toUpperCase()} - ****{a.account_number.slice(-4)} (${Number(a.balance).toLocaleString()})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 text-xs">
@@ -329,9 +419,18 @@ export default function TransfersPage() {
                     </div>
                   </div>
 
-                  <Button type="submit" className="w-full h-9 rounded-lg text-xs font-bold mt-2 shadow-sm" disabled={loading}>
-                    {loading ? "Processing..." : <><Globe className="h-3.5 w-3.5 mr-1.5" /> Initiate Global Wire</>}
-                  </Button>
+                  <div className="flex items-center space-x-2 pt-2 pb-1">
+                    <Checkbox id="save-beneficiary-intl" checked={intlForm.saveBeneficiary} onCheckedChange={(checked) => setIntlForm(f => ({ ...f, saveBeneficiary: checked === true }))} />
+                    <label htmlFor="save-beneficiary-intl" className="text-[10px] font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                      Save this recipient as a beneficiary
+                    </label>
+                  </div>
+
+                  <div className="flex justify-center pt-2">
+                    <Button type="submit" className="w-full max-w-[220px] h-10 rounded-xl text-xs font-bold shadow-md" disabled={loading}>
+                      {loading ? "Processing..." : <><Globe className="h-3.5 w-3.5 mr-1.5" /> Initiate Global Wire</>}
+                    </Button>
+                  </div>
                 </form>
               )}
             </div>
@@ -375,6 +474,15 @@ export default function TransfersPage() {
           </SlideUp>
         </div>
       </div>
+      
+      <TransactionPinDialog
+        isOpen={pinDialogOpen}
+        onClose={() => { setPinDialogOpen(false); setPendingTransfer(null); }}
+        onConfirm={executeTransfer}
+        amount={pendingTransfer === "local" ? parseFloat(form.amount) : parseFloat(intlForm.amountUsd)}
+        isLoading={loading}
+        description={`You are about to transfer funds to ${pendingTransfer === "local" ? (form.toName || form.toAccount) : intlForm.toName}.`}
+      />
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import logo from "@/assets/logo.png";
 import { supabase } from "@/integrations/supabase/client";
+import { TransactionPinDialog } from "@/components/dashboard/TransactionPinDialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { useBrand } from "@/contexts/BrandContext";
 import { StaggerContainer, StaggerItem, FadeIn, SlideUp } from "@/components/public/Motion";
@@ -380,8 +381,13 @@ const CardsPage = () => {
   const [showLimits, setShowLimits] = useState(false);
   const [showCvv, setShowCvv] = useState(false);
   const [newLimit, setNewLimit] = useState("");
+  const [viewMode, setViewMode] = useState<"front" | "back">("front");
   const [loading, setLoading] = useState(true);
   const [selectedType, setSelectedType] = useState("virtual");
+  
+  // PIN State
+  const [pinDialogOpen, setPinDialogOpen] = useState(false);
+  const [pendingRequest, setPendingRequest] = useState<any>(null);
   const [baseFee, setBaseFee] = useState<number>(15);
   const [cardCategory, setCardCategory] = useState<"physical" | "virtual">("physical");
 
@@ -426,13 +432,11 @@ const CardsPage = () => {
       
       const loadedCards = (data as Card[]) || [];
 
-      // Determine if we should auto-switch category
       setCards(prev => {
         if (prev.length === 0 && loadedCards.length > 0) {
           const hasPhysical = loadedCards.some(c => isCardPhysical(c));
           const hasVirtual = loadedCards.some(c => !isCardPhysical(c));
           if (!hasPhysical && hasVirtual) {
-            // Schedule it safely after render
             setTimeout(() => setCardCategory("virtual"), 0);
           }
         }
@@ -582,6 +586,17 @@ const CardsPage = () => {
       primaryAccountId = accounts[0].id;
     }
 
+    // Set pending request and open PIN dialog
+    setPendingRequest({
+      isVirtual, isInfinite, currentFee, deliveryAddress, holderName, primaryAccountId, type
+    });
+    setPinDialogOpen(true);
+  };
+
+  const executeRequestCard = async (pin: string) => {
+    if (!user || !pendingRequest) return;
+    const { isVirtual, isInfinite, currentFee, deliveryAddress, holderName, primaryAccountId, type } = pendingRequest;
+
     const provisionResult = await provisionCard({
       userId: user.id,
       cardType: isVirtual ? "virtual" : (isInfinite ? "infinite" : "debit"),
@@ -590,18 +605,21 @@ const CardsPage = () => {
 
     if (!provisionResult.success) {
       toast({ title: "Provisioning Failed", description: provisionResult.message, variant: "destructive" });
+      setPinDialogOpen(false);
       return;
     }
 
     if (!isVirtual && primaryAccountId) {
-      const { error: rpcError } = await supabase.rpc("process_card_fee", {
+      const { error: rpcError } = await (supabase.rpc as any)("process_card_fee", {
         p_user_id: user.id,
         p_account_id: primaryAccountId,
         p_fee_amount: currentFee,
-        p_reference: `FEE-${Date.now()}`
+        p_reference: `FEE-${Date.now()}`,
+        p_pin: pin
       });
       if (rpcError) {
         toast({ title: "Transaction Failed", description: rpcError.message, variant: "destructive" });
+        setPinDialogOpen(false);
         return;
       }
     }
@@ -618,35 +636,19 @@ const CardsPage = () => {
       is_frozen: false,
       is_physical: !isVirtual,
       delivery_address: deliveryAddress,
-      request_status: isVirtual ? null : "pending"
+      daily_limit: isVirtual ? 1000 : 5000,
     }).select().single();
 
     if (error) {
-      console.error("[Card Provisioning] Database Error:", error);
-      toast({ title: "Database Error", description: error.message, variant: "destructive" });
+      toast({ title: "Card Creation Failed", description: error.message, variant: "destructive" });
+      setPinDialogOpen(false);
       return;
     }
 
-    if (newCard) {
-      setCards(prev => {
-        if (prev.some(c => c.id === newCard.id)) return prev;
-        return [...prev, newCard as Card];
-      });
-      setCardCategory(isVirtual ? "virtual" : "physical");
-    }
-
-    await supabase.from("audit_logs").insert({
-      user_id: user.id,
-      action: "card_provisioned",
-      entity_type: "cards",
-      details: { provider_ref: provisionResult.providerCardId, type: isVirtual ? "virtual" : "debit", is_physical: !isVirtual }
-    });
-
-    toast({ 
-      title: isVirtual ? "Card Provisioned" : "Request Submitted", 
-      description: isVirtual ? provisionResult.message : "Physical card request submitted and pending review." 
-    });
+    toast({ title: "Card Created Successfully", description: isVirtual ? "Your new virtual card is ready to use." : "Your physical card is being processed and will be shipped soon." });
     setShowRequest(false);
+    setPinDialogOpen(false);
+    setPendingRequest(null);
     fetchCards();
   };
 
@@ -947,6 +949,14 @@ const CardsPage = () => {
           )}
         </DialogContent>
       </Dialog>
+      
+      <TransactionPinDialog
+        isOpen={pinDialogOpen}
+        onClose={() => { setPinDialogOpen(false); setPendingRequest(null); }}
+        onConfirm={executeRequestCard}
+        amount={pendingRequest?.currentFee || undefined}
+        description={`You are about to authorize a new card issuance.`}
+      />
     </div>
   );
 };

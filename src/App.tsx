@@ -58,6 +58,8 @@ const DepositPage = lazy(() => import("./pages/dashboard/DepositPage"));
 const DashboardServicesPage = lazy(() => import("./pages/dashboard/ServicesPage"));
 
 const InvestmentsPage = lazy(() => import("./pages/dashboard/InvestmentsPage"));
+const CertificatePage = lazy(() => import("./pages/dashboard/CertificatePage"));
+const VerifyCertificate = lazy(() => import("./pages/public/VerifyCertificate"));
 const StatementsPage = lazy(() => import("./pages/dashboard/StatementsPage"));
 const PayeesPage = lazy(() => import("./pages/dashboard/PayeesPage"));
 const PremiumDashboardHome = lazy(() => import("./pages/dashboard/PremiumDashboardHome"));
@@ -146,6 +148,7 @@ const App = () => (
                     <Route path="/privacy" element={<PrivacyPage />} />
                     <Route path="/terms" element={<TermsPage />} />
                     <Route path="/info/:slug" element={<InfoPage />} />
+                    <Route path="/verify/:code" element={<VerifyCertificate />} />
                   </Route>
 
                   <Route path="/login" element={<LoginPage />} />
@@ -175,6 +178,7 @@ const App = () => (
                     <Route path="profile" element={<ProfilePage />} />
                     <Route path="security" element={<SecurityPage />} />
                     <Route path="investments" element={<InvestmentsPage />} />
+                    <Route path="investments/certificate/:id" element={<CertificatePage />} />
                     <Route path="statements" element={<StatementsPage />} />
                     <Route path="documents" element={<DocumentCenterPage />} />
                     <Route path="payees" element={<PayeesPage />} />

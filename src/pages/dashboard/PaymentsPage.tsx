@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLocation, Link } from "react-router-dom";
 import { StaggerContainer, StaggerItem, FadeIn, SlideUp } from "@/components/public/Motion";
 import QRCode from "@/components/ui/QRCode";
+import { TransactionPinDialog } from "@/components/dashboard/TransactionPinDialog";
 
 interface Payee { id: string; payee_name: string; category: string; account_number_masked: string; payment_method: string; }
 interface Payment { id: string; payment_type: string; provider: string | null; amount: number; status: string; created_at: string; }
@@ -47,6 +48,10 @@ export default function PaymentsPage() {
 
   // QR State
   const [qrMode, setQrMode] = useState<"scan" | "receive">("scan");
+
+  // PIN State
+  const [pinDialogOpen, setPinDialogOpen] = useState(false);
+  const [pendingTx, setPendingTx] = useState<{type: "bill" | "airtime" | "data", amount: number, details: any} | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -92,6 +97,16 @@ export default function PaymentsPage() {
       return;
     }
 
+    setPendingTx({ type, amount: txAmount, details });
+    setPinDialogOpen(true);
+  };
+
+  const executeTransaction = async (pin: string) => {
+    if (!pendingTx || !user || !selectedAccountId) return;
+    const account = accounts.find((a) => a.id === selectedAccountId);
+    if (!account) return;
+    
+    const { type, amount: txAmount, details } = pendingTx;
     setLoading(true);
     try {
       let rpcName = "process_bill_payment";
@@ -123,16 +138,19 @@ export default function PaymentsPage() {
         toast({ title: "Payment Scheduled", description: `Queued recurring payment to ${p_payee_name}.` });
       } else {
         const { error: rpcError } = await (supabase.rpc as any)(rpcName, {
-          p_user_id: user.id, p_account_id: account.id, p_payee_name, p_category, p_amount: txAmount, p_account_masked
+          p_user_id: user.id, p_account_id: account.id, p_payee_name, p_category, p_amount: txAmount, p_account_masked, p_pin: pin
         });
         if (rpcError) throw rpcError;
         toast({ title: "Transaction Successful!", description: `Paid $${txAmount.toLocaleString()} for ${p_payee_name}.` });
       }
 
       setAmount(""); setAirtimeAmt(""); setDataPlan("");
+      setPinDialogOpen(false);
+      setPendingTx(null);
       fetchData();
     } catch (e: any) {
       toast({ title: "Transaction Failed", description: e.message, variant: "destructive" });
+      setPinDialogOpen(false);
     } finally {
       setLoading(false);
     }

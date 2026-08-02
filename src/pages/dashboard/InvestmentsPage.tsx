@@ -1,5 +1,9 @@
 import { useEffect, useState, useMemo, useCallback, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, AreaChart, Area, XAxis, YAxis } from "recharts";
+import { LineChart, Line, XAxis as RechartsXAxis, YAxis as RechartsYAxis, Tooltip as RechartsTooltip, ResponsiveContainer as RechartsResponsiveContainer, ReferenceLine } from "recharts";
+import { format } from "date-fns";
+import { TransactionPinDialog } from "@/components/dashboard/TransactionPinDialog";
 import {
   TrendingUp,
   ArrowUpRight,
@@ -18,6 +22,7 @@ import {
   Building2,
   CheckCircle2,
   Download,
+  Award,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -101,6 +106,7 @@ const getPremiumInvestmentName = (type: string) => {
 };
 
 export default function InvestmentsPage() {
+  const navigate = useNavigate();
   const { user, profile } = useAuth();
   const { toast } = useToast();
   
@@ -111,6 +117,7 @@ export default function InvestmentsPage() {
   const [holdings, setHoldings] = useState<Holding[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [generatingCert, setGeneratingCert] = useState<string | null>(null);
 
   // Active view tab: "explore" vs "portfolio"
   const [activeTab, setActiveTab] = useState<"explore" | "portfolio">("explore");
@@ -130,11 +137,15 @@ export default function InvestmentsPage() {
   const [detailOpen, setDetailOpen] = useState(false);
   const [selectedStock, setSelectedStock] = useState<StockMeta | null>(null);
 
-  // Funding State
+  // Funding
   const [fundOpen, setFundOpen] = useState(false);
   const [fundAmount, setFundAmount] = useState("");
   const [checkingAccounts, setCheckingAccounts] = useState<any[]>([]);
   const [selectedCheckingId, setSelectedCheckingId] = useState("");
+
+  // PIN State
+  const [pinDialogOpen, setPinDialogOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState<"trade" | "fund" | null>(null);
   const [downloadingPdf, setDownloadingPdf] = useState(false);
 
   useEffect(() => {
@@ -313,6 +324,33 @@ export default function InvestmentsPage() {
       }
     }
 
+    setPendingAction("trade");
+    setPinDialogOpen(true);
+  };
+
+  const handleFundAccount = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user || !selectedAccount || !selectedCheckingId) return;
+    const amount = parseFloat(fundAmount);
+    if (isNaN(amount) || amount <= 0) return;
+
+    setPendingAction("fund");
+    setPinDialogOpen(true);
+  };
+
+  const executeAction = async (pin: string) => {
+    if (pendingAction === "trade") {
+      await executeTrade(pin);
+    } else if (pendingAction === "fund") {
+      await executeFundAccount(pin);
+    }
+  };
+
+  const executeTrade = async (pin: string) => {
+    if (!user || !selectedAccount || !orderStock) return;
+    const qty = parseFloat(orderQty);
+    const price = livePrices[orderStock.symbol] || orderStock.current_price;
+
     try {
       const { error } = await (supabase.rpc as any)("process_trade", {
         p_user_id: user.id,
@@ -323,6 +361,7 @@ export default function InvestmentsPage() {
         p_quantity: qty,
         p_current_price: price,
         p_asset_class: orderStock.asset_class,
+        p_pin: pin
       });
 
       if (error) throw error;
@@ -330,27 +369,45 @@ export default function InvestmentsPage() {
       setOrderOpen(false);
       setDetailOpen(false);
       setOrderQty("");
+      setPinDialogOpen(false);
+      setPendingAction(null);
       fetchAccountData(selectedAccount.id);
       fetchData();
     } catch (e: any) {
       toast({ title: "Order Failed", description: e.message, variant: "destructive" });
+      setPinDialogOpen(false);
     }
   };
 
   const handleOpenFundDialog = async () => {
     if (!user) return;
     const { data } = await supabase.from("accounts").select("id, account_type, account_number, balance").eq("user_id", user.id).eq("status", "active");
-    const accs = data || [];
-    setCheckingAccounts(accs);
-    if (accs.length > 0) setSelectedCheckingId(accs[0].id);
-    setFundOpen(true);
+    if (data && data.length > 0) {
+      setCheckingAccounts(data as any[]);
+      setSelectedCheckingId(data[0].id);
+      setFundOpen(true);
+    }
   };
 
-  const handleFundAccount = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleGenerateCertificate = async (holdingId: string) => {
+    setGeneratingCert(holdingId);
+    try {
+      const { data, error } = await (supabase.rpc as any)("generate_stock_certificate", { p_holding_id: holdingId });
+      if (error) throw error;
+      if (data && data.certificate_id) {
+        toast({ title: "Certificate Generated", description: "Your proof of ownership certificate is ready." });
+        navigate(`/dashboard/investments/certificate/${data.certificate_id}`);
+      }
+    } catch (err: any) {
+      toast({ title: "Generation Failed", description: err.message || "Failed to generate certificate.", variant: "destructive" });
+    } finally {
+      setGeneratingCert(null);
+    }
+  };
+
+  const executeFundAccount = async (pin: string) => {
     if (!user || !selectedAccount || !selectedCheckingId) return;
     const amount = parseFloat(fundAmount);
-    if (isNaN(amount) || amount <= 0) return;
 
     try {
       const { error } = await (supabase.rpc as any)("fund_brokerage_account", {
@@ -358,15 +415,19 @@ export default function InvestmentsPage() {
         p_checking_account_id: selectedCheckingId,
         p_brokerage_account_id: selectedAccount.id,
         p_amount: amount,
+        p_pin: pin
       });
       if (error) throw error;
       toast({ title: "Funding Completed", description: `$${amount.toLocaleString()} added to your cash balance.` });
       setFundOpen(false);
       setFundAmount("");
+      setPinDialogOpen(false);
+      setPendingAction(null);
       fetchData();
       if (selectedAccount) fetchAccountData(selectedAccount.id);
     } catch (e: any) {
       toast({ title: "Funding Error", description: e.message, variant: "destructive" });
+      setPinDialogOpen(false);
     }
   };
 
@@ -900,7 +961,17 @@ export default function InvestmentsPage() {
                                 <td className={`p-2.5 text-right font-bold font-mono text-[11px] ${isGain ? "text-success" : "text-destructive"}`}>
                                   {isGain ? "+" : ""}${gainDollars.toFixed(2)} ({isGain ? "+" : ""}{gainPercent.toFixed(2)}%)
                                 </td>
-                                <td className="p-2.5 text-center flex gap-1">
+                                <td className="p-2.5 text-center flex gap-1 justify-center">
+                                  <Button size="sm" variant="outline" className="h-7 text-[10px] font-bold rounded-lg" disabled={generatingCert === h.id} onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleGenerateCertificate(h.id);
+                                  }}>
+                                    {generatingCert === h.id ? (
+                                      <span className="h-3 w-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                                    ) : (
+                                      <><Award className="h-3 w-3 mr-1" /> Cert</>
+                                    )}
+                                  </Button>
                                   <Button size="sm" variant="outline" className="h-7 text-[10px] font-bold rounded-lg" onClick={() => {
                                     const matchingStock = dbStocks.find(s => s.symbol === h.symbol);
                                     if (matchingStock) {
@@ -1251,6 +1322,18 @@ export default function InvestmentsPage() {
           </form>
         </DialogContent>
       </Dialog>
+      
+      <TransactionPinDialog
+        isOpen={pinDialogOpen}
+        onClose={() => { setPinDialogOpen(false); setPendingAction(null); }}
+        onConfirm={executeAction}
+        amount={pendingAction === "fund" ? parseFloat(fundAmount) : (orderStock ? (livePrices[orderStock.symbol] || orderStock.current_price) * parseFloat(orderQty) : 0)}
+        description={
+          pendingAction === "fund" 
+            ? "You are about to fund your brokerage account."
+            : `You are about to execute a ${orderSide?.toUpperCase()} order for ${orderQty} shares of ${orderStock?.symbol}.`
+        }
+      />
     </div>
   );
 }

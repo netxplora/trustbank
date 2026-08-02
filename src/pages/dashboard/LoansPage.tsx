@@ -9,6 +9,7 @@ import { StaggerContainer, StaggerItem, FadeIn, SlideUp } from "@/components/pub
 import { generateLoanSummaryPDF } from "@/lib/pdf/domainDocuments";
 import { saveDocumentRecord } from "@/lib/pdf/documentService";
 import { fetchBrandPDFColors } from "@/lib/pdf/brandColorForPDF";
+import { TransactionPinDialog } from "@/components/dashboard/TransactionPinDialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -57,6 +58,10 @@ const LoansPage = () => {
   const [repayAmount, setRepayAmount] = useState("");
   const [repayLoading, setRepayLoading] = useState(false);
   const [payAllLoading, setPayAllLoading] = useState(false);
+
+  // PIN State
+  const [pinDialogOpen, setPinDialogOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState<"repay" | "payAll" | null>(null);
 
   const calculateAmortization = (principal: number, months: number, annualRate: number) => {
     if (!principal || !months) return { monthlyPayment: 0, totalInterest: 0, totalPayment: 0 };
@@ -119,7 +124,7 @@ const LoansPage = () => {
   const availableLimit = Math.max(0, loanLimit - activeLoansTotal);
 
   // Summary Stats
-  const totalCollected = loans.filter(l => ["active", "approved", "completed"].includes(l.status)).reduce((sum, l) => sum + Number(l.amount), 0);
+  const totalCollected = loans.filter(l => ["active", "approved", "paid"].includes(l.status)).reduce((sum, l) => sum + Number(l.amount), 0);
   const totalRepaid = loans.reduce((sum, l) => sum + Number(l.total_repaid || 0), 0);
   const activeLoansCount = loans.filter(l => l.status === "active" || l.status === "approved").length;
   const totalOutstanding = loans.filter(l => l.status === "active" || l.status === "approved").reduce((sum, l) => sum + Number(l.outstanding_balance || 0), 0);
@@ -172,137 +177,75 @@ const LoansPage = () => {
       return;
     }
 
+    setPendingAction("repay");
+    setPinDialogOpen(true);
+  };
+
+  const handlePayAllDebt = async () => {
+    if (!user) return;
+    setPendingAction("payAll");
+    setPinDialogOpen(true);
+  };
+
+  const executeAction = async (pin: string) => {
+    if (pendingAction === "repay") {
+      await executeRepayment(pin);
+    } else if (pendingAction === "payAll") {
+      await executePayAllDebt(pin);
+    }
+  };
+
+  const executeRepayment = async (pin: string) => {
     setRepayLoading(true);
+    const amount = parseFloat(repayAmount);
     try {
-      const newOutstanding = Math.max(0, outstanding - amount);
-      const newTotalRepaid = Number(repayLoan.total_repaid || 0) + amount;
-      const newStatus = newOutstanding <= 0 ? "completed" : repayLoan.status;
-
-      // Update loan record
-      const { error: loanError } = await (supabase as any)
-        .from("loans")
-        .update({
-          outstanding_balance: newOutstanding,
-          total_repaid: newTotalRepaid,
-          status: newStatus,
-        })
-        .eq("id", repayLoan.id);
-
-      if (loanError) throw loanError;
-
-      // Find user's savings account to debit
-      const { data: accts } = await supabase
-        .from("accounts")
-        .select("id, balance")
-        .eq("user_id", user.id)
-        .eq("account_type", "savings")
-        .eq("status", "active")
-        .limit(1);
-
-      const savingsAccount = accts?.[0];
-      if (savingsAccount) {
-        const newBalance = Math.max(0, Number(savingsAccount.balance) - amount);
-        await supabase
-          .from("accounts")
-          .update({ balance: newBalance } as any)
-          .eq("id", savingsAccount.id);
-      }
-
-      // Create a transaction record
-      await (supabase as any).from("transactions").insert({
-        user_id: user.id,
-        type: "debit",
-        amount,
-        description: `Loan repayment - ${repayLoan.purpose || "Credit Facility"} (${repayLoan.id.slice(0, 8).toUpperCase()})`,
-        reference: `REPAY-${repayLoan.id.slice(0, 8).toUpperCase()}-${Date.now().toString(36).toUpperCase()}`,
-        status: "completed",
+      const { data, error } = await supabase.rpc('process_loan_repayment', {
+        p_loan_id: repayLoan?.id,
+        p_amount: amount,
+        p_pin: pin
       });
 
+      if (error) throw error;
+
       toast({
-        title: newStatus === "completed" ? "Loan Fully Repaid!" : "Payment Successful",
-        description: newStatus === "completed"
-          ? `Your loan has been fully settled. Total repaid: $${newTotalRepaid.toLocaleString(undefined, { minimumFractionDigits: 2 })}`
-          : `$${amount.toLocaleString(undefined, { minimumFractionDigits: 2 })} applied. Remaining balance: $${newOutstanding.toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
+        title: data.new_status === "paid" ? "Loan Fully Repaid!" : "Payment Successful",
+        description: data.new_status === "paid"
+          ? `Your loan has been fully settled.`
+          : `$${amount.toLocaleString(undefined, { minimumFractionDigits: 2 })} applied. Remaining balance: $${Number(data.new_outstanding).toLocaleString(undefined, { minimumFractionDigits: 2 })}`,
       });
 
       setRepayOpen(false);
       setRepayLoan(null);
       setRepayAmount("");
+      setPinDialogOpen(false);
+      setPendingAction(null);
       fetchLoans();
     } catch (err: any) {
       toast({ title: "Repayment Failed", description: err?.message || "Could not process repayment.", variant: "destructive" });
+      setPinDialogOpen(false);
     } finally {
       setRepayLoading(false);
     }
   };
 
-  const handlePayAllDebt = async () => {
-    if (!user) return;
-    
-    const activeLoansList = loans.filter(l => l.status === "active" || l.status === "approved" || l.status === "pending");
-    const totalDebt = activeLoansList.reduce((sum, l) => sum + Number(l.outstanding_balance || 0), 0);
-    
-    if (totalDebt <= 0) {
-      toast({ title: "No Debt", description: "You have no outstanding debt to clear." });
-      return;
-    }
-
+  const executePayAllDebt = async (pin: string) => {
     setPayAllLoading(true);
     try {
-      const { data: accts } = await supabase
-        .from("accounts")
-        .select("id, balance")
-        .eq("user_id", user.id)
-        .eq("account_type", "savings")
-        .eq("status", "active")
-        .limit(1);
+      const { data, error } = await supabase.rpc('clear_all_debt', { p_pin: pin });
 
-      const savingsAccount = accts?.[0];
-      if (!savingsAccount || Number(savingsAccount.balance) < totalDebt) {
-        toast({ title: "Insufficient Funds", description: "You do not have enough funds in your savings account to clear all debt.", variant: "destructive" });
-        setPayAllLoading(false);
-        return;
-      }
-
-      const newBalance = Number(savingsAccount.balance) - totalDebt;
-      await supabase
-        .from("accounts")
-        .update({ balance: newBalance } as any)
-        .eq("id", savingsAccount.id);
-
-      for (const loan of activeLoansList) {
-        const outstanding = Number(loan.outstanding_balance || 0);
-        if (outstanding <= 0) continue;
-
-        const newTotalRepaid = Number(loan.total_repaid || 0) + outstanding;
-
-        await (supabase as any)
-          .from("loans")
-          .update({
-            outstanding_balance: 0,
-            total_repaid: newTotalRepaid,
-            status: "completed",
-          })
-          .eq("id", loan.id);
-      }
-
-      await (supabase as any).from("transactions").insert({
-        user_id: user.id,
-        type: "debit",
-        amount: totalDebt,
-        description: `Full Debt Clearance - ${activeLoansList.length} Facilities`,
-        reference: `CLEARALL-${Date.now().toString(36).toUpperCase()}`,
-        status: "completed",
-      });
+      if (error) throw error;
 
       toast({
         title: "All Debt Cleared!",
-        description: `$${totalDebt.toLocaleString(undefined, { minimumFractionDigits: 2 })} paid in full. You are now debt-free!`,
+        description: `$${Number(data.total_cleared).toLocaleString(undefined, { minimumFractionDigits: 2 })} paid in full. You are now debt-free!`,
       });
 
+      setPinDialogOpen(false);
+      setPendingAction(null);
       fetchLoans();
     } catch (err: any) {
       toast({ title: "Clearance Failed", description: err?.message || "Could not process full debt clearance.", variant: "destructive" });
+      setPinDialogOpen(false);
     } finally {
       setPayAllLoading(false);
     }
@@ -506,12 +449,12 @@ const LoansPage = () => {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div className="flex items-center gap-3 min-w-0">
                     <div className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 ${
-                      loan.status === "completed" ? "bg-emerald-500/10 text-emerald-500" :
+                      loan.status === "paid" ? "bg-emerald-500/10 text-emerald-500" :
                       loan.status === "active" || loan.status === "approved" ? "bg-blue-500/10 text-blue-500" :
                       loan.status === "pending" ? "bg-amber-500/10 text-amber-500" :
                       "bg-rose-500/10 text-rose-500"
                     }`}>
-                      {loan.status === "completed" ? <CheckCircle className="h-4 w-4" /> :
+                      {loan.status === "paid" ? <CheckCircle className="h-4 w-4" /> :
                        loan.status === "active" || loan.status === "approved" ? <TrendingUp className="h-4 w-4" /> :
                        loan.status === "pending" ? <Clock className="h-4 w-4" /> :
                        <AlertCircle className="h-4 w-4" />}
@@ -520,7 +463,7 @@ const LoansPage = () => {
                       <div className="flex items-center gap-2 flex-wrap">
                         <h3 className="font-bold text-foreground text-xs truncate">{loan.purpose || "General Credit Facility"}</h3>
                         <span className={`text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md border shrink-0 ${
-                          loan.status === "completed" ? "bg-success/10 text-success border-success/20" :
+                          loan.status === "paid" ? "bg-success/10 text-success border-success/20" :
                           loan.status === "active" || loan.status === "approved" ? "bg-blue-500/10 text-blue-500 border-blue-500/20" : 
                           loan.status === "pending" ? "bg-warning/10 text-warning border-warning/20" : "bg-destructive/10 text-destructive border-destructive/20"
                         }`}>{loan.status}</span>
@@ -707,6 +650,15 @@ const LoansPage = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <TransactionPinDialog
+        isOpen={pinDialogOpen}
+        onClose={() => { setPinDialogOpen(false); setPendingAction(null); }}
+        onConfirm={executeAction}
+        amount={pendingAction === "repay" ? parseFloat(repayAmount) : totalOutstanding}
+        isLoading={repayLoading || payAllLoading}
+        description={pendingAction === "repay" ? "You are about to process a loan repayment." : "You are about to clear all your outstanding debt."}
+      />
 
       {/* Repayment Dialog */}
       <Dialog open={repayOpen} onOpenChange={setRepayOpen}>
