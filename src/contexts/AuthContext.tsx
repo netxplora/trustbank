@@ -179,27 +179,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [user, resetInactivityTimer]);
 
   const signOut = async () => {
-    try {
-      await supabase.auth.signOut();
-    } catch (error) {
-      console.warn("Error during Supabase sign out", error);
-    }
-    
+    // Optimistic UI updates
     setUser(null);
     setSession(null);
     setProfile(null);
     setIsAdmin(false);
 
-    // Clear all sensitive storage but preserve theme
+    // Clear all sensitive storage but preserve theme & brand design system
     const theme = localStorage.getItem("vite-ui-theme");
+    const brandDesign = localStorage.getItem("brand_design_system");
     localStorage.clear();
     sessionStorage.clear();
     if (theme) {
       localStorage.setItem("vite-ui-theme", theme);
     }
+    if (brandDesign) {
+      localStorage.setItem("brand_design_system", brandDesign);
+    }
+
+    // Fire network request in the background
+    supabase.auth.signOut().catch(error => {
+      console.warn("Error during Supabase sign out", error);
+    });
     
     // Force a full reload to clear any memory cache (e.g. react-query)
-    window.location.href = "/";
+    setTimeout(() => {
+      window.location.href = "/";
+    }, 50);
   };
 
   return (

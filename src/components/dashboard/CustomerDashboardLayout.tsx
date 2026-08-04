@@ -16,6 +16,7 @@ import { ActionTooltip } from "@/components/ui/action-tooltip";
 const navItems = [
   { icon: LayoutDashboard, label: "Overview", to: "/dashboard", tooltip: "View your account summary and recent activity." },
   { icon: Wallet, label: "Accounts", to: "/dashboard/accounts", tooltip: "Manage your checking and savings accounts." },
+  { icon: PlusCircle, label: "Deposit Funds", to: "/dashboard/deposit", tooltip: "Fund your account via bank transfer or digital currency." },
   { icon: ArrowRightLeft, label: "Transfers", to: "/dashboard/transfers", tooltip: "Send money to other accounts." },
   { icon: Receipt, label: "Transactions", to: "/dashboard/transactions", tooltip: "View your transaction history." },
   { icon: CreditCard, label: "Cards", to: "/dashboard/cards", tooltip: "Manage your physical and virtual cards." },

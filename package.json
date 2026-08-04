@@ -53,6 +53,7 @@
     "dompurify": "^3.4.11",
     "embla-carousel-react": "^8.6.0",
     "framer-motion": "^12.42.2",
+    "iceberg-js": "^1.0.0",
     "input-otp": "^1.4.2",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.8",

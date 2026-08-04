@@ -268,7 +268,7 @@ export async function getAllGrantApplications(): Promise<GrantApplication[]> {
 
 export async function submitGrantApplication(
   app: Omit<GrantApplication, "id" | "application_number" | "created_at">
-): Promise<boolean> {
+): Promise<{ success: boolean; error?: string }> {
   try {
     // Ensure grant program exists in DB before inserting application (prevents FK error)
     if (app.grant_program_id) {
@@ -297,6 +297,18 @@ export async function submitGrantApplication(
       }
     }
 
+    // Check if application already exists
+    const { data: existing } = await supabase
+      .from("grant_applications")
+      .select("id")
+      .eq("user_id", app.user_id)
+      .eq("grant_program_id", app.grant_program_id)
+      .maybeSingle();
+      
+    if (existing) {
+      return { success: false, error: "You have already submitted an application for this grant campaign." };
+    }
+
     const appNumber = `GR-${Date.now().toString(36).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
     const { error } = await supabase.from("grant_applications").insert({
       grant_program_id: app.grant_program_id,
@@ -313,11 +325,16 @@ export async function submitGrantApplication(
       status: app.status || "submitted",
     });
 
-    if (error) throw error;
-    return true;
-  } catch (err) {
+    if (error) {
+      if (error.code === '23505') { // Unique violation
+        return { success: false, error: "You have already submitted an application for this grant campaign." };
+      }
+      throw error;
+    }
+    return { success: true };
+  } catch (err: any) {
     console.error("Error submitting grant application:", err);
-    return false;
+    return { success: false, error: err.message || "Failed to submit application" };
   }
 }
 

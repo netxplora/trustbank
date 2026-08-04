@@ -16,6 +16,8 @@ import { StaggerContainer, StaggerItem, FadeIn, SlideUp } from "@/components/pub
 import { getUserCryptoWallets, getLiveCryptoRates, UserCryptoWallet, CryptoAsset } from "@/services/digitalCurrencyService";
 import { getGrantPrograms, GrantProgram } from "@/services/grantsService";
 import { OptimizedImage } from "@/components/ui/OptimizedImage";
+import { useSearchParams } from "react-router-dom";
+import { TransactionDetailsModal } from "@/components/dashboard/TransactionDetailsModal";
 
 const BalanceChart = lazy(() => import("@/components/dashboard/BalanceChart"));
 
@@ -44,6 +46,7 @@ interface Transaction {
 export default function CustomerDashboardHome() {
   const { profile, user } = useAuth();
   const { design } = useBrand();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [showBalances, setShowBalances] = useState(true);
   const [accounts, setAccounts] = useState<AccountData[]>([]);
   const [wallets, setWallets] = useState<UserCryptoWallet[]>([]);
@@ -305,7 +308,11 @@ export default function CustomerDashboardHome() {
           {recentTransactions.length > 0 ? (
             <div className="space-y-2">
               {recentTransactions.map((tx) => (
-                <div key={tx.id} className="flex items-center justify-between group py-1.5 border-b border-border/40 last:border-0">
+                <div 
+                  key={tx.id} 
+                  className="flex items-center justify-between group py-1.5 border-b border-border/40 last:border-0 cursor-pointer hover:bg-muted/30 px-2 -mx-2 rounded-lg transition-colors"
+                  onClick={() => setSearchParams({ tx: tx.id })}
+                >
                   <div className="flex items-center gap-2.5">
                     <div className={`h-8 w-8 rounded-full flex items-center justify-center shrink-0 ${
                       tx.type === 'credit' || tx.type === 'deposit' 
@@ -319,13 +326,16 @@ export default function CustomerDashboardHome() {
                       <p className="text-[10px] text-muted-foreground mt-0.5 leading-tight">{new Date(tx.created_at).toLocaleDateString()} • Ref: {tx.reference}</p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className={`text-xs font-bold font-mono ${
-                      tx.type === 'credit' || tx.type === 'deposit' ? 'text-emerald-500' : 'text-foreground'
-                    }`}>
-                      {tx.type === 'credit' || tx.type === 'deposit' ? '+' : '-'}${Math.abs(tx.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                    </p>
-                    <Badge variant="outline" className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0 mt-0.5 h-4">{tx.status}</Badge>
+                  <div className="flex items-center gap-3 text-right">
+                    <div>
+                      <p className={`text-xs font-bold font-mono ${
+                        tx.type === 'credit' || tx.type === 'deposit' ? 'text-emerald-500' : 'text-foreground'
+                      }`}>
+                        {tx.type === 'credit' || tx.type === 'deposit' ? '+' : '-'}${Math.abs(tx.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                      </p>
+                      <Badge variant="outline" className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0 mt-0.5 h-4">{tx.status}</Badge>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground/50 group-hover:text-primary transition-colors" />
                   </div>
                 </div>
               ))}
@@ -453,6 +463,16 @@ export default function CustomerDashboardHome() {
           </CardContent>
         </Card>
       </SlideUp>
+      {/* Floating Action Button (Mobile) */}
+      <div className="md:hidden fixed bottom-6 right-4 z-40">
+        <Link to="/dashboard/transfers">
+          <Button size="icon" className="h-14 w-14 rounded-full shadow-xl bg-primary hover:bg-primary/90">
+            <ArrowRightLeft className="h-6 w-6 text-primary-foreground" />
+          </Button>
+        </Link>
+      </div>
+
+      <TransactionDetailsModal />
     </div>
   );
 }

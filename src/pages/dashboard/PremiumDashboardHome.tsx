@@ -12,11 +12,12 @@ import {
 import { Virtuoso } from 'react-virtuoso';
 import { StaggerContainer, StaggerItem, FadeIn, SlideUp } from "@/components/public/Motion";
 import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { DashboardPageSkeleton } from '@/components/skeletons/DashboardSkeleton';
+import { TransactionDetailsModal } from "@/components/dashboard/TransactionDetailsModal";
 
 // --- Static Data ---
 const quickActions = [
@@ -115,6 +116,7 @@ const BalanceCard = ({ totalBalance, primaryAccount }: { totalBalance: number; p
           <Link to="/dashboard/transfers"><ArrowUpRight size={18} /> Send</Link>
         </Button>
       </div>
+      <TransactionDetailsModal />
     </div>
   );
 };
@@ -223,7 +225,9 @@ const SmartInsights = ({ monthlySpend, totalSavings }: { monthlySpend: number; t
   );
 };
 
-const RecentTransactions = ({ transactions }: { transactions: TxRow[] }) => (
+const RecentTransactions = ({ transactions }: { transactions: TxRow[] }) => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  return (
   <section className="px-4 sm:px-8 mb-10">
     <div className="flex justify-between items-end mb-6">
       <h3 className="text-lg font-poppins font-bold text-foreground">Recent Activity</h3>
@@ -245,7 +249,7 @@ const RecentTransactions = ({ transactions }: { transactions: TxRow[] }) => (
                 const timeStr = new Date(tx.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
                 const status = tx.status || 'completed';
                 return (
-                  <div key={tx.id} className="flex items-center justify-between p-4 hover:bg-muted/30 rounded-2xl transition-colors cursor-pointer group border-b border-border/50 last:border-0">
+                  <div key={tx.id} onClick={() => setSearchParams({ tx: tx.id })} className="flex items-center justify-between p-4 hover:bg-muted/30 rounded-2xl transition-colors cursor-pointer group border-b border-border/50 last:border-0">
                     <div className="flex items-center gap-4">
                       <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${tx.type === 'credit' ? 'bg-success/10 text-success' : 'bg-surface text-muted-foreground'} group-hover:scale-105 transition-transform border border-border/50`}>
                         {tx.type === 'credit' ? <ArrowDownLeft size={20} /> : <Receipt size={20} />}
@@ -272,7 +276,8 @@ const RecentTransactions = ({ transactions }: { transactions: TxRow[] }) => (
       </div>
     </div>
   </section>
-);
+  );
+};
 
 const SpendingAnalytics = ({ spendingData }: { spendingData: SpendingPoint[] }) => (
   <section className="px-4 sm:px-8 mb-10">

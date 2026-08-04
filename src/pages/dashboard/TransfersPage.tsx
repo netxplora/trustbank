@@ -114,6 +114,7 @@ export default function TransfersPage() {
   const handleTransfer = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
+    if (!form.fromAccountId) { toast({ title: "Account Required", description: "Please select an account to debit from.", variant: "destructive" }); return; }
     const tier = profile?.kyc_tier || 0;
     const amount = parseFloat(form.amount);
     if (!checkLimits(amount, tier)) return;
@@ -125,6 +126,7 @@ export default function TransfersPage() {
   const handleIntlTransfer = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
+    if (!intlForm.fromAccountId) { toast({ title: "Account Required", description: "Please select an account to debit from.", variant: "destructive" }); return; }
     const tier = profile?.kyc_tier || 0;
     const amountUsd = parseFloat(intlForm.amountUsd);
     if (!checkLimits(amountUsd, tier)) return;

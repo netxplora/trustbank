@@ -60,8 +60,6 @@ export default defineConfig(({ mode }) => ({
     // Warn only on large chunks (reduced threshold to catch regressions)
     chunkSizeWarningLimit: 600,
     rollupOptions: {
-      // Exclude phantom packages that are in node_modules but not imported by this app
-      external: ['iceberg-js'],
       treeshake: {
         moduleSideEffects: false,
         propertyReadSideEffects: false,

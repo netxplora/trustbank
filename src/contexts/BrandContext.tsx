@@ -286,10 +286,18 @@ export const BrandProvider = ({ children }: { children: React.ReactNode }) => {
         --error: ${hexToHslString(c.error || "#EF4444")};
         --info: ${hexToHslString(c.info || "#3B82F6")};
         --ring: ${hexToHslString(c.primary)};
+        --sidebar-background: ${hexToHslString(c.background)};
+        --sidebar-foreground: ${hexToHslString(c.foreground)};
+        --sidebar-primary: ${hexToHslString(c.primary)};
+        --sidebar-primary-foreground: ${hexToHslString("#FFFFFF")};
+        --sidebar-accent: ${hexToHslString(c.muted || "#F1F5F9")};
+        --sidebar-accent-foreground: ${hexToHslString(c.foreground)};
+        --sidebar-border: ${hexToHslString(c.border || "#E2E8F0")};
+        --sidebar-ring: ${hexToHslString(c.primary)};
       `;
 
       let css = `
-        :root {
+        html:root {
           ${generateVars(light)}
           --radius: ${design.radius};
       `;
@@ -301,7 +309,7 @@ export const BrandProvider = ({ children }: { children: React.ReactNode }) => {
       }
       css += `
         }
-        .dark {
+        html.dark {
           ${generateVars(dark)}
         }
       `;

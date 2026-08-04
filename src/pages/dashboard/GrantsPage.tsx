@@ -96,11 +96,11 @@ export default function GrantsPage() {
       });
       return;
     }
-    const alreadyApplied = applications.some(app => app.grant_program_id === program.id && app.status !== 'closed' && app.status !== 'rejected');
-    if (alreadyApplied) {
+    const existingApp = applications.find(app => app.grant_program_id === program.id);
+    if (existingApp && existingApp.status !== 'draft') {
       toast({ 
         title: "Application Exists", 
-        description: "You have an active application for this specific grant program.", 
+        description: "You have already submitted an application for this grant campaign.", 
         variant: "destructive" 
       });
       return;
@@ -325,9 +325,32 @@ export default function GrantsPage() {
                       <span className="font-semibold text-foreground text-[9px] sm:text-[11px]">{new Date(program.deadline).toLocaleDateString()}</span>
                     </div>
 
-                    <Button onClick={() => handleApplyClick(program)} size="sm" className="w-full h-7 sm:h-8 rounded-lg font-bold text-[10px] sm:text-xs gap-1 shadow-sm">
-                      Apply Now <ArrowUpRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-                    </Button>
+                    {(() => {
+                      const existingApp = applications.find(a => a.grant_program_id === program.id);
+                      if (existingApp) {
+                        if (existingApp.status === 'draft') {
+                          return (
+                            <Button onClick={() => handleApplyClick(program)} size="sm" className="w-full h-7 sm:h-8 rounded-lg font-bold text-[10px] sm:text-xs gap-1 shadow-sm bg-blue-600 hover:bg-blue-700 text-white">
+                              Continue Application <ArrowUpRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                            </Button>
+                          );
+                        } else {
+                          return (
+                            <div className="space-y-1">
+                              <Button disabled size="sm" variant="secondary" className="w-full h-7 sm:h-8 rounded-lg font-bold text-[10px] sm:text-xs gap-1 shadow-sm opacity-70">
+                                <CheckCircle2 className="h-3 w-3 sm:h-3.5 sm:w-3.5" /> Already Applied
+                              </Button>
+                              <p className="text-[9px] text-center text-muted-foreground leading-tight">Track status in Application History</p>
+                            </div>
+                          );
+                        }
+                      }
+                      return (
+                        <Button onClick={() => handleApplyClick(program)} size="sm" className="w-full h-7 sm:h-8 rounded-lg font-bold text-[10px] sm:text-xs gap-1 shadow-sm">
+                          Apply Now <ArrowUpRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                        </Button>
+                      );
+                    })()}
                   </CardContent>
                 </Card>
               </StaggerItem>

@@ -206,7 +206,7 @@ export default function GrantApplicationWizard() {
       const selectedProg = programs.find(p => p.id === formData.grant_program_id);
       const generatedTitle = `${formData.business_name} - ${selectedProg?.title || 'Grant Request'}`;
 
-      const success = await submitGrantApplication({
+      const result = await submitGrantApplication({
         grant_program_id: formData.grant_program_id,
         user_id: user.id,
         project_title: generatedTitle,
@@ -220,12 +220,12 @@ export default function GrantApplicationWizard() {
         status: "submitted"
       });
 
-      if (success) {
+      if (result.success) {
         localStorage.removeItem("grant_application_draft");
         toast({ title: "Application Submitted", description: "Your grant application has been successfully submitted for review." });
         navigate("/dashboard/grants");
       } else {
-        throw new Error("Failed to submit application");
+        throw new Error(result.error || "Failed to submit application");
       }
     } catch (error: any) {
       toast({ title: "Submission Failed", description: error.message || "An error occurred.", variant: "destructive" });

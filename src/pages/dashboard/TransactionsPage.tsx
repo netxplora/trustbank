@@ -10,7 +10,8 @@ import { fetchBrandPDFColors } from "@/lib/pdf/brandColorForPDF";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { useSearchParams } from "react-router-dom";
+import { TransactionDetailsModal } from "@/components/dashboard/TransactionDetailsModal";
 
 interface Transaction {
   id: string;
@@ -34,7 +35,7 @@ export default function TransactionsPage() {
   const [hasMore, setHasMore] = useState(true);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const [selectedTx, setSelectedTx] = useState<Transaction | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const PAGE_SIZE = 25;
   const offsetRef = React.useRef(0);
@@ -76,110 +77,6 @@ export default function TransactionsPage() {
   };
 
   const handleLoadMore = () => fetchTransactions(offsetRef.current);
-
-  const handleDownloadReceipt = async () => {
-    if (!selectedTx || !user) return;
-
-    const isCredit = selectedTx.type === 'credit' || selectedTx.type === 'deposit';
-    const txTypeLabel = selectedTx.type.toUpperCase().replace(/_/g, ' ');
-    const amountStr = `${isCredit ? '+' : '-'}$${Math.abs(selectedTx.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
-    const docType = selectedTx.type.includes('transfer') ? 'transfer_receipt' : 
-                    selectedTx.type === 'deposit' ? 'deposit_receipt' :
-                    selectedTx.type === 'withdrawal' ? 'withdrawal_receipt' : 'payment_receipt';
-
-    const refNum = generateReferenceNumber(docType);
-    const verCode = generateVerificationCode();
-
-    const contentRows: ContentBlock[] = [
-      {
-        type: "status",
-        label: "Transaction Status",
-        value: selectedTx.status,
-        color: selectedTx.status === 'completed' ? 'green' : selectedTx.status === 'failed' ? 'red' : 'amber'
-      },
-      { type: "spacer", height: 4 },
-      {
-        type: "rows",
-        data: [
-          { label: "Transaction Type", value: txTypeLabel, bold: true },
-          { label: "Amount", value: amountStr, bold: true, highlight: true },
-          { label: "Balance After", value: selectedTx.balance_after ? `$${selectedTx.balance_after.toLocaleString(undefined, { minimumFractionDigits: 2 })}` : 'N/A' },
-          { label: "Description", value: selectedTx.description || txTypeLabel },
-          { label: "Original Reference", value: selectedTx.reference || '—' },
-          { label: "Date & Time", value: new Date(selectedTx.created_at).toLocaleString() },
-        ]
-      },
-    ];
-
-    // Add recipient info if present
-    if (selectedTx.recipient_name || selectedTx.recipient_bank || selectedTx.recipient_account) {
-      contentRows.push({ type: "divider" });
-      contentRows.push({ type: "heading", text: "Beneficiary Details" });
-      const recipientRows = [];
-      if (selectedTx.recipient_name) recipientRows.push({ label: "Recipient Name", value: selectedTx.recipient_name });
-      if (selectedTx.recipient_bank) recipientRows.push({ label: "Recipient Bank", value: selectedTx.recipient_bank });
-      if (selectedTx.recipient_account) recipientRows.push({ label: "Recipient Account", value: selectedTx.recipient_account });
-      contentRows.push({ type: "rows", data: recipientRows });
-    }
-
-    // Generate PDF
-    const brandColors = await fetchBrandPDFColors();
-    const pdf = await generateDocument({
-      config: {
-        title: `${txTypeLabel} Receipt`,
-        documentType: docType,
-        category: 'banking',
-        referenceNumber: refNum,
-        verificationCode: verCode,
-        date: new Date(selectedTx.created_at),
-      },
-      customer: {
-        name: profile?.display_name || profile?.first_name || 'Valued Customer',
-        accountNumber: profile?.account_number || '',
-        email: profile?.email || '',
-        phone: profile?.phone || '',
-      },
-      content: contentRows,
-      brandColors,
-    });
-
-    pdf.save(`TrustBank_Receipt_${selectedTx.reference || refNum}.pdf`);
-
-    // Save document record to database
-    await saveDocumentRecord({
-      userId: user.id,
-      documentType: docType,
-      documentCategory: 'banking',
-      referenceNumber: refNum,
-      verificationCode: verCode,
-      title: `${txTypeLabel} Receipt`,
-      entityType: 'transactions',
-      entityId: selectedTx.id,
-      metadata: {
-        amount: selectedTx.amount,
-        type: selectedTx.type,
-        status: selectedTx.status,
-        original_reference: selectedTx.reference,
-      },
-    });
-  };
-
-  const handleShareReceipt = async () => {
-    if (!selectedTx) return;
-    
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: 'TrustBank Transaction Receipt',
-          text: `Transaction Receipt [Ref: ${selectedTx.reference}]\nAmount: $${Math.abs(selectedTx.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}\nDate: ${new Date(selectedTx.created_at).toLocaleString()}`,
-        });
-      } catch (err) {
-        console.error('Error sharing', err);
-      }
-    } else {
-      handleDownloadReceipt(); // fallback to download
-    }
-  };
 
   const filteredTxs = useMemo(() => {
     return transactions.filter(tx => 
@@ -236,7 +133,7 @@ export default function TransactionsPage() {
                   <tr 
                     key={tx.id} 
                     className="hover:bg-muted/10 transition-colors cursor-pointer group"
-                    onClick={() => setSelectedTx(tx)}
+                    onClick={() => setSearchParams({ tx: tx.id })}
                   >
                     <td className="p-2 sm:p-3">
                       <div className="flex items-center gap-2.5">
@@ -298,75 +195,7 @@ export default function TransactionsPage() {
       )}
 
       {/* Dedicated Transaction Detail View Modal */}
-      <Dialog open={!!selectedTx} onOpenChange={(open) => !open && setSelectedTx(null)}>
-        <DialogContent className="sm:max-w-[425px] rounded-3xl p-0 overflow-hidden border-border/50">
-          <div className="bg-muted/30 p-6 flex flex-col items-center justify-center text-center border-b border-border/50 relative overflow-hidden">
-            {selectedTx && (
-              <>
-                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl pointer-events-none" />
-                <div className={`h-16 w-16 rounded-full flex items-center justify-center shadow-lg border-2 mb-4 relative z-10 ${
-                  selectedTx.type === 'credit' || selectedTx.type === 'deposit' 
-                    ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400' 
-                    : 'bg-rose-500/10 border-rose-500/20 text-rose-600 dark:text-rose-400'
-                }`}>
-                  {selectedTx.type === 'credit' || selectedTx.type === 'deposit' ? <ArrowDownLeft className="h-8 w-8" /> : <ArrowUpRight className="h-8 w-8" />}
-                </div>
-                <h2 className="text-3xl font-bold font-poppins text-foreground relative z-10 tracking-tight">
-                  {selectedTx.type === 'credit' || selectedTx.type === 'deposit' ? '+' : '-'}${Math.abs(selectedTx.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                </h2>
-                <p className="text-sm font-medium text-muted-foreground mt-1 relative z-10">{selectedTx.description || selectedTx.type}</p>
-                <Badge variant="outline" className={`mt-3 uppercase tracking-widest text-[10px] relative z-10 ${
-                  selectedTx.status === 'completed' ? 'border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/5' : 
-                  selectedTx.status === 'pending' ? 'border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/5' : 
-                  'border-rose-500/30 text-rose-600 dark:text-rose-400 bg-rose-500/5'
-                }`}>
-                  {selectedTx.status}
-                </Badge>
-              </>
-            )}
-          </div>
-          
-          {selectedTx && (
-            <div className="p-6 space-y-4">
-              <div className="grid grid-cols-2 gap-y-4 text-sm">
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1 uppercase tracking-wider font-bold">Date & Time</p>
-                  <p className="font-semibold text-foreground">{new Date(selectedTx.created_at).toLocaleString()}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1 uppercase tracking-wider font-bold">Reference ID</p>
-                  <p className="font-mono text-xs font-semibold bg-muted inline-block px-1.5 py-0.5 rounded border border-border/50 text-foreground">{selectedTx.reference}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1 uppercase tracking-wider font-bold">Type</p>
-                  <p className="font-semibold text-foreground capitalize">{selectedTx.type.replace('_', ' ')}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1 uppercase tracking-wider font-bold">Balance After</p>
-                  <p className="font-semibold text-foreground">{selectedTx.balance_after ? `$${selectedTx.balance_after.toLocaleString(undefined, { minimumFractionDigits: 2 })}` : '—'}</p>
-                </div>
-                
-                {selectedTx.recipient_name && (
-                  <div className="col-span-2">
-                    <p className="text-xs text-muted-foreground mb-1 uppercase tracking-wider font-bold">Recipient / Beneficiary</p>
-                    <div className="bg-muted/30 p-3 rounded-xl border border-border/50 flex flex-col gap-1">
-                      <p className="font-semibold text-foreground">{selectedTx.recipient_name}</p>
-                      {selectedTx.recipient_bank && <p className="text-xs text-muted-foreground">Bank: {selectedTx.recipient_bank}</p>}
-                      {selectedTx.recipient_account && <p className="text-xs text-muted-foreground font-mono">A/C: {selectedTx.recipient_account}</p>}
-                    </div>
-                  </div>
-                )}
-              </div>
-              
-              <div className="pt-4 border-t border-border/50 flex flex-col sm:flex-row gap-2">
-                <Button className="w-full sm:w-1/3 rounded-xl h-11" variant="outline" onClick={() => setSelectedTx(null)}>Close</Button>
-                <Button className="w-full sm:w-1/3 rounded-xl gap-2 h-11" variant="secondary" onClick={handleShareReceipt}><Share2 className="h-4 w-4" /> Share</Button>
-                <Button className="w-full sm:w-1/3 rounded-xl gap-2 h-11 shadow-sm" onClick={handleDownloadReceipt}><Download className="h-4 w-4" /> Receipt</Button>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      <TransactionDetailsModal />
     </div>
   );
 }

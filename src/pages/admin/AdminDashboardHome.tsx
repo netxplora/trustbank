@@ -166,7 +166,7 @@ const AdminDashboardHome = () => {
       </div>
 
       <div className="lg:col-span-3 mb-2">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {statCards.map(({ icon: Icon, label, value, change, color }, i) => (
             <div key={label} className={`rounded-xl p-3.5 shadow-sm border flex flex-col justify-between ${
               i === 3 

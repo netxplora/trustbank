@@ -5,6 +5,76 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#1E3A8A" />
+    <script>
+      (function() {
+        try {
+          var cached = localStorage.getItem("brand_design_system");
+          if (cached) {
+            var design = JSON.parse(cached);
+            if (design && design.colors) {
+              function hexToHsl(hex) {
+                if (!hex) return "0 0% 0%";
+                hex = hex.replace(/^#/, "");
+                if (hex.length === 3) hex = hex.split("").map(function(c) { return c + c; }).join("");
+                if (hex.length !== 6) return "0 0% 0%";
+                var r = parseInt(hex.substring(0, 2), 16) / 255;
+                var g = parseInt(hex.substring(2, 4), 16) / 255;
+                var b = parseInt(hex.substring(4, 6), 16) / 255;
+                var max = Math.max(r, g, b), min = Math.min(r, g, b);
+                var h = 0, s = 0, l = (max + min) / 2;
+                if (max !== min) {
+                  var d = max - min;
+                  s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                  switch (max) {
+                    case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                    case g: h = (b - r) / d + 2; break;
+                    case b: h = (r - g) / d + 4; break;
+                  }
+                  h /= 6;
+                }
+                return Math.round(h * 360) + " " + Math.round(s * 100) + "% " + Math.round(l * 100) + "%";
+              }
+              var light = design.colors;
+              var dark = design.dark_mode_colors || light;
+               function gen(c) {
+                 return "--primary: " + hexToHsl(c.primary) + ";" +
+                        "--secondary: " + hexToHsl(c.secondary) + ";" +
+                        "--accent: " + hexToHsl(c.accent) + ";" +
+                        "--background: " + hexToHsl(c.background) + ";" +
+                        "--foreground: " + hexToHsl(c.foreground) + ";" +
+                        "--card: " + hexToHsl(c.card || c.background || "#FFFFFF") + ";" +
+                        "--card-foreground: " + hexToHsl(c.card_foreground || c.foreground || "#0F1626") + ";" +
+                        "--popover: " + hexToHsl(c.popover || c.background || "#FFFFFF") + ";" +
+                        "--popover-foreground: " + hexToHsl(c.popover_foreground || c.foreground || "#0F1626") + ";" +
+                        "--surface: " + hexToHsl(c.surface || "#F8FAFC") + ";" +
+                        "--surface-hover: " + hexToHsl(c.surface_hover || "#F1F5F9") + ";" +
+                        "--muted: " + hexToHsl(c.muted || "#F1F5F9") + ";" +
+                        "--muted-foreground: " + hexToHsl(c.muted_foreground || "#64748B") + ";" +
+                        "--border: " + hexToHsl(c.border || "#E2E8F0") + ";" +
+                        "--input: " + hexToHsl(c.input || "#E2E8F0") + ";" +
+                        "--success: " + hexToHsl(c.success || "#10B981") + ";" +
+                        "--warning: " + hexToHsl(c.warning || "#F59E0B") + ";" +
+                        "--error: " + hexToHsl(c.error || "#EF4444") + ";" +
+                        "--info: " + hexToHsl(c.info || c.primary) + ";" +
+                        "--ring: " + hexToHsl(c.primary) + ";" +
+                        "--sidebar-background: " + hexToHsl(c.background) + ";" +
+                        "--sidebar-foreground: " + hexToHsl(c.foreground) + ";" +
+                        "--sidebar-primary: " + hexToHsl(c.primary) + ";" +
+                        "--sidebar-primary-foreground: " + hexToHsl("#FFFFFF") + ";" +
+                        "--sidebar-accent: " + hexToHsl(c.muted || "#F1F5F9") + ";" +
+                        "--sidebar-accent-foreground: " + hexToHsl(c.foreground) + ";" +
+                        "--sidebar-border: " + hexToHsl(c.border || "#E2E8F0") + ";" +
+                        "--sidebar-ring: " + hexToHsl(c.primary) + ";";
+               }
+               var style = document.createElement("style");
+               style.id = "theme-engine";
+               style.textContent = "html:root { " + gen(light) + (design.radius ? "--radius: " + design.radius + ";" : "") + " } html.dark { " + gen(dark) + " }";
+               document.head.appendChild(style);
+            }
+          }
+        } catch(e) {}
+      })();
+    </script>
 
     <!-- Primary SEO -->
     <title>TrustBank | Premium Banking & Wealth Management</title>

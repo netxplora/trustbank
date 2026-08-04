@@ -18,10 +18,10 @@ export interface PDFBrandColors {
   primaryLight: [number, number, number];
 }
 
-/** Default fallback — matches TrustBank crimson used before branding was dynamic */
+/** Default fallback — matches default TrustBank modern blue */
 const DEFAULT_BRAND: PDFBrandColors = {
-  primary: [130, 20, 40],
-  primaryLight: [180, 40, 60],
+  primary: [59, 130, 246],
+  primaryLight: [96, 165, 250],
 };
 
 /**
@@ -67,14 +67,14 @@ function lightenRgb(
 
 /**
  * Fetches brand colours from the CMS and returns them as jsPDF-ready RGB tuples.
- * Falls back to the default crimson palette if the setting cannot be loaded.
+ * Falls back to the default modern blue palette if the setting cannot be loaded.
  */
 export async function fetchBrandPDFColors(): Promise<PDFBrandColors> {
   try {
     const { data, error } = await supabase
       .from("cms_site_settings")
       .select("value")
-      .eq("key", "brand_settings")
+      .eq("key", "design_system")
       .maybeSingle();
 
     if (error || !data?.value) return DEFAULT_BRAND;
