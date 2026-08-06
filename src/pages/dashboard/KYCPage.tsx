@@ -235,7 +235,7 @@ const KYCPage = () => {
                   { id: user.id, status: kycStatus, tier: kycTier, created_at: new Date().toISOString() },
                   brandColors
                 );
-                pdf.save(`TrustBank_KYC_Verification.pdf`);
+                pdf.save(`${identity?.short_name || 'TrustBank'}_KYC_Verification.pdf`);
                 await saveDocumentRecord({ userId: user.id, documentType: "kyc_approval", documentCategory: "kyc", referenceNumber, verificationCode, title: `KYC Tier ${kycTier} Approval Letter`, metadata: { tier: kycTier, status: kycStatus } });
               }}
             >

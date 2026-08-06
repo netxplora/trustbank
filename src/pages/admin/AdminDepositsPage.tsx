@@ -535,8 +535,14 @@ export default function AdminDepositsPage() {
                     <p className="text-sm font-bold text-foreground">{d.customer_name || "Unknown"}</p>
                     <p className="text-xs text-muted-foreground">{d.customer_email || "No email"}</p>
                   </td>
-                  <td className="p-4 text-sm font-semibold font-mono text-foreground">
-                    {d.amount ? `$${Number(d.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}` : "—"}
+                  <td className="p-4">
+                    <p className="text-sm font-bold text-foreground font-mono">
+                      {d.amount 
+                        ? d.deposit_type === "crypto" 
+                          ? `${Number(d.amount).toLocaleString()} ${d.currency}`
+                          : `$${Number(d.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}` 
+                        : "—"}
+                    </p>
                   </td>
                   <td className="p-4">
                     {d.reference && (
@@ -648,7 +654,13 @@ export default function AdminDepositsPage() {
                 </div>
                 <div>
                   <p className="text-xs font-semibold text-muted-foreground uppercase">Amount</p>
-                  <p className="font-bold text-lg">{selected.amount ? `$${Number(selected.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}` : "Not specified"}</p>
+                  <p className="font-bold text-lg">
+                    {selected.amount 
+                      ? selected.deposit_type === "crypto" 
+                        ? `${Number(selected.amount).toLocaleString()} ${selected.currency}`
+                        : `$${Number(selected.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}` 
+                      : "Not specified"}
+                  </p>
                 </div>
                 <div>
                   <p className="text-xs font-semibold text-muted-foreground uppercase">Status</p>

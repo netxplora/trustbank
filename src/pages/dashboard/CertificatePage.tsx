@@ -151,11 +151,10 @@ export default function CertificatePage() {
               </div>
 
               {/* Formal Attestation */}
-              <div className="text-center mb-12 px-8">
-                <p className="text-base leading-loose text-slate-700 font-medium font-sans">
-                  This is to officially certify and attest that <br />
-                  <strong className="text-2xl font-bold text-slate-900 font-poppins block my-4 uppercase tracking-wide">{shareholderName}</strong>
-                  is the registered holder of the specified shares listed below, maintained in official registry by TrustBank Wealth Management.
+              <div className="text-center my-6">
+                <p className="text-[11px] leading-relaxed text-slate-700 font-sans">
+                  This certifies that <strong>{shareholderName}</strong><br/>
+                  is the registered holder of the specified shares listed below, maintained in official registry by {identity?.short_name || 'TrustBank'} Wealth Management.
                 </p>
               </div>
 
@@ -212,9 +211,9 @@ export default function CertificatePage() {
                       <ShieldCheck size={18} />
                       <span className="font-bold font-poppins text-xs tracking-wider uppercase">Verified</span>
                     </div>
-                    <p className="text-[9px] text-slate-500 font-medium leading-relaxed">
-                      Scan this QR code to verify the authenticity of this document via the official TrustBank portal.
-                    </p>
+                    <div className="flex-1 space-y-1">
+                      <p className="text-[9px] text-slate-600 font-sans font-medium">Scan this QR code to verify the authenticity of this document via the official {identity?.platform_name || 'TrustBank'} portal.</p>
+                    </div>
                     <p className="text-[10px] font-mono font-bold text-slate-800 bg-slate-100 inline-block px-2 py-1 rounded">
                       {cert.verification_code}
                     </p>

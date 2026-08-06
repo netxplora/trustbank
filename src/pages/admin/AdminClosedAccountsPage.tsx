@@ -55,16 +55,26 @@ export const AdminClosedAccountsPage = () => {
 
   const fetchClosedAccounts = async () => {
     try {
-      const { data, error } = await supabase
+      const { data: closuresData, error: closuresErr } = await supabase
         .from('account_closure_requests')
-        .select(`
-          *,
-          profiles!inner(display_name, email, account_number)
-        `)
+        .select('*')
         .order('closure_date', { ascending: false });
 
-      if (error) throw error;
-      setAccounts(data as any);
+      if (closuresErr) throw closuresErr;
+
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('user_id, display_name, email, account_number');
+
+      const profileMap = new Map<string, any>();
+      profilesData?.forEach((p: any) => profileMap.set(p.user_id, p));
+
+      const mergedData = closuresData?.map((c: any) => ({
+        ...c,
+        profiles: profileMap.get(c.user_id) || null
+      }));
+
+      setAccounts(mergedData as any);
     } catch (err: any) {
       toast({ title: "Error loading accounts", description: err.message, variant: "destructive" });
     } finally {

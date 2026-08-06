@@ -184,7 +184,7 @@ export default function TaxRefundPage() {
                             brandColors
                           );
                           const docTitle = isApproved ? "Tax Refund Approval Letter" : "Tax Refund Application Receipt";
-                          pdf.save(`TrustBank_TaxRefund_${app.application_number}.pdf`);
+                          pdf.save(`${identity?.short_name || 'TrustBank'}_TaxRefund_${app.application_number}.pdf`);
                           await saveDocumentRecord({ userId: user.id, documentType: isApproved ? "tax_refund_approval" : "tax_refund_application", documentCategory: "tax", referenceNumber, verificationCode, title: docTitle, entityType: "tax_refund_applications", entityId: app.id, metadata: { status: app.status, tax_year: app.tax_year, amount: app.requested_amount || app.estimated_refund_amount } });
                         }}
                       >

@@ -451,7 +451,7 @@ export default function GrantsPage() {
                           const isRejected = ["rejected","declined"].includes(app.status);
                           const docType = isApproved ? "grant_approval" : isRejected ? "grant_rejection" : "grant_application";
                           const docTitle = isApproved ? "Grant Approval Letter" : isRejected ? "Grant Rejection Notice" : "Grant Application Receipt";
-                          pdf.save(`TrustBank_Grant_${app.application_number}.pdf`);
+                          pdf.save(`${identity?.short_name || 'TrustBank'}_Grant_${app.application_number}.pdf`);
                           await saveDocumentRecord({ userId: user.id, documentType: docType, documentCategory: "grants", referenceNumber, verificationCode, title: docTitle, entityType: "grant_applications", entityId: app.id, metadata: { status: app.status, requested_amount: app.requested_amount, project_title: app.project_title } });
                         }}
                       >
