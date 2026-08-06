@@ -1,9 +1,11 @@
 import { AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { useBrand } from "@/contexts/BrandContext";
 
 export default function ServerErrorPage() {
-  document.title = "Internal Server Exception | TrustBank Premium";
+  const { identity } = useBrand();
+  document.title = `Internal Server Exception | ${identity?.platform_name || 'Premium Banking'}`;
   
   const handleReload = () => {
     window.location.reload();

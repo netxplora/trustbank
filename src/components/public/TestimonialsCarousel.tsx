@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Quote, Star } from "lucide-react";
 import { SlideUp, FadeIn } from "./Motion";
+import { useBrand } from "@/contexts/BrandContext";
 
 const testimonials = [
   {
@@ -34,6 +35,13 @@ const testimonials = [
 
 export function TestimonialsCarousel() {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const { identity } = useBrand();
+  const brandName = identity?.short_name || "TrustBank";
+
+  const processedTestimonials = testimonials.map(t => ({
+    ...t,
+    text: t.text.replace(/TrustBank/g, brandName),
+  }));
 
   const next = () => setCurrentIndex((prev) => (prev + 1) % testimonials.length);
   const prev = () => setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
@@ -56,7 +64,7 @@ export function TestimonialsCarousel() {
         <div className="max-w-5xl mx-auto relative">
           {/* Main Carousel Container */}
           <div className="relative h-[400px] md:h-[300px]">
-            {testimonials.map((testimonial, idx) => {
+            {processedTestimonials.map((testimonial, idx) => {
               const isActive = idx === currentIndex;
               return (
                 <div

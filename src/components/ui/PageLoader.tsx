@@ -4,12 +4,12 @@ import defaultLogo from "@/assets/logo.png";
 export function PageLoader() {
   // Try to use brand context, but fallback gracefully if not available
   let logoUrl: string | undefined;
-  let siteName = "TrustBank";
+  let siteName = "";
   
   try {
     const brand = useBrand();
     logoUrl = brand?.visuals?.primary_logo;
-    siteName = brand?.identity?.platform_name || "TrustBank";
+    siteName = brand?.identity?.platform_name || "";
   } catch {
     // BrandProvider not available yet (e.g., during initial Suspense)
   }

@@ -9,40 +9,43 @@ import { FadeIn, SlideUp, StaggerContainer, StaggerItem } from "@/components/pub
 import { SectionHeader } from "@/components/public/SectionHeader";
 import heroContact from "@/assets/hero-contact.jpg";
 import { supabase } from "@/integrations/supabase/client";
+import { useBrand } from "@/contexts/BrandContext";
 
-const routingDirectory = [
+const routingDirectory = (corporate: any, domain: string) => [
   {
     icon: Building2,
     title: "Commercial & Corporate Banking",
-    phone: "+1 (800) 555-0199",
-    email: "corporate@trustbank.com",
+    phone: corporate?.phone || "",
+    email: `corporate@${domain}`,
     desc: "Treasury management, commercial lending, and syndicated finance inquiries."
   },
   {
     icon: Briefcase,
     title: "Private Wealth Advisory",
-    phone: "+1 (800) 555-0288",
-    email: "wealth@trustbank.com",
+    phone: corporate?.phone || "",
+    email: `wealth@${domain}`,
     desc: "Direct line for existing Private Wealth and Family Office clients."
   },
   {
     icon: Landmark,
     title: "Retail Banking Support",
-    phone: "+1 (800) 555-0377",
-    email: "support@trustbank.com",
+    phone: corporate?.phone || "",
+    email: corporate?.email || `support@${domain}`,
     desc: "General inquiries for standard checking, savings, and personal loans."
   },
   {
     icon: ShieldAlert,
     title: "Fraud & Security Desk",
-    phone: "+1 (800) 555-0911",
-    email: "security@trustbank.com",
+    phone: corporate?.phone || "",
+    email: `security@${domain}`,
     desc: "24/7 dedicated line for reporting lost cards or suspicious activity."
   }
 ];
 
 const ContactPage = () => {
   const { toast } = useToast();
+  const { identity, corporate } = useBrand();
+  const emailDomain = corporate?.email?.split('@')[1] || identity?.domain || 'example.com';
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
@@ -106,7 +109,7 @@ const ContactPage = () => {
             description="Bypass automated systems. Connect directly with the specialized desk equipped to handle your specific financial requirements."
           />
           <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mt-8 sm:mt-12">
-            {routingDirectory.map((dept, idx) => (
+            {routingDirectory(corporate, emailDomain).map((dept, idx) => (
               <StaggerItem key={dept.title}>
                 <div className="bg-card rounded-2xl border border-muted/50 p-4 sm:p-6 shadow-sm hover-lift transition-all h-full flex flex-col justify-between">
                   <div>
@@ -188,7 +191,7 @@ const ContactPage = () => {
                 <h2 className="text-2xl font-poppins font-bold text-foreground mb-6 border-b pb-4 border-muted">Corporate Headquarters</h2>
                 <div className="space-y-8">
                   {[
-                    { icon: MapPin, label: "Registered Address", value: "100 Wall Street, Suite 4500\nNew York, NY 10005" },
+                    { icon: MapPin, label: "Registered Address", value: corporate?.headquarters || identity?.address || "" },
                     { icon: Clock, label: "Trading Hours", value: "Market Days: 8:00 AM - 5:00 PM EST\nDigital Systems: 24/7/365" },
                   ].map(({ icon: Icon, label, value }) => (
                     <div key={label} className="flex gap-5 items-start">
@@ -206,7 +209,7 @@ const ContactPage = () => {
                 <div className="mt-12 pt-8 border-t border-muted/50">
                   <h3 className="font-poppins font-bold text-foreground text-sm uppercase tracking-wider mb-4">Press & Media Inquiries</h3>
                   <p className="text-xs text-muted-foreground leading-relaxed mb-4">For press releases, executive interviews, or media relations, please contact our corporate communications desk directly.</p>
-                  <p className="text-sm font-bold text-primary">media@trustbank.com</p>
+                  <p className="text-sm font-bold text-primary">{`media@${emailDomain}`}</p>
                 </div>
               </div>
             </SlideUp>
@@ -245,7 +248,7 @@ const ContactPage = () => {
       <section className="py-8 bg-surface border-t border-border">
         <div className="container px-4 sm:px-6 lg:px-8">
           <p className="text-[10px] leading-relaxed text-muted-foreground max-w-5xl mx-auto text-justify font-sans">
-            Important Communication Disclosures: Electronic mail (email) and web forms submitted through the public internet may not be completely secure against interception. Do not send sensitive personal information such as account numbers, Social Security numbers, or wire transfer instructions through these unauthenticated channels. TrustBank personnel will never request your online banking password or physical security token codes via email, text, or unsolicited telephone calls. If you receive a suspicious communication claiming to be from TrustBank, immediately contact the Fraud & Security Desk.
+            Important Communication Disclosures: Electronic mail (email) and web forms submitted through the public internet may not be completely secure against interception. Do not send sensitive personal information such as account numbers, Social Security numbers, or wire transfer instructions through these unauthenticated channels. {identity?.short_name || 'TrustBank'} personnel will never request your online banking password or physical security token codes via email, text, or unsolicited telephone calls. If you receive a suspicious communication claiming to be from {identity?.short_name || 'TrustBank'}, immediately contact the Fraud & Security Desk.
           </p>
         </div>
       </section>

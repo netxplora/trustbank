@@ -5,7 +5,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useBrand } from "@/contexts/BrandContext";
 import { generateStatementPDF } from "@/lib/pdf/statement";
+import { generateReferenceNumber, generateVerificationCode } from "@/lib/pdf/referenceGenerator";
 import { fetchBrandPDFColors } from "@/lib/pdf/brandColorForPDF";
 import { StaggerContainer, StaggerItem, FadeIn, SlideUp } from "@/components/public/Motion";
 import { TableSkeleton } from "@/components/skeletons/DashboardSkeleton";
@@ -57,6 +59,7 @@ const getPremiumAccountName = (type: string) => {
 export default function StatementsPage() {
   const { toast } = useToast();
   const { user, profile } = useAuth();
+  const { identity, corporate, visuals } = useBrand();
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [taxDocs, setTaxDocs] = useState<TaxDocument[]>([]);
   const [stmtHistory, setStmtHistory] = useState<StatementHistory[]>([]);
@@ -115,7 +118,7 @@ export default function StatementsPage() {
     try {
       const { data } = await (supabase as any)
         .from("account_statements")
-        .select("id, period_start, period_end, generated_at, opening_balance, closing_balance")
+        .select("id, period_start, period_end, generated_at, opening_balance, closing_balance, reference_number, verification_code")
         .eq("account_id", acctId)
         .order("generated_at", { ascending: false });
 
@@ -147,13 +150,17 @@ export default function StatementsPage() {
       // 2. Generate PDF using jsPDF
       const customerName = profile?.display_name || `${profile?.first_name || ""} ${profile?.last_name || ""}`.trim() || "Valued Customer";
       const brandColors = await fetchBrandPDFColors();
+      // Pre-generate document identifiers so they can be stored and re-used on re-download
+      const stmtRefNum = generateReferenceNumber("account_statement");
+      const stmtVerCode = generateVerificationCode();
       const doc = await generateStatementPDF(
         { name: customerName, email: profile?.email || "", phone: profile?.phone || "", accountNumber: account.account_number },
-        account, txList as any[], month.label, brandColors
+        account, txList as any[], month.label, brandColors, { identity, corporate, visuals },
+        { refNum: stmtRefNum, verCode: stmtVerCode, date: new Date() }
       );
 
       // 3. Trigger immediate local browser download
-      doc.save(`TrustBank_Statement_${account.account_number.slice(-4)}_${month.label.replace(" ", "_")}.pdf`);
+      doc.save(`${identity?.short_name || 'Statement'}_${account.account_number.slice(-4)}_${month.label.replace(" ", "_")}.pdf`);
 
       // 4. Convert PDF to Blob for storage upload
       const pdfBlob = doc.output("blob");
@@ -188,6 +195,8 @@ export default function StatementsPage() {
         opening_balance: startBalance,
         closing_balance: account.balance,
         pdf_url: publicUrl,
+        reference_number: stmtRefNum,
+        verification_code: stmtVerCode,
       });
 
       toast({
@@ -222,9 +231,10 @@ export default function StatementsPage() {
     
     jspdfDoc.setFont("helvetica", "normal");
     jspdfDoc.setFontSize(10);
-    jspdfDoc.text("TrustyBank NA", 14, 36);
-    jspdfDoc.text("100 Wall Street, Suite 500", 14, 41);
-    jspdfDoc.text("New York, NY 10005", 14, 46);
+    jspdfDoc.text(identity?.legal_name || "Financial Institution", 14, 36);
+    if (corporate?.headquarters) {
+      jspdfDoc.text(corporate.headquarters, 14, 41);
+    }
     
     // Draw Box
     jspdfDoc.rect(12, 24, 90, 26);
@@ -295,7 +305,7 @@ export default function StatementsPage() {
     jspdfDoc.text("If you are required to file a return, a negligence penalty or other sanction may be imposed", 14, 105);
     jspdfDoc.text("on you if this income is taxable and the IRS determines that it has not been reported.", 14, 110);
     
-    jspdfDoc.save(`TrustBank_Form_${doc.form_type}_${doc.year}.pdf`);
+    jspdfDoc.save(`${identity?.short_name || 'TrustBank'}_Form_${doc.form_type}_${doc.year}.pdf`);
     toast({ title: "Tax Document Downloaded", description: `Form ${doc.form_type} for year ${doc.year} downloaded.` });
   };
 
@@ -417,14 +427,20 @@ export default function StatementsPage() {
                                   .gte("created_at", `${h.period_start}T00:00:00Z`)
                                   .lte("created_at", `${h.period_end}T23:59:59Z`);
 
-                                const customerName = profile?.display_name || "Valued Customer";
+                                const brandColors = await fetchBrandPDFColors();
+                                const customerName = profile?.display_name || `${profile?.first_name || ""} ${profile?.last_name || ""}`.trim() || "Valued Customer";
                                 const doc = await generateStatementPDF(
                                   { name: customerName, email: profile?.email || "", phone: profile?.phone || "", accountNumber: account.account_number },
                                   account,
                                   (txData as any[]) || [],
-                                  new Date(h.period_start).toLocaleDateString("en-US", { month: "long", year: "numeric" })
+                                  new Date(h.period_start).toLocaleDateString("en-US", { month: "long", year: "numeric" }),
+                                  brandColors,
+                                  { identity, corporate, visuals },
+                                  (h as any).reference_number && (h as any).verification_code
+                                    ? { refNum: (h as any).reference_number, verCode: (h as any).verification_code, date: new Date(h.generated_at) }
+                                    : undefined
                                 );
-                                doc.save(`TrustBank_Statement_${account.account_number.slice(-4)}.pdf`);
+                                doc.save(`${identity?.short_name || 'Statement'}_${account.account_number.slice(-4)}.pdf`);
                               }}
                             >
                               <Download className="h-3.5 w-3.5" />

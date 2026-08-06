@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useBrand } from "@/contexts/BrandContext";
 import { StaggerContainer, StaggerItem, FadeIn, SlideUp } from "@/components/public/Motion";
 import { generateLoanSummaryPDF } from "@/lib/pdf/domainDocuments";
 import { saveDocumentRecord } from "@/lib/pdf/documentService";
@@ -45,6 +46,8 @@ interface Loan {
 const LoansPage = () => {
   const { toast } = useToast();
   const { user, profile } = useAuth();
+  const { identity } = useBrand();
+  const brandName = identity?.short_name || "TrustBank";
   const [tab, setTab] = useState<"active" | "history" | "apply">("active");
   const [loading, setLoading] = useState(false);
   const [loans, setLoans] = useState<Loan[]>([]);
@@ -420,7 +423,7 @@ const LoansPage = () => {
                         loan,
                         brandColors
                       );
-                      pdf.save(`TrustBank_Loan_${loan.id.slice(0, 8).toUpperCase()}.pdf`);
+                      pdf.save(`${brandName}_Loan_${loan.id.slice(0, 8).toUpperCase()}.pdf`);
                       await saveDocumentRecord({ userId: user.id, documentType: "loan_application", documentCategory: "loans", referenceNumber, verificationCode, title: "Credit Facility Summary", entityType: "loans", entityId: loan.id, metadata: { amount: loan.amount, status: loan.status, purpose: loan.purpose } });
                     }}
                   >
@@ -433,7 +436,6 @@ const LoansPage = () => {
           })}
         </StaggerContainer>
 
-      /* History Tab */
       ) : tab === "history" ? (
         <StaggerContainer className="space-y-2">
           {historyLoans.length === 0 ? (
@@ -498,7 +500,7 @@ const LoansPage = () => {
                           loan,
                           brandColors
                         );
-                        pdf.save(`TrustBank_Loan_${loan.id.slice(0, 8).toUpperCase()}.pdf`);
+                        pdf.save(`${brandName}_Loan_${loan.id.slice(0, 8).toUpperCase()}.pdf`);
                         await saveDocumentRecord({ userId: user.id, documentType: "loan_application", documentCategory: "loans", referenceNumber, verificationCode, title: "Credit Facility Summary", entityType: "loans", entityId: loan.id, metadata: { amount: loan.amount, status: loan.status, purpose: loan.purpose } });
                       }}
                     >

@@ -1,9 +1,11 @@
 import { ShieldAlert, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { useBrand } from "@/contexts/BrandContext";
 
 export default function AccessDenied() {
-  document.title = "Access Denied | TrustBank Premium";
+  const { identity } = useBrand();
+  document.title = `Access Denied | ${identity?.platform_name || 'TrustBank Premium'}`;
   return (
     <div className="min-h-screen flex items-center justify-center bg-background text-foreground font-sans relative overflow-hidden">
       {/* Background Watermark */}

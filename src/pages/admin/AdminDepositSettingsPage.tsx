@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StaggerContainer, StaggerItem, SlideUp, FadeIn } from "@/components/public/Motion";
 import QRCode from "@/components/ui/QRCode";
+import { useBrand } from "@/contexts/BrandContext";
 
 // ─── Interfaces ───────────────────────────────────────────────────
 interface CryptoWallet {
@@ -44,6 +45,8 @@ interface FiatBank {
 const AdminDepositSettingsPage = () => {
   const { toast } = useToast();
   const { user } = useAuth();
+  const { identity } = useBrand();
+  const brandName = identity?.short_name || "TrustBank";
 
   
   // ── Fiat state ──
@@ -547,8 +550,8 @@ const AdminDepositSettingsPage = () => {
               <Input placeholder="e.g. Federal Reserve Central" value={fiatForm.bank_name} onChange={(e) => setFiatForm(f => ({ ...f, bank_name: e.target.value }))} className="mt-1" />
             </div>
             <div>
-              <Label className="text-xs font-semibold">Account Name *</Label>
-              <Input placeholder="e.g. TrustBank Custodial Accounts" value={fiatForm.account_name} onChange={(e) => setFiatForm(f => ({ ...f, account_name: e.target.value }))} className="mt-1" />
+              <Label className="text-xs font-semibold text-slate-500 uppercase">Receiving Account Name</Label>
+              <Input placeholder={`e.g. ${brandName} Custodial Accounts`} value={fiatForm.account_name} onChange={(e) => setFiatForm(f => ({ ...f, account_name: e.target.value }))} className="mt-1" />
             </div>
             <div>
               <Label className="text-xs font-semibold">Account Number *</Label>

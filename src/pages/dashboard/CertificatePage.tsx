@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import QRCode from "@/components/ui/QRCode";
 import logo from "@/assets/logo.png";
 import { PageLoader } from "@/components/ui/PageLoader";
+import { useBrand } from "@/contexts/BrandContext";
 
 interface CertificateData {
   id: string;
@@ -36,6 +37,8 @@ export default function CertificatePage() {
   const [cert, setCert] = useState<CertificateData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const { identity, visuals } = useBrand();
+  const brandName = identity?.short_name || "TrustBank";
 
   useEffect(() => {
     if (id && user) {
@@ -122,9 +125,9 @@ export default function CertificatePage() {
               {/* Header */}
               <div className="flex justify-between items-start mb-14">
                 <div className="flex items-center gap-4">
-                  <img src={logo} alt="TrustBank" className="h-12 w-12 object-contain" />
+                <img src={visuals?.primary_logo || logo} alt={brandName} className="h-12 w-12 object-contain" />
                   <div>
-                    <h1 className="text-2xl font-bold tracking-tight text-slate-900 font-poppins">TrustBank</h1>
+                    <h1 className="text-2xl font-bold tracking-tight text-slate-900 font-poppins">{brandName}</h1>
                     <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em]">Wealth Management</p>
                   </div>
                 </div>

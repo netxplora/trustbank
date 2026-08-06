@@ -5,6 +5,7 @@ import { ShieldCheck, ShieldAlert, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import logo from "@/assets/logo.png";
 import { PageLoader } from "@/components/ui/PageLoader";
+import { useBrand } from "@/contexts/BrandContext";
 
 interface VerifyData {
   certificate_number: string;
@@ -27,6 +28,9 @@ export default function VerifyCertificate() {
   const [cert, setCert] = useState<VerifyData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const { identity, visuals } = useBrand();
+  const brandName = identity?.short_name || "TrustBank";
+  const logoUrl = visuals?.primary_logo;
 
   useEffect(() => {
     if (code) {
@@ -64,8 +68,8 @@ export default function VerifyCertificate() {
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col font-sans">
       <header className="h-16 border-b border-border bg-background flex items-center px-4 sm:px-8 shrink-0 shadow-sm">
         <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <img src={logo} alt="TrustBank" className="h-6 w-6" />
-          <span className="font-poppins text-lg font-bold text-foreground">TrustBank</span>
+          <img src={logoUrl || logo} alt={brandName} className="h-6 w-6 object-contain" />
+          <span className="font-poppins text-lg font-bold text-foreground">{brandName}</span>
         </Link>
       </header>
 
@@ -92,7 +96,7 @@ export default function VerifyCertificate() {
                   <ShieldCheck className="h-8 w-8 text-success" />
                 </div>
                 <h1 className="text-2xl font-bold font-poppins text-success mb-2">Verified Official Document</h1>
-                <p className="text-sm text-success/80 font-medium">This Stock Holdings Certificate is authentic and was issued by TrustBank.</p>
+                <p className="text-sm text-success/80 font-medium">This Stock Holdings Certificate is authentic and was issued by {brandName}.</p>
               </div>
 
               {/* Document Details */}

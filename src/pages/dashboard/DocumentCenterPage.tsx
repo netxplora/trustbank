@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+import { useBrand } from "@/contexts/BrandContext";
 import { getUserDocuments } from "@/lib/pdf/documentService";
 import { FadeIn, SlideUp, StaggerContainer, StaggerItem } from "@/components/public/Motion";
 
@@ -48,6 +49,8 @@ const STATUS_META = {
 export default function DocumentCenterPage() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { identity } = useBrand();
+  const brandName = identity?.short_name || "TrustBank";
   const [documents, setDocuments] = useState<PlatformDocument[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -218,7 +221,6 @@ export default function DocumentCenterPage() {
                     const catMeta = CATEGORY_META[doc.document_category] || CATEGORY_META.general;
                     const statusMeta = STATUS_META[doc.status] || STATUS_META.issued;
                     const CatIcon = catMeta.icon;
-                    const StatusIcon = statusMeta.icon;
 
                     return (
                       <StaggerItem key={doc.id}>
@@ -326,8 +328,8 @@ export default function DocumentCenterPage() {
                   <p className="font-mono text-xs font-bold text-amber-800 dark:text-amber-300 tracking-widest">
                     {selectedDoc.verification_code}
                   </p>
-                  <p className="text-[9px] text-amber-600/80 dark:text-amber-500/80 mt-1">
-                    Use this code to verify document authenticity at any TrustBank branch or portal.
+                  <p className="text-xs text-slate-500 font-sans mt-2">
+                    Use this code to verify document authenticity at any {brandName} branch or portal.
                   </p>
                 </div>
               </FadeIn>

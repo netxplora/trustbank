@@ -5,8 +5,10 @@ import { FadeIn, SlideUp, StaggerContainer, StaggerItem } from "@/components/pub
 import { SectionHeader } from "@/components/public/SectionHeader";
 import heroBranches from "@/assets/hero-branches.jpg";
 
-const branches = [
-  { name: "Wall Street Head Office", address: "100 Wall Street, Suite 1500, New York, NY 10005", phone: "+1 (212) 555-0180", hours: "Mon–Fri: 8:00 AM – 4:00 PM", coordinates: "40.7061,-74.0089", type: "Corporate Headquarters", icon: Briefcase },
+import { useBrand } from "@/contexts/BrandContext";
+
+const getBranches = (corporate: any) => [
+  { name: "Head Office", address: corporate?.headquarters || "100 Wall Street, Suite 1500, New York, NY 10005", phone: corporate?.phone || "+1 (212) 555-0180", hours: "Mon–Fri: 8:00 AM – 4:00 PM", coordinates: "40.7061,-74.0089", type: "Corporate Headquarters", icon: Briefcase },
   { name: "K Street Advisory Suite", address: "1600 K St NW, Washington, D.C. 20006", phone: "+1 (202) 555-0144", hours: "By Appointment Only", coordinates: "38.9023,-77.0369", type: "Private Wealth & Government Relations", icon: Key },
   { name: "Loop Commercial Center", address: "233 S Wacker Dr, Chicago, IL 60606", phone: "+1 (312) 555-0192", hours: "Mon–Fri: 8:00 AM – 4:00 PM", coordinates: "41.8789,-87.6358", type: "Commercial Lending Desk", icon: Briefcase },
   { name: "Trade Street Vault & Advisory", address: "101 S Tryon St, Charlotte, NC 28280", phone: "+1 (704) 555-0128", hours: "Mon–Fri: 8:00 AM – 4:00 PM", coordinates: "35.2271,-80.8431", type: "Secure Vault Facility", icon: Shield },
@@ -15,6 +17,7 @@ const branches = [
 ];
 
 const BranchesPage = () => {
+  const { identity, corporate } = useBrand();
   return (
     <>
       <PageHero 
@@ -42,7 +45,7 @@ const BranchesPage = () => {
                 height="100%"
                 style={{ border: 0 }}
                 loading="lazy"
-                src="https://maps.google.com/maps?q=100%20Wall%20Street,%20New%20York&t=&z=4&ie=UTF8&iwloc=&output=embed"
+                src={`https://maps.google.com/maps?q=${encodeURIComponent(corporate?.headquarters || "100 Wall Street, New York")}&t=&z=4&ie=UTF8&iwloc=&output=embed`}
                 allowFullScreen
               />
             </div>
@@ -88,7 +91,7 @@ const BranchesPage = () => {
           />
 
           <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
-            {branches.map((branch, idx) => (
+            {getBranches(corporate).map((branch, idx) => (
               <StaggerItem key={branch.name}>
                 <div className="bg-card rounded-2xl border border-muted/50 p-8 hover-lift transition-all shadow-sm flex flex-col justify-between h-full">
                   <div>
@@ -134,7 +137,7 @@ const BranchesPage = () => {
       <section className="py-8 bg-surface border-t border-border">
         <div className="container px-4 sm:px-6 lg:px-8">
           <p className="text-[10px] leading-relaxed text-muted-foreground max-w-5xl mx-auto text-justify font-sans">
-            Important Access Disclosures: Access to TrustBank Private Wealth Suites and Secure Vault Facilities is strictly by appointment only. Walk-in services for non-account holders are not accommodated. All facilities employ extensive biometric access controls, armed security personnel, and continuous closed-circuit surveillance. Visitors must present valid government-issued identification matching their scheduled appointment roster prior to entry.
+            Important Access Disclosures: Access to {identity?.short_name || 'TrustBank'} Private Wealth Suites and Secure Vault Facilities is strictly by appointment only. Walk-in services for non-account holders are not accommodated. All facilities employ extensive biometric access controls, armed security personnel, and continuous closed-circuit surveillance. Visitors must present valid government-issued identification matching their scheduled appointment roster prior to entry.
           </p>
         </div>
       </section>

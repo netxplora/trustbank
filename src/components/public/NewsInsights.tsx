@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { SlideUp, FadeIn, StaggerContainer, StaggerItem } from "./Motion";
 import { ArrowRight, Clock, User } from "lucide-react";
+import { useBrand } from "@/contexts/BrandContext";
 
 interface Post {
   id: string;
@@ -56,6 +57,8 @@ const defaultPosts: Post[] = [
 export function NewsInsights() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const { identity } = useBrand();
+  const brandName = identity?.short_name || "TrustBank";
 
   useEffect(() => {
     fetchPosts();
@@ -130,7 +133,7 @@ export function NewsInsights() {
                         {new Date(featured.published_at!).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                       </span>
                       <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> 5 min read</span>
-                      <span className="flex items-center gap-1"><User className="h-3 w-3" /> TrustBank Research</span>
+                      <span className="flex items-center gap-1"><User className="h-3 w-3" /> {brandName} Research</span>
                     </div>
                     <h4 className="text-3xl md:text-4xl font-poppins font-bold text-white mb-4 leading-tight group-hover:text-primary/90 transition-colors">
                       {featured.title}

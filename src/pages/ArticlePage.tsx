@@ -4,6 +4,7 @@ import { CalendarDays, ArrowLeft, Clock, Tag, Share2, Copy, CheckCircle2 } from 
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { FadeIn, SlideUp } from "@/components/public/Motion";
+import { useBrand } from "@/contexts/BrandContext";
 
 interface Article {
   id: string;
@@ -25,6 +26,8 @@ export default function ArticlePage() {
   const [notFound, setNotFound] = useState(false);
   const [relatedPosts, setRelatedPosts] = useState<Article[]>([]);
   const [copied, setCopied] = useState(false);
+  const { identity } = useBrand();
+  const brandName = identity?.short_name || "TrustBank";
 
   useEffect(() => {
     if (slug) fetchArticle(slug);
@@ -40,7 +43,7 @@ export default function ArticlePage() {
         .select("*")
         .eq("slug", articleSlug)
         .eq("status", "published")
-        .single();
+        .maybeSingle();
 
       // If no slug match, try by ID
       let finalData = data;
@@ -51,7 +54,7 @@ export default function ArticlePage() {
           .select("*")
           .eq("id", articleSlug)
           .eq("status", "published")
-          .single();
+          .maybeSingle();
         finalData = result.data;
       }
 
@@ -293,7 +296,7 @@ export default function ArticlePage() {
       <section className="py-8 bg-surface border-t border-border">
         <div className="container px-4 sm:px-6 lg:px-8">
           <p className="text-[10px] leading-relaxed text-muted-foreground max-w-5xl mx-auto text-justify font-sans">
-            Important Research Disclosures: The macroeconomic analysis, market briefs, and corporate announcements provided on this platform are for informational purposes only and do not constitute formal investment advice, an offer to sell, or a solicitation of an offer to buy any security or financial instrument. TrustBank relies on internal models and third-party data sources believed to be reliable; however, we make no representation as to their absolute accuracy or completeness. Past performance is no guarantee of future results. Forward-looking statements are subject to numerous assumptions, risks, and uncertainties, which change over time. Please consult your dedicated wealth manager or corporate advisor before executing any strategic financial decisions based on this research.
+            Important Research Disclosures: The macroeconomic analysis, market briefs, and corporate announcements provided on this platform are for informational purposes only and do not constitute formal investment advice, an offer to sell, or a solicitation of an offer to buy any security or financial instrument. {brandName} relies on internal models and third-party data sources believed to be reliable; however, we make no representation as to their absolute accuracy or completeness. Past performance is no guarantee of future results. Forward-looking statements are subject to numerous assumptions, risks, and uncertainties, which change over time. Please consult your dedicated wealth manager or corporate advisor before executing any strategic financial decisions based on this research.
           </p>
         </div>
       </section>

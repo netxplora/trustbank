@@ -76,22 +76,26 @@ export interface DocumentOptions {
   config: DocumentConfig;
   customer: CustomerInfo;
   content: ContentBlock[];
-  /** Optional: institution info override */
-  institution?: {
-    name?: string;
-    address?: string;
+  /**
+   * Brand identity overrides fetched from CMS
+   */
+  identity?: {
+    platform_name?: string;
+    document_issuer_name?: string;
+    document_disclaimer?: string;
+  };
+  corporate?: {
+    headquarters?: string;
     email?: string;
     phone?: string;
-    website?: string;
+    website_url?: string;
   };
-  /** Optional: additional footer text */
+  visuals?: {
+    document_logo?: string;
+    primary_logo?: string;
+  };
   additionalDisclaimer?: string;
-  /** Optional: skip QR code */
   skipQR?: boolean;
-  /**
-   * Brand colours fetched from admin CMS configuration.
-   * When omitted the engine falls back to the built-in default palette.
-   */
   brandColors?: PDFBrandColors;
 }
 
@@ -126,17 +130,17 @@ const MARGIN_TOP = 12;
 const CONTENT_WIDTH = PAGE_WIDTH - MARGIN_LEFT - MARGIN_RIGHT;
 
 const DEFAULT_INSTITUTION = {
-  name: "TrustBank",
-  address: "350 Fifth Avenue, Suite 4500, New York, NY 10118",
-  email: "support@trustbank.com",
-  phone: "+1 (212) 555-0180",
-  website: "www.trustbank.com",
+  name: "Financial Institution",
+  address: "100 Main Street, Suite 100",
+  email: "support@institution.com",
+  phone: "+1 (800) 555-0000",
+  website: "www.institution.com",
 };
 
-const DISCLAIMER = "This document is issued by TrustBank and is intended solely for the named recipient. " +
+const DEFAULT_DISCLAIMER = "This document is issued by the Financial Institution and is intended solely for the named recipient. " +
   "It is generated electronically and does not require a physical signature. " +
   "For verification, scan the QR code or visit our verification portal with the verification code provided. " +
-  "TrustBank is a member of the Federal Deposit Insurance Corporation (FDIC). Deposits are insured up to applicable limits.";
+  "Deposits are insured up to applicable limits.";
 
 // ─── QR Code SVG-to-Image Renderer ──────────────────────────────
 
@@ -170,8 +174,38 @@ function generateQRBase64(value: string, size: number = 80): string {
 // ─── Main Generator ─────────────────────────────────────────────
 
 export async function generateDocument(options: DocumentOptions): Promise<jsPDF> {
-  const { config, customer, content, institution, additionalDisclaimer, skipQR, brandColors } = options;
-  const inst = { ...DEFAULT_INSTITUTION, ...institution };
+  let { config, customer, content, identity, corporate, visuals, additionalDisclaimer, skipQR, brandColors } = options;
+  
+  // Fallback to fetching from DB if not provided
+  if (!identity || !corporate) {
+    try {
+      const { supabase } = await import("@/integrations/supabase/client");
+      const { data } = await supabase
+        .from("cms_site_settings")
+        .select("key, value")
+        .in("key", ["brand_identity", "corporate_info"]);
+      
+      if (data) {
+        data.forEach((setting) => {
+          if (setting.key === "brand_identity" && !identity) identity = setting.value as any;
+          if (setting.key === "corporate_info" && !corporate) corporate = setting.value as any;
+        });
+      }
+    } catch (e) {
+      console.warn("Could not fetch brand settings for PDF generation", e);
+    }
+  }
+
+  const inst = {
+    name: identity?.document_issuer_name || identity?.platform_name || DEFAULT_INSTITUTION.name,
+    address: corporate?.headquarters || DEFAULT_INSTITUTION.address,
+    email: corporate?.support_email || corporate?.email || DEFAULT_INSTITUTION.email,
+    phone: corporate?.phone || DEFAULT_INSTITUTION.phone,
+    website: corporate?.website_url || DEFAULT_INSTITUTION.website,
+  };
+  
+  const baseDisclaimer = identity?.document_disclaimer || DEFAULT_DISCLAIMER;
+  
   const doc = new jsPDF({ unit: "mm", format: "a4" });
 
   // Build the runtime colour palette — brand primary comes from admin CMS,
@@ -193,7 +227,8 @@ export async function generateDocument(options: DocumentOptions): Promise<jsPDF>
   doc.rect(0, 0, PAGE_WIDTH, 3, "F");
 
   // Logo — fetched at runtime so the 169KB base64 is never in the JS bundle
-  const logoBase64 = await getLogoBase64();
+  const logoUrl = visuals?.document_logo || visuals?.primary_logo;
+  const logoBase64 = await getLogoBase64(logoUrl);
   try {
     if (logoBase64) {
       doc.addImage(logoBase64, "PNG", MARGIN_LEFT, y + 2, 12, 12);
@@ -207,7 +242,8 @@ export async function generateDocument(options: DocumentOptions): Promise<jsPDF>
     doc.setTextColor(...COLORS.white);
     doc.setFont("Helvetica", "bold");
     doc.setFontSize(8);
-    doc.text("TB", MARGIN_LEFT + 3.5, y + 9.5);
+    const fallbackText = inst.name.substring(0, 2).toUpperCase();
+    doc.text(fallbackText, MARGIN_LEFT + 3.5, y + 9.5);
   }
 
   // Institution name
@@ -498,8 +534,8 @@ export async function generateDocument(options: DocumentOptions): Promise<jsPDF>
 
   // Disclaimer
   const disclaimerText = additionalDisclaimer
-    ? `${DISCLAIMER} ${additionalDisclaimer}`
-    : DISCLAIMER;
+    ? `${baseDisclaimer} ${additionalDisclaimer}`
+    : baseDisclaimer;
 
   doc.setFont("Helvetica", "normal");
   doc.setFontSize(5.5);

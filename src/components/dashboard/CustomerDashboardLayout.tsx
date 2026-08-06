@@ -11,6 +11,7 @@ import logo from "@/assets/logo.png";
 import { supabase } from "@/integrations/supabase/client";
 const LiveChatWidget = lazy(() => import("./LiveChatWidget").then(m => ({ default: m.LiveChatWidget })));
 import { ActionTooltip } from "@/components/ui/action-tooltip";
+import { useBrand } from "@/contexts/BrandContext";
 
 // Primary Navigation
 const navItems = [
@@ -37,6 +38,7 @@ export default function CustomerDashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { toast } = useToast();
   const { profile, signOut, isAdmin } = useAuth();
+  const { identity, visuals } = useBrand();
 
   const handleSignOut = async () => {
     await signOut();
@@ -83,9 +85,13 @@ export default function CustomerDashboardLayout() {
         <div className="h-14 flex shrink-0 items-center px-4 border-b border-border/50 bg-background/50">
           <Link to="/" onClick={() => setSidebarOpen(false)} className="flex items-center gap-2.5 hover:opacity-80 transition-opacity flex-1">
             <div className="h-7 w-7 rounded-md bg-primary/10 flex items-center justify-center shadow-inner border border-primary/20 shrink-0">
-              <img src={logo} alt="TrustBank" className="h-5 w-5" width={20} height={20} />
+              {visuals?.primary_logo ? (
+                <img src={visuals.primary_logo} alt={identity?.short_name || "TrustBank"} className="h-5 w-auto max-w-[20px] object-contain" />
+              ) : (
+                <img src={logo} alt="TrustBank" className="h-5 w-5" width={20} height={20} />
+              )}
             </div>
-            <span className="font-poppins text-base font-bold text-foreground tracking-tight truncate">TrustBank</span>
+            <span className="font-poppins text-base font-bold text-foreground tracking-tight truncate">{identity?.short_name || "TrustBank"}</span>
           </Link>
           <button className="lg:hidden ml-auto text-muted-foreground hover:text-foreground p-1" onClick={() => setSidebarOpen(false)}>
             <X className="h-4 w-4" />

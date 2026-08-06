@@ -1,9 +1,11 @@
 import { Clock, PhoneCall } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { useBrand } from "@/contexts/BrandContext";
 
 export default function MaintenancePage() {
-  document.title = "Core System Update | TrustBank Premium";
+  const { identity } = useBrand();
+  document.title = `Core System Update | ${identity?.platform_name || 'Premium Banking'}`;
   return (
     <div className="min-h-screen flex items-center justify-center bg-background text-foreground font-sans relative overflow-hidden">
       {/* Background Watermark */}

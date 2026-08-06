@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Users, Wallet, ArrowRightLeft, TrendingUp, CreditCard, Bell, FileText, Settings, LogOut, Menu, X, User, ShieldCheck, Bitcoin, MessageCircle, LineChart, FileSpreadsheet, Paintbrush, Globe, Box, Image, ScrollText, Briefcase, ArrowDownCircle, Award, ChevronLeft, Landmark, FolderOpen } from "lucide-react";
+import { LayoutDashboard, Users, UserX, Wallet, ArrowRightLeft, TrendingUp, CreditCard, Bell, FileText, Settings, LogOut, Menu, X, User, ShieldCheck, Bitcoin, MessageCircle, LineChart, FileSpreadsheet, Paintbrush, Globe, Box, Image, ScrollText, Briefcase, ArrowDownCircle, Award, ChevronLeft, Landmark, FolderOpen } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { NotificationPopover } from "./NotificationPopover";
@@ -9,6 +9,7 @@ import { PageTransition } from "@/components/PageTransition";
 import { AnimatePresence } from "framer-motion";
 import logo from "@/assets/logo.png";
 import { ActionTooltip } from "@/components/ui/action-tooltip";
+import { useBrand } from "@/contexts/BrandContext";
 
 const navGroups = [
   {
@@ -16,6 +17,7 @@ const navGroups = [
     items: [
       { icon: LayoutDashboard, label: "Overview", to: "/admin", tooltip: "View platform statistics and recent activity." },
       { icon: Users, label: "Customers", to: "/admin/customers", tooltip: "Manage registered users and profiles." },
+      { icon: UserX, label: "Closed Accounts", to: "/admin/closed-accounts", tooltip: "View and manage closed user accounts and data retention." },
       { icon: Wallet, label: "Accounts", to: "/admin/accounts", tooltip: "Manage savings and checking accounts." },
       { icon: Briefcase, label: "Current Apps", to: "/admin/current-applications", tooltip: "Review current account applications." },
       { icon: ArrowRightLeft, label: "Transactions", to: "/admin/transactions", tooltip: "Monitor all platform transactions." },
@@ -58,6 +60,7 @@ export default function AdminDashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { toast } = useToast();
   const { profile, signOut } = useAuth();
+  const { identity, visuals } = useBrand();
 
   const handleSignOut = async () => {
     await signOut();
@@ -80,10 +83,14 @@ export default function AdminDashboardLayout() {
         <div className="h-14 flex shrink-0 items-center px-4 border-b border-border/50 bg-background/50">
           <Link to="/" onClick={() => setSidebarOpen(false)} className="flex items-center gap-2.5 hover:opacity-80 transition-opacity flex-1">
             <div className="h-7 w-7 rounded-md bg-primary/10 flex items-center justify-center shadow-inner border border-primary/20 shrink-0">
-              <img src={logo} alt="TrustBank" className="h-5 w-5" width={20} height={20} />
+              {visuals?.primary_logo ? (
+                <img src={visuals.primary_logo} alt={identity?.short_name || "TrustBank"} className="h-5 w-auto max-w-[20px] object-contain" />
+              ) : (
+                <img src={logo} alt="TrustBank" className="h-5 w-5" width={20} height={20} />
+              )}
             </div>
             <div>
-              <span className="font-poppins text-base font-bold text-foreground tracking-tight">TrustBank</span>
+              <span className="font-poppins text-base font-bold text-foreground tracking-tight">{identity?.short_name || "TrustBank"}</span>
               <p className="text-[8px] text-muted-foreground uppercase tracking-widest font-sans font-bold -mt-0.5">Admin Portal</p>
             </div>
           </Link>
@@ -151,7 +158,11 @@ export default function AdminDashboardLayout() {
             </ActionTooltip>
             <div className="flex items-center gap-2">
               <div className="h-6 w-6 rounded-md bg-primary/10 flex items-center justify-center border border-primary/20">
-                <img src={logo} alt="TrustBank" className="h-3.5 w-3.5" />
+                {visuals?.primary_logo ? (
+                  <img src={visuals.primary_logo} alt={identity?.short_name || "TrustBank"} className="h-3.5 w-auto max-w-[14px] object-contain" />
+                ) : (
+                  <img src={logo} alt="TrustBank" className="h-3.5 w-3.5" />
+                )}
               </div>
               <span className="font-poppins font-bold text-xs sm:text-sm text-foreground">Admin</span>
             </div>

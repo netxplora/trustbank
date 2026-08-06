@@ -11,32 +11,37 @@
  * This removes ~170KB from the initial JS bundle.
  */
 
-/** Cached result so we only fetch once per session */
-let _cachedLogoBase64: string | null = null;
+/** Cached result so we only fetch once per session per URL */
+const _logoCache = new Map<string, string>();
 
 /**
  * Returns the logo as a base64 data URL.
- * Fetches from /logo.png on first call, then returns the cached value.
+ * Fetches from the provided URL or falls back to /logo.png.
  * Returns an empty string if the fetch fails (PDF will render without logo).
  */
-export async function getLogoBase64(): Promise<string> {
-  if (_cachedLogoBase64 !== null) return _cachedLogoBase64;
+export async function getLogoBase64(url?: string): Promise<string> {
+  const targetUrl = url || "/logo.png";
+  
+  if (_logoCache.has(targetUrl)) {
+    return _logoCache.get(targetUrl)!;
+  }
 
   try {
-    const response = await fetch("/logo.png");
+    const response = await fetch(targetUrl);
     if (!response.ok) throw new Error(`Logo fetch failed: ${response.status}`);
     const blob = await response.blob();
-    _cachedLogoBase64 = await new Promise<string>((resolve) => {
+    const base64 = await new Promise<string>((resolve) => {
       const reader = new FileReader();
       reader.onloadend = () => resolve(reader.result as string);
       reader.readAsDataURL(blob);
     });
+    _logoCache.set(targetUrl, base64);
+    return base64;
   } catch {
     // Silently fall back — PDF will render a placeholder box instead
-    _cachedLogoBase64 = "";
+    _logoCache.set(targetUrl, "");
+    return "";
   }
-
-  return _cachedLogoBase64;
 }
 
 /**

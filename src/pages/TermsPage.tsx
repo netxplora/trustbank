@@ -2,12 +2,17 @@ import { Shield, Scale, FileText, AlertCircle } from "lucide-react";
 import { PageHero } from "@/components/public/PageHero";
 import { SlideUp, StaggerContainer, StaggerItem } from "@/components/public/Motion";
 import heroFaq from "@/assets/hero-faq.jpg";
+import { useBrand } from "@/contexts/BrandContext";
 
-const TermsPage = () => (
+const TermsPage = () => {
+  const { identity } = useBrand();
+  const brandName = identity?.short_name || "TrustBank";
+  
+  return (
   <>
     <PageHero 
       title="Master Commercial & Retail Depository Agreement" 
-      description="The foundational legal framework governing your financial relationship, capital deployment, and digital access with TrustBank." 
+      description={`The foundational legal framework governing your financial relationship, capital deployment, and digital access with ${brandName}.`} 
       image={heroFaq} 
       showTrustBadges={true}
     />
@@ -24,7 +29,7 @@ const TermsPage = () => (
             <div className="bg-primary/5 border border-primary/20 rounded-3xl p-6 mb-8">
               <h3 className="font-poppins font-bold text-primary mb-2">Agreement Summary</h3>
               <p className="text-sm font-sans text-muted-foreground leading-relaxed">
-                By establishing an account with TrustBank, you agree to our Master Commercial & Retail Depository Agreement. This covers your responsibilities, funds availability, mandatory arbitration, and limitations of liability. Please review the detailed sections below carefully.
+                By establishing an account with {brandName}, you agree to our Master Commercial & Retail Depository Agreement. This covers your responsibilities, funds availability, mandatory arbitration, and limitations of liability. Please review the detailed sections below carefully.
               </p>
             </div>
 
@@ -36,7 +41,7 @@ const TermsPage = () => (
                     To help the government fight the funding of terrorism and money laundering activities, Federal law (Title III of the USA PATRIOT Act) requires all financial institutions to obtain, verify, and record information that identifies each person or entity who opens an account.
                   </p>
                   <p className="text-muted-foreground leading-relaxed text-sm font-sans">
-                    By executing this agreement, you authorize TrustBank to utilize consumer reporting agencies, public databases, and proprietary risk-scoring models to verify your identity. Corporate entities must provide certified articles of incorporation, board resolutions detailing authorized signers, and explicit disclosures of all Ultimate Beneficial Owners (UBOs) holding a 25% or greater equity stake.
+                    By executing this agreement, you authorize {brandName} to utilize consumer reporting agencies, public databases, and proprietary risk-scoring models to verify your identity. Corporate entities must provide certified articles of incorporation, board resolutions detailing authorized signers, and explicit disclosures of all Ultimate Beneficial Owners (UBOs) holding a 25% or greater equity stake.
                   </p>
                 </div>
               </StaggerItem>
@@ -45,7 +50,7 @@ const TermsPage = () => (
                 <div>
                   <h3 className="text-sm font-poppins font-bold text-foreground mb-3 uppercase tracking-wider">2. Deposit Insurance & Funds Availability</h3>
                   <p className="text-muted-foreground leading-relaxed text-sm font-sans mb-4">
-                    TrustBank is a Member of the Federal Deposit Insurance Corporation (FDIC). Your eligible depository accounts are insured up to the standard maximum deposit insurance amount (SMDIA) of $250,000 per depositor, per insured depository institution, for each account ownership category.
+                    {brandName} is a Member of the Federal Deposit Insurance Corporation (FDIC). Your eligible depository accounts are insured up to the standard maximum deposit insurance amount (SMDIA) of $250,000 per depositor, per insured depository institution, for each account ownership category.
                   </p>
                   <p className="text-muted-foreground leading-relaxed text-sm font-sans">
                     Pursuant to Regulation CC (Expedited Funds Availability Act), our general policy is to allow you to withdraw funds deposited in your account on the first business day after the day we receive your deposit. Electronic direct deposits will be available on the day we receive the deposit. However, we reserve the right to delay availability for large deposits, newly established accounts, or items requiring extended clearing verification.
@@ -69,7 +74,7 @@ const TermsPage = () => (
                 <div>
                   <h3 className="text-sm font-poppins font-bold text-foreground mb-3 uppercase tracking-wider">4. Fiduciary Duty & Wealth Management</h3>
                   <p className="text-muted-foreground leading-relaxed text-sm font-sans">
-                    Assets held within TrustBank Wealth Management LLC, an SEC-registered investment adviser, are managed under a strict fiduciary standard. However, these assets are NOT FDIC INSURED, ARE NOT BANK DEPOSITS, AND MAY LOSE VALUE. Brokerage services are provided through TrustBank Securities Inc., Member FINRA/SIPC. TrustBank Securities Inc. and TrustBank Wealth Management LLC are affiliated entities.
+                    Assets held within {brandName} Wealth Management LLC, an SEC-registered investment adviser, are managed under a strict fiduciary standard. However, these assets are NOT FDIC INSURED, ARE NOT BANK DEPOSITS, AND MAY LOSE VALUE. Brokerage services are provided through {brandName} Securities Inc., Member FINRA/SIPC. {brandName} Securities Inc. and {brandName} Wealth Management LLC are affiliated entities.
                   </p>
                 </div>
               </StaggerItem>
@@ -93,7 +98,7 @@ const TermsPage = () => (
                 <div>
                   <h3 className="text-sm font-poppins font-bold text-foreground mb-3 uppercase tracking-wider">6. Limitation of Liability & Force Majeure</h3>
                   <p className="text-muted-foreground leading-relaxed text-sm font-sans">
-                    TrustBank shall not be liable for direct, indirect, incidental, special, consequential, or exemplary damages, including but not limited to, damages for loss of profits, goodwill, use, data, or other intangible losses resulting from (i) the use or the inability to use the digital portal; (ii) unauthorized access to or alteration of your transmissions or data; or (iii) any disruption of service caused by acts of God, war, terrorism, or systemic telecommunications failures.
+                    {brandName} shall not be liable for direct, indirect, incidental, special, consequential, or exemplary damages, including but not limited to, damages for loss of profits, goodwill, use, data, or other intangible losses resulting from (i) the use or the inability to use the digital portal; (ii) unauthorized access to or alteration of your transmissions or data; or (iii) any disruption of service caused by acts of God, war, terrorism, or systemic telecommunications failures.
                   </p>
                 </div>
               </StaggerItem>
@@ -104,6 +109,7 @@ const TermsPage = () => (
       </div>
     </section>
   </>
-);
+  );
+};
 
 export default TermsPage;

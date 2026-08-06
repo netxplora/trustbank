@@ -320,7 +320,7 @@ export default function AdminPagesManager() {
 
             {editingPage.content_blocks.map((block, index) => (
               <BlockEditor
-                key={block.id}
+                key={block.id || `block-${index}`}
                 block={block}
                 index={index}
                 totalBlocks={editingPage.content_blocks.length}
@@ -621,30 +621,32 @@ function FieldLabel({ children }: { children: React.ReactNode }) {
 }
 
 function HeroEditor({ block, onUpdate }: { block: ContentBlock; onUpdate: (id: string, f: string, v: any) => void }) {
+  const c = block.content || {};
   return (
     <>
-      <div><FieldLabel>Headline</FieldLabel><Input value={block.content.headline || ""} onChange={e => onUpdate(block.id, "headline", e.target.value)} placeholder="Main headline text" /></div>
-      <div><FieldLabel>Subheadline</FieldLabel><Textarea value={block.content.subheadline || ""} onChange={e => onUpdate(block.id, "subheadline", e.target.value)} placeholder="Supporting text" rows={2} /></div>
+      <div><FieldLabel>Headline</FieldLabel><Input value={c.headline || ""} onChange={e => onUpdate(block.id, "headline", e.target.value)} placeholder="Main headline text" /></div>
+      <div><FieldLabel>Subheadline</FieldLabel><Textarea value={c.subheadline || ""} onChange={e => onUpdate(block.id, "subheadline", e.target.value)} placeholder="Supporting text" rows={2} /></div>
       <div className="grid grid-cols-2 gap-4">
-        <div><FieldLabel>Button Text</FieldLabel><Input value={block.content.cta_text || ""} onChange={e => onUpdate(block.id, "cta_text", e.target.value)} placeholder="Get Started" /></div>
-        <div><FieldLabel>Button Link</FieldLabel><Input value={block.content.cta_link || ""} onChange={e => onUpdate(block.id, "cta_link", e.target.value)} placeholder="/signup" /></div>
+        <div><FieldLabel>Button Text</FieldLabel><Input value={c.cta_text || ""} onChange={e => onUpdate(block.id, "cta_text", e.target.value)} placeholder="Get Started" /></div>
+        <div><FieldLabel>Button Link</FieldLabel><Input value={c.cta_link || ""} onChange={e => onUpdate(block.id, "cta_link", e.target.value)} placeholder="/signup" /></div>
       </div>
-      <div><FieldLabel>Background Image URL</FieldLabel><Input value={block.content.bg_image || ""} onChange={e => onUpdate(block.id, "bg_image", e.target.value)} placeholder="https://..." /></div>
+      <div><FieldLabel>Background Image URL</FieldLabel><Input value={c.bg_image || ""} onChange={e => onUpdate(block.id, "bg_image", e.target.value)} placeholder="https://..." /></div>
     </>
   );
 }
 
 function TextEditor({ block, onUpdate }: { block: ContentBlock; onUpdate: (id: string, f: string, v: any) => void }) {
+  const c = block.content || {};
   return (
     <>
-      <div><FieldLabel>Section Title</FieldLabel><Input value={block.content.title || ""} onChange={e => onUpdate(block.id, "title", e.target.value)} placeholder="Section heading" /></div>
-      <div><FieldLabel>Body Content</FieldLabel><Textarea value={block.content.body || ""} onChange={e => onUpdate(block.id, "body", e.target.value)} placeholder="Write your content here..." rows={6} className="font-sans" /></div>
+      <div><FieldLabel>Section Title</FieldLabel><Input value={c.title || ""} onChange={e => onUpdate(block.id, "title", e.target.value)} placeholder="Section heading" /></div>
+      <div><FieldLabel>Body Content</FieldLabel><Textarea value={c.body || ""} onChange={e => onUpdate(block.id, "body", e.target.value)} placeholder="Write your content here..." rows={6} className="font-sans" /></div>
       <div>
         <FieldLabel>Text Alignment</FieldLabel>
         <div className="flex gap-2 mt-1">
           {["left", "center", "right"].map(a => (
             <button key={a} onClick={() => onUpdate(block.id, "alignment", a)}
-              className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-colors capitalize ${block.content.alignment === a ? "bg-primary text-primary-foreground border-primary" : "bg-background hover:bg-muted"}`}>
+              className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition-colors capitalize ${c.alignment === a ? "bg-primary text-primary-foreground border-primary" : "bg-background hover:bg-muted"}`}>
               {a}
             </button>
           ))}
@@ -655,24 +657,26 @@ function TextEditor({ block, onUpdate }: { block: ContentBlock; onUpdate: (id: s
 }
 
 function CtaEditor({ block, onUpdate }: { block: ContentBlock; onUpdate: (id: string, f: string, v: any) => void }) {
+  const c = block.content || {};
   return (
     <>
-      <div><FieldLabel>Headline</FieldLabel><Input value={block.content.headline || ""} onChange={e => onUpdate(block.id, "headline", e.target.value)} placeholder="Call to action headline" /></div>
-      <div><FieldLabel>Description</FieldLabel><Textarea value={block.content.description || ""} onChange={e => onUpdate(block.id, "description", e.target.value)} placeholder="Supporting description" rows={2} /></div>
+      <div><FieldLabel>Headline</FieldLabel><Input value={c.headline || ""} onChange={e => onUpdate(block.id, "headline", e.target.value)} placeholder="Call to action headline" /></div>
+      <div><FieldLabel>Description</FieldLabel><Textarea value={c.description || ""} onChange={e => onUpdate(block.id, "description", e.target.value)} placeholder="Supporting description" rows={2} /></div>
       <div className="grid grid-cols-2 gap-4">
-        <div><FieldLabel>Button Text</FieldLabel><Input value={block.content.button_text || ""} onChange={e => onUpdate(block.id, "button_text", e.target.value)} placeholder="Learn More" /></div>
-        <div><FieldLabel>Button Link</FieldLabel><Input value={block.content.button_link || ""} onChange={e => onUpdate(block.id, "button_link", e.target.value)} placeholder="/contact" /></div>
+        <div><FieldLabel>Button Text</FieldLabel><Input value={c.button_text || ""} onChange={e => onUpdate(block.id, "button_text", e.target.value)} placeholder="Learn More" /></div>
+        <div><FieldLabel>Button Link</FieldLabel><Input value={c.button_link || ""} onChange={e => onUpdate(block.id, "button_link", e.target.value)} placeholder="/contact" /></div>
       </div>
       <div>
         <FieldLabel>Background Color</FieldLabel>
         <div className="flex items-center gap-3">
-          <input type="color" value={block.content.bg_color || "#1e3a5f"} onChange={e => onUpdate(block.id, "bg_color", e.target.value)} className="h-9 w-12 rounded border cursor-pointer" />
-          <Input value={block.content.bg_color || "#1e3a5f"} onChange={e => onUpdate(block.id, "bg_color", e.target.value)} className="font-mono text-xs max-w-[120px]" />
+          <input type="color" value={c.bg_color || "#1e3a5f"} onChange={e => onUpdate(block.id, "bg_color", e.target.value)} className="h-9 w-12 rounded border cursor-pointer" />
+          <Input value={c.bg_color || "#1e3a5f"} onChange={e => onUpdate(block.id, "bg_color", e.target.value)} className="font-mono text-xs max-w-[120px]" />
         </div>
       </div>
     </>
   );
 }
+
 
 // ─── Generic Array Block Editor ────────────────────────────────
 function ArrayBlockEditor({
@@ -688,11 +692,12 @@ function ArrayBlockEditor({
   onAddArrayItem: (id: string, f: string, t: any) => void;
   onRemoveArrayItem: (id: string, f: string, i: number) => void;
 }) {
-  const items = block.content[field] || [];
+  const c = block.content || {};
+  const items = c[field] || [];
 
   return (
     <>
-      <div><FieldLabel>Section Title</FieldLabel><Input value={block.content.title || ""} onChange={e => onUpdateContent(block.id, "title", e.target.value)} placeholder="Section heading" /></div>
+      <div><FieldLabel>Section Title</FieldLabel><Input value={c.title || ""} onChange={e => onUpdateContent(block.id, "title", e.target.value)} placeholder="Section heading" /></div>
 
       <div className="space-y-3">
         <div className="flex items-center justify-between">
@@ -750,7 +755,7 @@ function LivePreview({ blocks }: { blocks: ContentBlock[] }) {
 }
 
 function PreviewBlock({ block }: { block: ContentBlock }) {
-  const c = block.content;
+  const c = block.content || {};
 
   switch (block.type) {
     case "hero":

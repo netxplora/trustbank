@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { StaggerContainer, StaggerItem, FadeIn, SlideUp } from "@/components/public/Motion";
 import QRCode from "@/components/ui/QRCode";
 import { Textarea } from "@/components/ui/textarea";
+import { useBrand } from "@/contexts/BrandContext";
 
 interface Account {
   id: string;
@@ -52,6 +53,8 @@ interface Props {
 const CryptoDepositExperience = ({ accounts, cryptoWallets, onBack }: Props) => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { identity } = useBrand();
+  const brandName = identity?.short_name || "TrustBank";
 
   const [step, setStep] = useState<number>(1);
   const [selectedWallet, setSelectedWallet] = useState<CryptoWallet | null>(null);
@@ -521,7 +524,7 @@ const CryptoDepositExperience = ({ accounts, cryptoWallets, onBack }: Props) => 
       <Dialog open={showThirdPartyNotice} onOpenChange={setShowThirdPartyNotice}>
         <DialogContent className="max-w-md font-sans">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-xl font-poppins"><ExternalLink className="h-5 w-5 text-primary" /> You Are Leaving TrustBank</DialogTitle>
+            <DialogTitle className="flex items-center gap-2 text-xl font-poppins"><ExternalLink className="h-5 w-5 text-primary" /> You Are Leaving {brandName}</DialogTitle>
             <DialogDescription asChild>
               <div className="text-foreground pt-4 space-y-3 text-sm">
                 <p>You are about to visit a trusted third-party platform to purchase digital currency.</p>
@@ -530,8 +533,8 @@ const CryptoDepositExperience = ({ accounts, cryptoWallets, onBack }: Props) => 
                   <ul className="list-disc list-inside space-y-2 ml-1 text-muted-foreground text-xs font-medium">
                     <li>Confirm the website URL before entering data.</li>
                     <li>Complete your purchase directly with the provider.</li>
-                    <li>After purchasing, return to TrustBank to submit your hash.</li>
-                    <li>TrustBank does not control third-party platforms.</li>
+                    <li>After purchasing, return to {brandName} to submit your hash.</li>
+                    <li>{brandName} does not control third-party platforms.</li>
                   </ul>
                 </div>
               </div>
@@ -554,7 +557,7 @@ const CryptoDepositExperience = ({ accounts, cryptoWallets, onBack }: Props) => 
           </DialogHeader>
           <div className="space-y-4 py-2">
             <p className="text-sm font-semibold text-foreground">
-              Sending funds to an incorrect address or an unsupported blockchain network will result in permanent loss. TrustBank cannot recover lost transactions.
+              Sending funds to an incorrect address or an unsupported blockchain network will result in permanent loss. {brandName} cannot recover lost transactions.
             </p>
             <ul className="text-sm text-muted-foreground list-disc list-inside space-y-2 ml-1">
               <li>Never manually type the wallet address. Always use Copy.</li>

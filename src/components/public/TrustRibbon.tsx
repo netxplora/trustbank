@@ -1,11 +1,16 @@
+import { useBrand } from "@/contexts/BrandContext";
+
 export function TrustRibbon() {
+  const { identity } = useBrand();
+  const brandName = identity?.short_name || "TrustBank";
+  const legalName = identity?.legal_name || `${brandName} Corporation`;
   return (
     <div className="bg-[#12141C] text-foreground/50 border-t border-white/5 py-4 text-xs">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-wrap justify-between items-center gap-4">
           <div className="flex flex-wrap items-center gap-6">
-            <span className="font-semibold text-foreground/70">TrustBank Premium Banking</span>
-            <span>© 2026 TrustBank. All rights reserved.</span>
+            <span className="font-semibold text-foreground/70">{brandName} Premium Banking</span>
+            <span>© {new Date().getFullYear()} {legalName}. All rights reserved.</span>
           </div>
 
           <div className="flex items-center gap-6">

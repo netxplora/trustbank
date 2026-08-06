@@ -10,6 +10,7 @@ import { generateDocument, ContentBlock } from "@/lib/pdf/documentEngine";
 import { generateReferenceNumber, generateVerificationCode } from "@/lib/pdf/referenceGenerator";
 import { saveDocumentRecord } from "@/lib/pdf/documentService";
 import { fetchBrandPDFColors } from "@/lib/pdf/brandColorForPDF";
+import { useBrand } from "@/contexts/BrandContext";
 
 interface Transaction {
   id: string;
@@ -29,6 +30,8 @@ export function TransactionDetailsModal() {
   const [searchParams, setSearchParams] = useSearchParams();
   const txId = searchParams.get("tx");
   const { user, profile } = useAuth();
+  const { identity } = useBrand();
+  const brandName = identity?.short_name || "TrustBank";
   
   const [transaction, setTransaction] = useState<Transaction | null>(null);
   const [loading, setLoading] = useState(false);
@@ -142,7 +145,7 @@ export function TransactionDetailsModal() {
       brandColors,
     });
 
-    pdf.save(`TrustBank_Receipt_${transaction.reference || refNum}.pdf`);
+    pdf.save(`${brandName}_Receipt_${transaction.reference || refNum}.pdf`);
 
     await saveDocumentRecord({
       userId: user.id,
@@ -168,7 +171,7 @@ export function TransactionDetailsModal() {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'TrustBank Transaction Receipt',
+          title: `${brandName} Transaction Receipt`,
           text: `Transaction Receipt [Ref: ${transaction.reference}]\nAmount: $${Math.abs(transaction.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}\nDate: ${new Date(transaction.created_at).toLocaleString()}`,
         });
       } catch (err) {

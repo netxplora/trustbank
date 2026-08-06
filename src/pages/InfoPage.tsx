@@ -9,6 +9,7 @@ import NotFound from "./NotFound";
 import { CheckCircle2, FileText, ArrowRight, ShieldCheck, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { useBrand } from "@/contexts/BrandContext";
 
 // Hero images referenced as URL strings — Vite copies them to /assets/ and serves them separately.
 // This prevents them from being inlined into the JS chunk (which caused the 179KB chunk size).
@@ -34,6 +35,7 @@ interface CmsPage {
 
 export default function InfoPage() {
   const { slug } = useParams<{ slug: string }>();
+  const { identity } = useBrand();
   const [cmsPage, setCmsPage] = useState<CmsPage | null>(null);
   const [localData, setLocalData] = useState<InfoPageContent | null>(null);
   const [loading, setLoading] = useState(true);
@@ -54,12 +56,29 @@ export default function InfoPage() {
         .maybeSingle()
         .then(({ data }: { data: CmsPage | null }) => setCmsPage(data ?? null))
         .catch(() => setCmsPage(null)),
-      // Dynamic import of 204KB data file — loaded only when user visits an info page
       import("@/data/infoPages")
-        .then((m) => setLocalData(m.infoPagesData[slug] ?? null))
+        .then((m) => {
+          const rawData = m.infoPagesData[slug] ?? null;
+          if (rawData) {
+            const brandName = identity?.short_name || "TrustBank";
+            const replaceBrandName = (obj: any): any => {
+              if (typeof obj === 'string') return obj.replace(/TrustBank/g, brandName);
+              if (Array.isArray(obj)) return obj.map(replaceBrandName);
+              if (typeof obj === 'object' && obj !== null) {
+                const newObj: any = {};
+                for (const key in obj) newObj[key] = replaceBrandName(obj[key]);
+                return newObj;
+              }
+              return obj;
+            };
+            setLocalData(replaceBrandName(rawData));
+          } else {
+            setLocalData(null);
+          }
+        })
         .catch(() => setLocalData(null)),
     ]).finally(() => setLoading(false));
-  }, [slug]);
+  }, [slug, identity]);
 
   // Kept for line-count parity — localData is now managed by state above
 
@@ -132,7 +151,7 @@ export default function InfoPage() {
   const additionalContent = localData?.additionalContent || "";
 
   // Dynamic Page Title SEO
-  document.title = `${title} | TrustBank Premium Banking`;
+  document.title = `${title} | ${identity?.platform_name || 'TrustBank Premium Banking'}`;
 
   return (
     <>

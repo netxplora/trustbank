@@ -11,13 +11,13 @@ import { FadeIn, SlideUp } from "@/components/public/Motion";
 
 const AdminSettingsPage = () => {
   const { toast } = useToast();
-  const { identity, design, visuals, corporate, refreshBrandSettings } = useBrand();
+  const { identity, design, visuals, corporate, seo, compliance, refreshBrandSettings } = useBrand();
   const [activeTab, setActiveTab] = useState("identity");
   const [saving, setSaving] = useState(false);
 
   // Local States for forms (Initialized with current context values or defaults)
   const [brandIdentity, setBrandIdentity] = useState(identity || {
-    platform_name: "", short_name: "", slogan: "", description: "", company_overview: ""
+    platform_name: "", short_name: "", legal_name: "", slogan: "", description: "", company_overview: "", website_url: "", document_issuer_name: "", document_disclaimer: ""
   });
 
   const [designSystem, setDesignSystem] = useState(design || {
@@ -27,19 +27,19 @@ const AdminSettingsPage = () => {
   });
 
   const [brandVisuals, setBrandVisuals] = useState(visuals || {
-    primary_logo: "", favicon: "", hero_image: ""
+    primary_logo: "", light_theme_logo: "", dark_theme_logo: "", document_logo: "", email_logo: "", favicon: "", hero_image: ""
   });
 
   const [corpInfo, setCorpInfo] = useState(corporate || {
-    phone: "", email: "", headquarters: "", support_hours: ""
+    phone: "", email: "", support_email: "", headquarters: "", mailing_address: "", support_hours: "", social_facebook: "", social_twitter: "", social_linkedin: "", social_instagram: ""
   });
 
-  const [seoInfo, setSeoInfo] = useState({
+  const [seoInfo, setSeoInfo] = useState(seo || {
     meta_title: "", meta_description: "", og_image: ""
   });
 
-  const [complianceInfo, setComplianceInfo] = useState({
-    terms_url: "/terms", privacy_url: "/privacy", cookie_url: "/cookies", legal_disclaimer: ""
+  const [complianceInfo, setComplianceInfo] = useState(compliance || {
+    terms_url: "/terms", privacy_url: "/privacy", cookie_url: "/cookies", legal_disclaimer: "", copyright_text: ""
   });
 
   const [notificationInfo, setNotificationInfo] = useState({
@@ -53,10 +53,8 @@ const AdminSettingsPage = () => {
   useEffect(() => {
     // Fetch non-brand settings that aren't in context
     const fetchExtraSettings = async () => {
-      const { data } = await supabase.from("cms_site_settings").select("key, value").in("key", ["seo", "compliance", "notifications", "physical_card_fee"]);
+      const { data } = await supabase.from("cms_site_settings").select("key, value").in("key", ["notifications", "physical_card_fee"]);
       data?.forEach(setting => {
-        if (setting.key === "seo") setSeoInfo(setting.value as any);
-        if (setting.key === "compliance") setComplianceInfo(setting.value as any);
         if (setting.key === "notifications") setNotificationInfo(setting.value as any);
         if (setting.key === "physical_card_fee") setPlatformFees({ physical_card_fee: setting.value as string });
       });
@@ -205,9 +203,19 @@ const AdminSettingsPage = () => {
               <div><label className="text-xs font-semibold text-muted-foreground mb-1 block">Platform Full Name</label><Input value={brandIdentity.platform_name} onChange={e => setBrandIdentity({...brandIdentity, platform_name: e.target.value})} className="font-semibold" /></div>
               <div><label className="text-xs font-semibold text-muted-foreground mb-1 block">Short Brand Name</label><Input value={brandIdentity.short_name} onChange={e => setBrandIdentity({...brandIdentity, short_name: e.target.value})} className="font-semibold" /></div>
             </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div><label className="text-xs font-semibold text-muted-foreground mb-1 block">Legal Business Name</label><Input value={brandIdentity.legal_name || ''} onChange={e => setBrandIdentity({...brandIdentity, legal_name: e.target.value})} className="font-semibold" /></div>
+              <div><label className="text-xs font-semibold text-muted-foreground mb-1 block">Website URL</label><Input value={brandIdentity.website_url || ''} onChange={e => setBrandIdentity({...brandIdentity, website_url: e.target.value})} className="font-semibold" /></div>
+            </div>
             <div><label className="text-xs font-semibold text-muted-foreground mb-1 block">Brand Slogan</label><Input value={brandIdentity.slogan} onChange={e => setBrandIdentity({...brandIdentity, slogan: e.target.value})} className="font-semibold" /></div>
             <div><label className="text-xs font-semibold text-muted-foreground mb-1 block">Short Description</label><Textarea value={brandIdentity.description} onChange={e => setBrandIdentity({...brandIdentity, description: e.target.value})} className="font-semibold h-20" /></div>
             <div><label className="text-xs font-semibold text-muted-foreground mb-1 block">Company Overview</label><Textarea value={brandIdentity.company_overview} onChange={e => setBrandIdentity({...brandIdentity, company_overview: e.target.value})} className="font-semibold h-32" /></div>
+            <div className="border-t pt-3 mt-4 space-y-3">
+              <h3 className="font-bold text-xs">Document Identity</h3>
+              <p className="text-[11px] text-muted-foreground">This information is stamped on PDFs, certificates, and official receipts.</p>
+              <div><label className="text-xs font-semibold text-muted-foreground mb-1 block">Document Issuer Name</label><Input value={brandIdentity.document_issuer_name || ''} onChange={e => setBrandIdentity({...brandIdentity, document_issuer_name: e.target.value})} className="font-semibold" /></div>
+              <div><label className="text-xs font-semibold text-muted-foreground mb-1 block">Document Footer Disclaimer</label><Textarea value={brandIdentity.document_disclaimer || ''} onChange={e => setBrandIdentity({...brandIdentity, document_disclaimer: e.target.value})} className="font-semibold h-16" /></div>
+            </div>
             
             <Button onClick={() => handleSave("brand_identity", brandIdentity)} disabled={saving} className="font-bold mt-4"><Save className="h-4 w-4 mr-1.5" /> {saving ? "Saving..." : "Save Identity Settings"}</Button>
           </div>
@@ -217,8 +225,14 @@ const AdminSettingsPage = () => {
           <div className="space-y-5">
             <h2 className="font-bold font-poppins text-foreground mb-4 border-b pb-2">Visual Assets</h2>
             <p className="text-xs text-muted-foreground mb-4">Provide URLs to the media library assets you want to use globally.</p>
-            <div><label className="text-xs font-semibold text-muted-foreground mb-1 block">Primary Logo URL</label><Input value={brandVisuals.primary_logo} onChange={e => setBrandVisuals({...brandVisuals, primary_logo: e.target.value})} className="font-mono text-sm" /></div>
-            <div><label className="text-xs font-semibold text-muted-foreground mb-1 block">Favicon URL</label><Input value={brandVisuals.favicon} onChange={e => setBrandVisuals({...brandVisuals, favicon: e.target.value})} className="font-mono text-sm" /></div>
+            <div className="grid grid-cols-2 gap-4">
+              <div><label className="text-xs font-semibold text-muted-foreground mb-1 block">Primary Logo URL</label><Input value={brandVisuals.primary_logo} onChange={e => setBrandVisuals({...brandVisuals, primary_logo: e.target.value})} className="font-mono text-sm" /></div>
+              <div><label className="text-xs font-semibold text-muted-foreground mb-1 block">Light Theme Logo URL</label><Input value={brandVisuals.light_theme_logo || ''} onChange={e => setBrandVisuals({...brandVisuals, light_theme_logo: e.target.value})} className="font-mono text-sm" /></div>
+              <div><label className="text-xs font-semibold text-muted-foreground mb-1 block">Dark Theme Logo URL</label><Input value={brandVisuals.dark_theme_logo || ''} onChange={e => setBrandVisuals({...brandVisuals, dark_theme_logo: e.target.value})} className="font-mono text-sm" /></div>
+              <div><label className="text-xs font-semibold text-muted-foreground mb-1 block">Document Logo URL (PDFs)</label><Input value={brandVisuals.document_logo || ''} onChange={e => setBrandVisuals({...brandVisuals, document_logo: e.target.value})} className="font-mono text-sm" /></div>
+              <div><label className="text-xs font-semibold text-muted-foreground mb-1 block">Email Logo URL</label><Input value={brandVisuals.email_logo || ''} onChange={e => setBrandVisuals({...brandVisuals, email_logo: e.target.value})} className="font-mono text-sm" /></div>
+              <div><label className="text-xs font-semibold text-muted-foreground mb-1 block">Favicon URL</label><Input value={brandVisuals.favicon} onChange={e => setBrandVisuals({...brandVisuals, favicon: e.target.value})} className="font-mono text-sm" /></div>
+            </div>
             <div><label className="text-xs font-semibold text-muted-foreground mb-1 block">Default Hero Image URL</label><Input value={brandVisuals.hero_image} onChange={e => setBrandVisuals({...brandVisuals, hero_image: e.target.value})} className="font-mono text-sm" /></div>
             
             <Button onClick={() => handleSave("visual_assets", brandVisuals)} disabled={saving} className="font-bold mt-4"><Save className="h-4 w-4 mr-1.5" /> {saving ? "Saving..." : "Save Visual Assets"}</Button>
@@ -347,10 +361,22 @@ const AdminSettingsPage = () => {
             <h2 className="font-bold font-poppins text-foreground mb-4 border-b pb-2">Contact & Corporate Info</h2>
             <div className="grid grid-cols-2 gap-4">
               <div><label className="text-xs font-semibold text-muted-foreground mb-1 block">Primary Phone</label><Input value={corpInfo.phone} onChange={e => setCorpInfo({...corpInfo, phone: e.target.value})} className="font-semibold" /></div>
-              <div><label className="text-xs font-semibold text-muted-foreground mb-1 block">Support Email</label><Input value={corpInfo.email} onChange={e => setCorpInfo({...corpInfo, email: e.target.value})} className="font-semibold" /></div>
+              <div><label className="text-xs font-semibold text-muted-foreground mb-1 block">Contact Email</label><Input value={corpInfo.email} onChange={e => setCorpInfo({...corpInfo, email: e.target.value})} className="font-semibold" /></div>
+              <div><label className="text-xs font-semibold text-muted-foreground mb-1 block">Support Email</label><Input value={corpInfo.support_email || ''} onChange={e => setCorpInfo({...corpInfo, support_email: e.target.value})} className="font-semibold" /></div>
+              <div><label className="text-xs font-semibold text-muted-foreground mb-1 block">Support Hours</label><Input value={corpInfo.support_hours} onChange={e => setCorpInfo({...corpInfo, support_hours: e.target.value})} className="font-semibold" /></div>
             </div>
             <div><label className="text-xs font-semibold text-muted-foreground mb-1 block">Corporate Headquarters Address</label><Input value={corpInfo.headquarters} onChange={e => setCorpInfo({...corpInfo, headquarters: e.target.value})} className="font-semibold" /></div>
-            <div><label className="text-xs font-semibold text-muted-foreground mb-1 block">Support Hours</label><Input value={corpInfo.support_hours} onChange={e => setCorpInfo({...corpInfo, support_hours: e.target.value})} className="font-semibold" /></div>
+            <div><label className="text-xs font-semibold text-muted-foreground mb-1 block">Mailing Address (if different)</label><Input value={corpInfo.mailing_address || ''} onChange={e => setCorpInfo({...corpInfo, mailing_address: e.target.value})} className="font-semibold" /></div>
+            
+            <div className="border-t pt-4 mt-4 space-y-4">
+              <h3 className="font-bold text-xs">Social Links</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div><label className="text-xs font-semibold text-muted-foreground mb-1 block">Facebook URL</label><Input value={corpInfo.social_facebook || ''} onChange={e => setCorpInfo({...corpInfo, social_facebook: e.target.value})} placeholder="https://facebook.com/..." className="font-mono text-sm" /></div>
+                <div><label className="text-xs font-semibold text-muted-foreground mb-1 block">Twitter / X URL</label><Input value={corpInfo.social_twitter || ''} onChange={e => setCorpInfo({...corpInfo, social_twitter: e.target.value})} placeholder="https://x.com/..." className="font-mono text-sm" /></div>
+                <div><label className="text-xs font-semibold text-muted-foreground mb-1 block">LinkedIn URL</label><Input value={corpInfo.social_linkedin || ''} onChange={e => setCorpInfo({...corpInfo, social_linkedin: e.target.value})} placeholder="https://linkedin.com/..." className="font-mono text-sm" /></div>
+                <div><label className="text-xs font-semibold text-muted-foreground mb-1 block">Instagram URL</label><Input value={corpInfo.social_instagram || ''} onChange={e => setCorpInfo({...corpInfo, social_instagram: e.target.value})} placeholder="https://instagram.com/..." className="font-mono text-sm" /></div>
+              </div>
+            </div>
             
             <Button onClick={() => handleSave("corporate", corpInfo)} disabled={saving} className="font-bold mt-4"><Save className="h-4 w-4 mr-1.5" /> {saving ? "Saving..." : "Save Contact Info"}</Button>
           </div>
@@ -365,6 +391,7 @@ const AdminSettingsPage = () => {
               <div><label className="text-xs font-semibold text-muted-foreground mb-1 block">Privacy Policy URL</label><Input value={complianceInfo.privacy_url} onChange={e => setComplianceInfo({...complianceInfo, privacy_url: e.target.value})} className="font-mono text-sm" /></div>
               <div><label className="text-xs font-semibold text-muted-foreground mb-1 block">Cookie Policy URL</label><Input value={complianceInfo.cookie_url} onChange={e => setComplianceInfo({...complianceInfo, cookie_url: e.target.value})} className="font-mono text-sm" /></div>
             </div>
+            <div><label className="text-xs font-semibold text-muted-foreground mb-1 block">Global Copyright Text</label><Input value={complianceInfo.copyright_text || ''} onChange={e => setComplianceInfo({...complianceInfo, copyright_text: e.target.value})} className="font-semibold" placeholder="© 2026 TrustBank..." /></div>
             <div><label className="text-xs font-semibold text-muted-foreground mb-1 block">Global Legal Disclaimer (Footer)</label><Textarea value={complianceInfo.legal_disclaimer} onChange={e => setComplianceInfo({...complianceInfo, legal_disclaimer: e.target.value})} className="font-sans text-xs h-32" placeholder="e.g. TrustBank is a financial technology company, not a bank. Banking services provided by..." /></div>
             
             <Button onClick={() => handleSave("compliance", complianceInfo)} disabled={saving} className="font-bold mt-4"><Save className="h-4 w-4 mr-1.5" /> {saving ? "Saving..." : "Save Compliance Settings"}</Button>

@@ -6,6 +6,7 @@ import { PageHero } from "@/components/public/PageHero";
 import { FadeIn, SlideUp, StaggerContainer, StaggerItem } from "@/components/public/Motion";
 import { SectionHeader } from "@/components/public/SectionHeader";
 import heroLoans from "@/assets/hero-loans.jpg";
+import { useBrand } from "@/contexts/BrandContext";
 
 const loanTypes = [
   { 
@@ -63,6 +64,14 @@ const faqs = [
 
 const LoansPage = () => {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
+  const { identity } = useBrand();
+  const brandName = identity?.short_name || "TrustBank";
+
+  const replaceStr = (str: string) => str.replace(/TrustBank/g, brandName);
+  
+  const processedLoanTypes = loanTypes.map(p => ({ ...p, description: replaceStr(p.description) }));
+  const processedScenarios = scenarios.map(s => ({ ...s, description: replaceStr(s.description) }));
+  const processedFaqs = faqs.map(f => ({ ...f, a: replaceStr(f.a) }));
 
   return (
     <>
@@ -95,7 +104,7 @@ const LoansPage = () => {
           />
 
           <StaggerContainer className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 mt-8 sm:mt-12 max-w-7xl mx-auto">
-            {loanTypes.map((product, idx) => (
+            {processedLoanTypes.map((product, idx) => (
               <StaggerItem key={product.title}>
                 <div
                   className={`rounded-2xl sm:rounded-3xl border p-5 sm:p-8 flex flex-col h-full transition-all duration-300 hover:-translate-y-1 group ${
@@ -176,10 +185,10 @@ const LoansPage = () => {
           <SectionHeader
             eyebrow="Deployment Strategies"
             title="Strategic Debt Utilization"
-            description="Examine how leading enterprises and private clients deploy TrustBank credit facilities for tactical advantage."
+            description={`Examine how leading enterprises and private clients deploy ${brandName} credit facilities for tactical advantage.`}
           />
           <StaggerContainer className="grid md:grid-cols-3 gap-8 mt-16 max-w-7xl mx-auto">
-            {scenarios.map((scenario, idx) => (
+            {processedScenarios.map((scenario, idx) => (
               <StaggerItem key={scenario.title}>
                 <div className="bg-background p-10 rounded-3xl border border-border shadow-sm h-full flex flex-col hover:shadow-xl hover:border-primary/30 transition-all duration-500 group">
                   <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-8 group-hover:scale-110 group-hover:bg-primary/20 transition-all duration-500">
@@ -238,7 +247,7 @@ const LoansPage = () => {
           />
 
           <StaggerContainer className="space-y-6 mt-16">
-            {faqs.map(({ q, a }, i) => (
+            {processedFaqs.map(({ q, a }, i) => (
               <StaggerItem key={i}>
                 <div className="border border-border rounded-2xl overflow-hidden bg-card hover:border-primary/30 transition-all duration-300 shadow-sm hover:shadow-md">
                   <button

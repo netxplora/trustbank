@@ -86,7 +86,7 @@ const Index = () => {
           .from("cms_pages")
           .select("slug, title, description, content_blocks")
           .eq("slug", "home")
-          .single();
+          .maybeSingle();
         if (data) setHomePageData(data);
       } catch {
         // Silently fail — page still works without CMS data

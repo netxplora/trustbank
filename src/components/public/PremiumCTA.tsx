@@ -2,23 +2,15 @@ import { Link } from "react-router-dom";
 import { ArrowRight, ShieldCheck } from "lucide-react";
 import { SlideUp, FadeIn } from "./Motion";
 import { Button } from "@/components/ui/button";
+import { useBrand } from "@/contexts/BrandContext";
 
 export function PremiumCTA() {
+  const { identity } = useBrand();
   return (
-    <section className="py-24 relative overflow-hidden bg-slate-100 dark:bg-slate-900 text-foreground dark:text-white">
-      {/* Background Image & Overlay */}
-      <div className="absolute inset-0 z-0">
-        <img 
-          src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2000&auto=format&fit=crop" 
-          alt="Modern architecture" 
-          className="w-full h-full object-cover opacity-10 dark:opacity-20"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-200 via-slate-100/80 to-transparent dark:from-slate-950 dark:via-slate-900/80 dark:to-transparent" />
-      </div>
-
-      {/* TrustBank Watermark */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.03] dark:opacity-5 pointer-events-none select-none z-0">
-        <span className="text-[20rem] font-poppins font-black tracking-tighter whitespace-nowrap">TRUSTBANK</span>
+    <section className="py-24 bg-primary text-primary-foreground relative overflow-hidden">
+      {/* Brand Watermark */}
+      <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none overflow-hidden select-none z-0">
+        <span className="text-[20rem] font-poppins font-black tracking-tighter whitespace-nowrap uppercase">{identity?.short_name || "BANK"}</span>
       </div>
 
       {/* Soft gradient lighting */}

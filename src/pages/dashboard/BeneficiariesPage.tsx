@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { StaggerContainer, StaggerItem, FadeIn, SlideUp } from "@/components/public/Motion";
+import { useBrand } from "@/contexts/BrandContext";
 
 interface Beneficiary { id: string; name: string; bank: string; account_number: string; nickname: string | null; }
 
@@ -15,6 +16,8 @@ const BeneficiariesPage = () => {
   const [beneficiaries, setBeneficiaries] = useState<Beneficiary[]>([]);
   const [showAdd, setShowAdd] = useState(false);
   const [loading, setLoading] = useState(true);
+  const { identity } = useBrand();
+  const brandName = identity?.short_name || "TrustBank";
 
   useEffect(() => {
     if (!user) return;
@@ -74,7 +77,7 @@ const BeneficiariesPage = () => {
             <Input name="name" placeholder="Full Name" required className="h-8 text-xs rounded-lg" />
             <select name="bank" className="w-full rounded-lg border border-input bg-background px-2.5 h-8 text-xs focus:outline-none focus:ring-1 focus:ring-primary" required>
               <option value="">Select Bank</option>
-              <option>TrustBank</option>
+              <option>{brandName}</option>
               <option>Chase</option>
               <option>Bank of America</option>
               <option>Wells Fargo</option>

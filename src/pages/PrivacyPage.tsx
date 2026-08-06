@@ -2,12 +2,17 @@ import { Shield, Lock, FileText, Database, EyeOff } from "lucide-react";
 import { PageHero } from "@/components/public/PageHero";
 import { SlideUp, StaggerContainer, StaggerItem } from "@/components/public/Motion";
 import heroFaq from "@/assets/hero-faq.jpg";
+import { useBrand } from "@/contexts/BrandContext";
 
-const PrivacyPage = () => (
+const PrivacyPage = () => {
+  const { identity, corporate } = useBrand();
+  const brandName = identity?.short_name || "TrustBank";
+  
+  return (
   <>
     <PageHero 
       title="Corporate Privacy & Data Security Policy" 
-      description="TrustBank operates under strict adherence to federal and international privacy mandates, ensuring your capital and identity remain insulated." 
+      description={`${brandName} operates under strict adherence to federal and international privacy mandates, ensuring your capital and identity remain insulated.`} 
       image={heroFaq} 
       showTrustBadges={true}
     />
@@ -24,7 +29,7 @@ const PrivacyPage = () => (
             <div className="bg-primary/5 border border-primary/20 rounded-3xl p-6 mb-8">
               <h3 className="font-poppins font-bold text-primary mb-2">Policy Summary</h3>
               <p className="text-sm font-sans text-muted-foreground leading-relaxed">
-                TrustBank strictly compartmentalizes your data. We do not sell or share your nonpublic personal information with non-affiliated third parties for joint marketing purposes. All data is encrypted at rest and in transit using military-grade cryptographic standards.
+                {brandName} strictly compartmentalizes your data. We do not sell or share your nonpublic personal information with non-affiliated third parties for joint marketing purposes. All data is encrypted at rest and in transit using military-grade cryptographic standards.
               </p>
             </div>
 
@@ -33,10 +38,10 @@ const PrivacyPage = () => (
                 <div>
                   <h3 className="text-sm font-poppins font-bold text-foreground mb-3 uppercase tracking-wider">1. Gramm-Leach-Bliley Act (GLBA) Disclosure</h3>
                   <p className="text-muted-foreground leading-relaxed text-sm font-sans mb-4">
-                    In compliance with the Gramm-Leach-Bliley Act, TrustBank is mandated to explain how we collect, share, and protect your nonpublic personal information (NPI). Financial companies choose how they share your personal information. Federal law gives consumers the right to limit some but not all sharing.
+                    In compliance with the Gramm-Leach-Bliley Act, {brandName} is mandated to explain how we collect, share, and protect your nonpublic personal information (NPI). Financial companies choose how they share your personal information. Federal law gives consumers the right to limit some but not all sharing.
                   </p>
                   <p className="text-muted-foreground leading-relaxed text-sm font-sans">
-                    TrustBank does not share your NPI with non-affiliated third parties for joint marketing purposes. We strictly compartmentalize your data, utilizing it solely for the facilitation of your requested transactions, underwriting assessments, and mandatory regulatory reporting (e.g., FinCEN filings).
+                    {brandName} does not share your NPI with non-affiliated third parties for joint marketing purposes. We strictly compartmentalize your data, utilizing it solely for the facilitation of your requested transactions, underwriting assessments, and mandatory regulatory reporting (e.g., FinCEN filings).
                   </p>
                 </div>
               </StaggerItem>
@@ -67,7 +72,7 @@ const PrivacyPage = () => (
                     For clients operating within the European Economic Area (EEA) or California (under CCPA/CPRA), you retain specific jurisdictional rights concerning your data. This includes the right to access the specific pieces of personal information we hold, the right to rectify inaccuracies, and the right to request deletion of your data.
                   </p>
                   <p className="text-muted-foreground leading-relaxed text-sm font-sans font-semibold">
-                    Note on Deletion Requests: Due to stringent Anti-Money Laundering (AML) and Know Your Customer (KYC) regulations mandated by the US Treasury, TrustBank is legally required to retain transaction ledgers and identity verification documents for a minimum of five (5) years following account closure. Regulatory retention supersedes GDPR/CCPA deletion requests.
+                    Note on Deletion Requests: Due to stringent Anti-Money Laundering (AML) and Know Your Customer (KYC) regulations mandated by the US Treasury, {brandName} is legally required to retain transaction ledgers and identity verification documents for a minimum of five (5) years following account closure. Regulatory retention supersedes GDPR/CCPA deletion requests.
                   </p>
                 </div>
               </StaggerItem>
@@ -76,7 +81,7 @@ const PrivacyPage = () => (
                 <div>
                   <h3 className="text-sm font-poppins font-bold text-foreground mb-3 uppercase tracking-wider">4. Third-Party Auditing & SOC 2 Compliance</h3>
                   <p className="text-muted-foreground leading-relaxed text-sm font-sans">
-                    TrustBank maintains SOC 2 Type II compliance, verified through independent, continuous auditing by accredited external assurance firms. This guarantees that our internal access controls, firewall configurations, and intrusion detection systems meet the highest institutional standards for security, availability, and processing integrity.
+                    {brandName} maintains SOC 2 Type II compliance, verified through independent, continuous auditing by accredited external assurance firms. This guarantees that our internal access controls, firewall configurations, and intrusion detection systems meet the highest institutional standards for security, availability, and processing integrity.
                   </p>
                 </div>
               </StaggerItem>
@@ -88,7 +93,11 @@ const PrivacyPage = () => (
                     <div>
                       <h4 className="text-sm font-poppins font-bold text-foreground uppercase tracking-wider mb-2">Opt-Out & Privacy Inquiries</h4>
                       <p className="text-xs text-muted-foreground font-sans leading-relaxed">
-                        To exercise your jurisdictional privacy rights, or to speak directly with our Chief Information Security Officer's desk regarding our cryptographic protocols, please contact our secure privacy routing at <span className="font-bold text-primary">privacy@trustbank.com</span>. Please authenticate all communications using your established corporate PGP key if applicable.
+                        To exercise your jurisdictional privacy rights, or to contact our privacy team, please use the contact details available on our{" "}
+                        <a href="/contact" className="font-bold text-primary underline underline-offset-2">Contact page</a>
+                        {corporate?.email && (
+                          <> or email <span className="font-bold text-primary">privacy@{corporate.email.split("@")[1]}</span></>
+                        )}.
                       </p>
                     </div>
                   </div>
@@ -101,6 +110,7 @@ const PrivacyPage = () => (
       </div>
     </section>
   </>
-);
+  );
+};
 
 export default PrivacyPage;

@@ -6,6 +6,7 @@ import { PageHero } from "@/components/public/PageHero";
 import { FadeIn, SlideUp, StaggerContainer, StaggerItem } from "@/components/public/Motion";
 import { SectionHeader } from "@/components/public/SectionHeader";
 import heroChecking from "@/assets/hero-checking.png";
+import { useBrand } from "@/contexts/BrandContext";
 
 const checkingProducts = [
   {
@@ -85,6 +86,14 @@ const faqs = [
 
 const CheckingPage = () => {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
+  const { identity } = useBrand();
+  const brandName = identity?.short_name || "TrustBank";
+
+  const replaceStr = (str: string) => str.replace(/TrustBank/g, brandName);
+
+  const processedProducts = checkingProducts.map(p => ({ ...p, description: replaceStr(p.description) }));
+  const processedScenarios = scenarios.map(s => ({ ...s, description: replaceStr(s.description) }));
+  const processedFaqs = faqs.map(f => ({ ...f, a: replaceStr(f.a) }));
 
   return (
     <>
@@ -117,7 +126,7 @@ const CheckingPage = () => {
           />
 
           <StaggerContainer className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 mt-8 sm:mt-12 max-w-7xl mx-auto">
-            {checkingProducts.map((product, idx) => (
+            {processedProducts.map((product, idx) => (
               <StaggerItem key={product.name}>
                 <div
                   className={`rounded-2xl sm:rounded-3xl border p-5 sm:p-8 flex flex-col h-full transition-all duration-300 hover:-translate-y-1 group ${
@@ -227,10 +236,10 @@ const CheckingPage = () => {
           <SectionHeader
             eyebrow="Deployment Scenarios"
             title="Capital Routing Architecture"
-            description="How corporate directors and private clients deploy TrustBank checking structures for complex asset management."
+            description={`How corporate directors and private clients deploy ${brandName} checking structures for complex asset management.`}
           />
           <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 mt-8 sm:mt-12 max-w-7xl mx-auto">
-            {scenarios.map((scenario, idx) => (
+            {processedScenarios.map((scenario, idx) => (
               <StaggerItem key={scenario.title}>
                 <div className="bg-background p-5 sm:p-8 rounded-2xl sm:rounded-3xl border border-border shadow-sm h-full flex flex-col hover:shadow-lg hover:border-primary/20 transition-all duration-300 group">
                   <div className="h-11 w-11 sm:h-14 sm:w-14 rounded-xl sm:rounded-2xl bg-primary/5 flex items-center justify-center mb-5 sm:mb-8 group-hover:scale-105 group-hover:bg-primary/10 transition-all duration-300">
@@ -257,7 +266,7 @@ const CheckingPage = () => {
           />
 
           <StaggerContainer className="space-y-6 mt-16">
-            {faqs.map(({ q, a }, i) => (
+            {processedFaqs.map(({ q, a }, i) => (
               <StaggerItem key={i}>
                 <div className="border border-border rounded-2xl overflow-hidden bg-card hover:border-primary/30 transition-all duration-300 shadow-sm hover:shadow-md">
                   <button
@@ -294,7 +303,7 @@ const CheckingPage = () => {
         <div className="container px-4 sm:px-6 lg:px-8 relative z-10 text-center max-w-3xl mx-auto">
           <h2 className="text-3xl md:text-5xl font-poppins font-bold tracking-tight mb-6">Elevate Your Liquidity Management</h2>
           <p className="text-lg md:text-xl text-primary-foreground/80 font-sans mb-10 leading-relaxed">
-            Transition your corporate or personal checking to TrustBank today to improve your financial management.
+            Transition your corporate or personal checking to {brandName} today to improve your financial management.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Button size="lg" className="bg-white text-primary hover:bg-white/90 h-14 px-8 text-base font-semibold rounded-xl" asChild>

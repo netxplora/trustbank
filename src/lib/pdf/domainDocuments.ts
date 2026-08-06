@@ -50,9 +50,15 @@ export interface LoanData {
   approved_at?: string | null;
 }
 
-export async function generateLoanSummaryPDF(customer: CustomerData, loan: LoanData, brandColors?: PDFBrandColors) {
-  const refNum = generateReferenceNumber("loan_application");
-  const verCode = generateVerificationCode();
+export async function generateLoanSummaryPDF(
+  customer: CustomerData,
+  loan: LoanData,
+  brandColors?: PDFBrandColors,
+  existingDoc?: { refNum: string; verCode: string; date?: Date }
+) {
+  const refNum = existingDoc?.refNum || generateReferenceNumber("loan_application");
+  const verCode = existingDoc?.verCode || generateVerificationCode();
+  const docDate = existingDoc?.date || new Date();
   const rate = loan.interest_rate || 5.0;
   const totalExpected = (loan.monthly_payment || 0) * loan.tenure_months;
   const totalInterest = totalExpected - loan.amount;
@@ -126,7 +132,7 @@ export async function generateLoanSummaryPDF(customer: CustomerData, loan: LoanD
         category: "loans",
         referenceNumber: refNum,
         verificationCode: verCode,
-        date: new Date(),
+        date: docDate,
       },
       customer,
       content,
@@ -156,10 +162,12 @@ export async function generateInvestmentReceiptPDF(
   customer: CustomerData,
   investment: InvestmentData,
   actionType: "buy" | "sell" = "buy",
-  brandColors?: PDFBrandColors
+  brandColors?: PDFBrandColors,
+  existingDoc?: { refNum: string; verCode: string; date?: Date }
 ) {
-  const refNum = generateReferenceNumber("investment_purchase");
-  const verCode = generateVerificationCode();
+  const refNum = existingDoc?.refNum || generateReferenceNumber("investment_purchase");
+  const verCode = existingDoc?.verCode || generateVerificationCode();
+  const docDate = existingDoc?.date || new Date();
   const totalValue = investment.shares * investment.current_price;
   const costBasis = investment.shares * investment.purchase_price;
   const gainLoss = totalValue - costBasis;
@@ -211,7 +219,7 @@ export async function generateInvestmentReceiptPDF(
         category: "investments",
         referenceNumber: refNum,
         verificationCode: verCode,
-        date: new Date(),
+        date: docDate,
       },
       customer,
       content,
@@ -227,10 +235,12 @@ export async function generatePortfolioSummaryPDF(
   investments: InvestmentData[],
   totalValue: number,
   totalCost: number,
-  brandColors?: PDFBrandColors
+  brandColors?: PDFBrandColors,
+  existingDoc?: { refNum: string; verCode: string; date?: Date }
 ) {
-  const refNum = generateReferenceNumber("portfolio_summary");
-  const verCode = generateVerificationCode();
+  const refNum = existingDoc?.refNum || generateReferenceNumber("portfolio_summary");
+  const verCode = existingDoc?.verCode || generateVerificationCode();
+  const docDate = existingDoc?.date || new Date();
   const totalGainLoss = totalValue - totalCost;
   const totalGainLossPct = totalCost > 0 ? ((totalGainLoss / totalCost) * 100).toFixed(2) : "0.00";
 
@@ -290,7 +300,7 @@ export async function generatePortfolioSummaryPDF(
         category: "investments",
         referenceNumber: refNum,
         verificationCode: verCode,
-        date: new Date(),
+        date: docDate,
       },
       customer,
       content,
@@ -322,10 +332,12 @@ export interface GrantApplicationData {
 export async function generateGrantApplicationReceiptPDF(
   customer: CustomerData,
   grant: GrantApplicationData,
-  brandColors?: PDFBrandColors
+  brandColors?: PDFBrandColors,
+  existingDoc?: { refNum: string; verCode: string; date?: Date }
 ) {
-  const refNum = generateReferenceNumber("grant_application");
-  const verCode = generateVerificationCode();
+  const refNum = existingDoc?.refNum || generateReferenceNumber("grant_application");
+  const verCode = existingDoc?.verCode || generateVerificationCode();
+  const docDate = existingDoc?.date || new Date();
   const isApproved = ["approved", "awarded"].includes(grant.status.toLowerCase());
   const isRejected = ["rejected", "declined"].includes(grant.status.toLowerCase());
 
@@ -378,7 +390,7 @@ export async function generateGrantApplicationReceiptPDF(
         category: "grants",
         referenceNumber: refNum,
         verificationCode: verCode,
-        date: new Date(),
+        date: docDate,
       },
       customer,
       content,
@@ -407,10 +419,12 @@ export interface TaxRefundData {
 export async function generateTaxRefundReceiptPDF(
   customer: CustomerData,
   taxRefund: TaxRefundData,
-  brandColors?: PDFBrandColors
+  brandColors?: PDFBrandColors,
+  existingDoc?: { refNum: string; verCode: string; date?: Date }
 ) {
-  const refNum = generateReferenceNumber("tax_refund_application");
-  const verCode = generateVerificationCode();
+  const refNum = existingDoc?.refNum || generateReferenceNumber("tax_refund_application");
+  const verCode = existingDoc?.verCode || generateVerificationCode();
+  const docDate = existingDoc?.date || new Date();
   const isApproved = ["approved", "completed", "paid"].includes(taxRefund.status.toLowerCase());
 
   const content: ContentBlock[] = [
@@ -456,7 +470,7 @@ export async function generateTaxRefundReceiptPDF(
         category: "tax",
         referenceNumber: refNum,
         verificationCode: verCode,
-        date: new Date(),
+        date: docDate,
       },
       customer,
       content,
@@ -481,9 +495,15 @@ export interface KYCData {
   created_at: string;
 }
 
-export async function generateKYCReceiptPDF(customer: CustomerData, kyc: KYCData, brandColors?: PDFBrandColors) {
-  const refNum = generateReferenceNumber("kyc_submission");
-  const verCode = generateVerificationCode();
+export async function generateKYCReceiptPDF(
+  customer: CustomerData,
+  kyc: KYCData,
+  brandColors?: PDFBrandColors,
+  existingDoc?: { refNum: string; verCode: string; date?: Date }
+) {
+  const refNum = existingDoc?.refNum || generateReferenceNumber("kyc_submission");
+  const verCode = existingDoc?.verCode || generateVerificationCode();
+  const docDate = existingDoc?.date || new Date();
   const isApproved = ["approved", "verified"].includes(kyc.status.toLowerCase());
   const isRejected = ["rejected", "declined"].includes(kyc.status.toLowerCase());
 
@@ -529,7 +549,7 @@ export async function generateKYCReceiptPDF(customer: CustomerData, kyc: KYCData
         category: "kyc",
         referenceNumber: refNum,
         verificationCode: verCode,
-        date: new Date(),
+        date: docDate,
       },
       customer,
       content,

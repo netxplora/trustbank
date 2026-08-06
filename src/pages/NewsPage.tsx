@@ -8,6 +8,7 @@ import { FadeIn, SlideUp, StaggerContainer, StaggerItem } from "@/components/pub
 import { SectionHeader } from "@/components/public/SectionHeader";
 import { supabase } from "@/integrations/supabase/client";
 import heroNews from "@/assets/hero-news.jpg";
+import { useBrand } from "@/contexts/BrandContext";
 
 interface Post {
   id: string;
@@ -33,6 +34,10 @@ const fallbackArticles: Post[] = [
 ];
 
 const NewsPage = () => {
+  const { identity } = useBrand();
+  const brandName = identity?.short_name || "TrustBank";
+  const replaceStr = (str: string) => str.replace(/TrustBank/g, brandName);
+  
   const [articles, setArticles] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -68,13 +73,13 @@ const NewsPage = () => {
         .order("published_at", { ascending: false });
 
       if (data && data.length > 0) {
-        setArticles(data as Post[]);
+        setArticles((data as Post[]).map(a => ({...a, title: replaceStr(a.title), summary: a.summary ? replaceStr(a.summary) : null, content: a.content ? replaceStr(a.content) : null})));
       } else {
-        setArticles(fallbackArticles);
+        setArticles(fallbackArticles.map(a => ({...a, title: replaceStr(a.title), summary: a.summary ? replaceStr(a.summary) : null, content: a.content ? replaceStr(a.content) : null})));
       }
     } catch (e) {
       console.error("Error fetching articles:", e);
-      setArticles(fallbackArticles);
+      setArticles(fallbackArticles.map(a => ({...a, title: replaceStr(a.title), summary: a.summary ? replaceStr(a.summary) : null, content: a.content ? replaceStr(a.content) : null})));
     } finally {
       setLoading(false);
     }
@@ -98,7 +103,7 @@ const NewsPage = () => {
     <>
       <PageHero
         title="Institutional Research & Corporate Press"
-        description="Access proprietary macroeconomic analysis, strategic market briefs, and official corporate announcements from TrustBank's senior advisory desk."
+        description={`Access proprietary macroeconomic analysis, strategic market briefs, and official corporate announcements from ${brandName}'s senior advisory desk.`}
         image={heroNews}
         primaryCtaText="Latest Publications"
         primaryCtaLink="#publications"
@@ -315,7 +320,7 @@ const NewsPage = () => {
             Important Research Disclosures: The macroeconomic analysis, market briefs, and corporate announcements
             provided on this platform are for informational purposes only and do not constitute formal investment
             advice, an offer to sell, or a solicitation of an offer to buy any security or financial instrument.
-            TrustBank relies on internal models and third-party data sources believed to be reliable; however, we make
+            {brandName} relies on internal models and third-party data sources believed to be reliable; however, we make
             no representation as to their absolute accuracy or completeness. Past performance is no guarantee of future
             results. Forward-looking statements are subject to numerous assumptions, risks, and uncertainties, which
             change over time. Please consult your dedicated wealth manager or corporate advisor before executing any

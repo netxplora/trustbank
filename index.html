@@ -69,7 +69,13 @@
                var style = document.createElement("style");
                style.id = "theme-engine";
                style.textContent = "html:root { " + gen(light) + (design.radius ? "--radius: " + design.radius + ";" : "") + " } html.dark { " + gen(dark) + " }";
-               document.head.appendChild(style);
+              var seoCached = localStorage.getItem("brand_seo_system");
+              if (seoCached) {
+                var seo = JSON.parse(seoCached);
+                if (seo.meta_title) document.title = seo.meta_title;
+                var metaDesc = document.querySelector('meta[name="description"]');
+                if (metaDesc && seo.meta_description) metaDesc.content = seo.meta_description;
+              }
             }
           }
         } catch(e) {}
@@ -77,20 +83,17 @@
     </script>
 
     <!-- Primary SEO -->
-    <title>TrustBank | Premium Banking & Wealth Management</title>
-    <meta name="description" content="Secure digital banking and asset management for individuals, families, and businesses. FDIC insured with bank-grade security." />
-    <meta name="author" content="TrustBank" />
+    <title>Premium Banking & Wealth Management</title>
+    <meta name="description" content="Secure digital banking and asset management for individuals, families, and businesses." />
+    <meta name="author" content="Financial Institution" />
     <meta name="robots" content="index, follow" />
 
     <!-- Open Graph -->
-    <meta property="og:title" content="TrustBank | Premium Banking & Wealth Management" />
-    <meta property="og:description" content="Secure digital banking and asset management for individuals, families, and businesses." />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="/logo.png" />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:site" content="@TrustBank" />
     <meta name="twitter:image" content="/logo.png" />
 
     <!--

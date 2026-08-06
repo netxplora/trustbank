@@ -5,6 +5,7 @@ import { PageHero } from "@/components/public/PageHero";
 import { FadeIn, SlideUp, StaggerContainer, StaggerItem } from "@/components/public/Motion";
 import { SectionHeader } from "@/components/public/SectionHeader";
 import heroAbout from "@/assets/hero-about.jpg";
+import { useBrand } from "@/contexts/BrandContext";
 
 const values = [
   { icon: Scale, title: "Fiduciary Standard", description: "Operating with absolute legal and ethical obligation to prioritize client financial interests above institutional profit." },
@@ -41,11 +42,17 @@ const boardMembers = [
 ];
 
 const AboutPage = () => {
+  const { identity } = useBrand();
+  const brandName = identity?.short_name || "TrustBank";
+  const replaceStr = (str: string) => str.replace(/TrustBank/g, brandName);
+
+  const processedBoardMembers = boardMembers.map(b => ({ ...b, bio: replaceStr(b.bio) }));
+
   return (
     <>
       <PageHero
         title="Corporate Heritage & Governance"
-        description="For over three decades, TrustBank has operated with an uncompromising fiduciary commitment to preserve, structure, and grow generational assets and corporate capital."
+        description={`For over three decades, ${brandName} has operated with an uncompromising fiduciary commitment to preserve, structure, and grow generational assets and corporate capital.`}
         image={heroAbout}
         primaryCtaText="Review Corporate Charter"
         primaryCtaLink="#history"
@@ -73,14 +80,14 @@ const AboutPage = () => {
               
               <div className="prose prose-slate dark:prose-invert max-w-none">
                 <p className="text-sm sm:text-base lg:text-lg leading-relaxed text-muted-foreground mb-6 sm:mb-8 font-sans">
-                  Established in 1994 amidst an era of rapid financial deregulation, TrustBank was founded on a contrarian principle: that disciplined risk management and fiduciary duty should supersede aggressive short-term yield. We began as a private wealth advisory, managing the complex estates of high-net-worth families who demanded absolute capital security.
+                  Established in 1994 amidst an era of rapid financial deregulation, {brandName} was founded on a contrarian principle: that disciplined risk management and fiduciary duty should supersede aggressive short-term yield. We began as a private wealth advisory, managing the complex estates of high-net-worth families who demanded absolute capital security.
                 </p>
                 <p className="text-sm sm:text-base lg:text-lg leading-relaxed text-muted-foreground mb-6 sm:mb-8 font-sans">
                   Over the decades, we systematically expanded our charter to serve commercial enterprises and institutional investors. By 2010, we recognized that the future of premium banking required bridging the gap between rigorous traditional underwriting and advanced digital infrastructure. Our strategic pivot resulted in the development of our proprietary, SOC2-compliant digital banking portal.
                 </p>
                 <div className="bg-card p-5 sm:p-8 rounded-2xl sm:rounded-3xl border border-border shadow-sm mb-6 sm:mb-8 mt-8 sm:mt-12">
                   <p className="text-sm sm:text-base lg:text-lg leading-relaxed text-foreground font-poppins font-medium">
-                    Today, TrustBank manages over $48 billion in assets. We remain independently governed, allowing us to maintain our strict underwriting standards, reject speculative financial instruments, and focus entirely on long-term value creation for our depositors and commercial partners.
+                    Today, {brandName} manages over $48 billion in assets. We remain independently governed, allowing us to maintain our strict underwriting standards, reject speculative financial instruments, and focus entirely on long-term value creation for our depositors and commercial partners.
                   </p>
                 </div>
               </div>
@@ -163,7 +170,7 @@ const AboutPage = () => {
           />
           
           <StaggerContainer className="grid lg:grid-cols-2 gap-10 mt-16 max-w-6xl mx-auto">
-            {boardMembers.map((member, idx) => (
+            {processedBoardMembers.map((member, idx) => (
               <StaggerItem key={member.name}>
                 <div className="bg-background p-10 rounded-3xl border border-border shadow-sm flex flex-col sm:flex-row gap-8 items-start h-full hover:shadow-xl transition-all duration-500 group">
                   <div className="h-32 w-32 rounded-2xl bg-slate-200 shrink-0 overflow-hidden border border-border group-hover:shadow-lg transition-all duration-500">
@@ -197,7 +204,7 @@ const AboutPage = () => {
                 </div>
                 
                 <p className="text-lg text-muted-foreground leading-relaxed mb-10">
-                  TrustBank integrates Environmental, Social, and Governance (ESG) criteria into our commercial underwriting and private wealth advisory practices. We recognize that sustainable corporate practices are inherently linked to long-term economic viability and risk mitigation.
+                  {brandName} integrates Environmental, Social, and Governance (ESG) criteria into our commercial underwriting and private wealth advisory practices. We recognize that sustainable corporate practices are inherently linked to long-term economic viability and risk mitigation.
                 </p>
                 
                 <div className="grid sm:grid-cols-3 gap-8">

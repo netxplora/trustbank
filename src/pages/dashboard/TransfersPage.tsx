@@ -10,6 +10,7 @@ import { StaggerContainer, StaggerItem, FadeIn, SlideUp } from "@/components/pub
 import { sanitizeInput } from "@/utils/security";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useBrand } from "@/contexts/BrandContext";
 
 interface Account { id: string; account_type: string; account_number: string; balance: number; }
 interface Transfer { id: string; to_name: string | null; to_bank: string | null; to_account_number: string; amount: number; status: string; created_at: string; reference: string | null; target_currency?: string; destination_amount?: number; transfer_type?: string; }
@@ -26,6 +27,8 @@ const CURRENCIES = [
 
 export default function TransfersPage() {
   const { toast } = useToast();
+  const { identity } = useBrand();
+  const brandName = identity?.short_name || "TrustBank";
   const { user, profile } = useAuth();
   const [tab, setTab] = useState<"same" | "other" | "intl">("same");
   const [loading, setLoading] = useState(false);
@@ -82,7 +85,7 @@ export default function TransfersPage() {
         beneficiariesMap[tx.to_account_number] = {
           name: tx.to_name,
           account: tx.to_account_number,
-          bank: tx.to_bank || "TrustBank",
+          bank: tx.to_bank || brandName,
           color: colors[colorIdx % colors.length],
           initial: tx.to_name.charAt(0).toUpperCase()
         };
@@ -94,7 +97,7 @@ export default function TransfersPage() {
   };
 
   const handleSelectBeneficiary = (b: Beneficiary) => {
-    if (b.bank === "TrustBank") {
+    if (b.bank === brandName) {
       setTab("same");
     } else {
       setTab("other");
@@ -153,7 +156,7 @@ export default function TransfersPage() {
       p_amount: amount,
       p_narration: form.narration ? sanitizeInput(form.narration) : null,
       p_to_name: form.toName ? sanitizeInput(form.toName) : null,
-      p_to_bank: tab === "other" ? sanitizeInput(form.toBank) : "TrustBank",
+      p_to_bank: tab === "other" ? sanitizeInput(form.toBank) : brandName,
       p_pin: pin
     });
 
@@ -167,7 +170,7 @@ export default function TransfersPage() {
         await supabase.from("beneficiaries").insert({
           user_id: user.id,
           name: sanitizeInput(form.toName || "Saved Beneficiary"),
-          bank: tab === "other" ? sanitizeInput(form.toBank) : "TrustBank",
+          bank: tab === "other" ? sanitizeInput(form.toBank) : brandName,
           account_number: sanitizeInput(form.toAccount)
         });
         toast({ title: "Beneficiary Saved", description: `${form.toName} has been saved for future transfers.` });
@@ -240,7 +243,7 @@ export default function TransfersPage() {
       {/* Segmented Control Tabs */}
       <div className="bg-muted/30 p-1 rounded-xl flex gap-1 border border-border/50 text-xs">
         {[
-          { id: "same", label: "TrustBank", icon: ArrowRightLeft },
+          { id: "same", label: brandName, icon: ArrowRightLeft },
           { id: "other", label: "Other Banks", icon: Building2 },
           { id: "intl", label: "Int'l Wire", icon: Globe }
         ].map(t => {
@@ -459,7 +462,7 @@ export default function TransfersPage() {
                         </div>
                         <div className="min-w-0">
                           <p className="text-xs font-bold text-foreground leading-tight truncate">{tx.to_name || tx.to_account_number}</p>
-                          <p className="text-[9px] text-muted-foreground font-mono truncate">{tx.to_bank || "TrustBank"} · {tx.reference || tx.id.slice(0,6)}</p>
+                          <p className="text-[9px] text-muted-foreground font-mono truncate">{tx.to_bank || brandName} · {tx.reference || tx.id.slice(0,6)}</p>
                         </div>
                       </div>
                       <div className="text-right shrink-0">

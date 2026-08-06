@@ -7,6 +7,7 @@ import { FadeIn, SlideUp, StaggerContainer, StaggerItem } from "@/components/pub
 import { SectionHeader } from "@/components/public/SectionHeader";
 import heroServices from "@/assets/hero-services.jpg";
 import { supabase } from "@/integrations/supabase/client";
+import { useBrand } from "@/contexts/BrandContext";
 
 const advisoryTiers = [
   {
@@ -71,6 +72,8 @@ const investmentHubs = [
 const ServicesPage = () => {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [faqs, setFaqs] = useState<any[]>([]);
+  const { identity } = useBrand();
+  const brandName = identity?.short_name || "TrustBank";
 
   useEffect(() => {
     const fetchFaqs = async () => {
@@ -242,7 +245,7 @@ const ServicesPage = () => {
       <section className="py-12 bg-surface border-t border-border">
         <div className="container px-4 sm:px-6 lg:px-8">
           <p className="text-[10px] leading-relaxed text-muted-foreground max-w-5xl mx-auto text-justify font-sans">
-            Important Wealth Management Disclosures: Investment advisory services are offered through TrustBank Wealth Management LLC, an SEC-registered investment adviser. Brokerage services are offered through TrustBank Securities Inc., Member FINRA/SIPC. TrustBank Securities Inc. and TrustBank Wealth Management LLC are affiliated entities and wholly owned subsidiaries of TrustBank Corporation. Investments are NOT FDIC INSURED, NOT BANK GUARANTEED, and MAY LOSE VALUE. Past performance is no guarantee of future results. Asset allocation and diversification do not assure or guarantee better performance and cannot eliminate the risk of investment losses. The information provided does not constitute tax, legal, or accounting advice. Please consult your own independent tax or legal advisor regarding your specific situation before making any financial decisions.
+            Important Wealth Management Disclosures: Investment advisory services are offered through {brandName} Wealth Management LLC, an SEC-registered investment adviser. Brokerage services are offered through {brandName} Securities Inc., Member FINRA/SIPC. {brandName} Securities Inc. and {brandName} Wealth Management LLC are affiliated entities and wholly owned subsidiaries of {brandName} Corporation. Investments are NOT FDIC INSURED, NOT BANK GUARANTEED, and MAY LOSE VALUE. Past performance is no guarantee of future results. Asset allocation and diversification do not assure or guarantee better performance and cannot eliminate the risk of investment losses. The information provided does not constitute tax, legal, or accounting advice. Please consult your own independent tax or legal advisor regarding your specific situation before making any financial decisions.
           </p>
         </div>
       </section>

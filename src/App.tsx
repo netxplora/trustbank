@@ -67,6 +67,7 @@ const CurrentAccountApplicationPage = lazy(() => import("./pages/dashboard/Curre
 const AdminDashboardLayout = lazy(() => import("@/components/dashboard/AdminDashboardLayout"));
 const AdminDashboardHome = lazy(() => import("./pages/admin/AdminDashboardHome"));
 const AdminCustomersPage = lazy(() => import("./pages/admin/AdminCustomersPage"));
+const AdminClosedAccountsPage = lazy(() => import("./pages/admin/AdminClosedAccountsPage").then(m => ({ default: m.AdminClosedAccountsPage })));
 const AdminAccountsPage = lazy(() => import("./pages/admin/AdminAccountsPage"));
 const AdminCurrentAccountsPage = lazy(() => import("./pages/admin/AdminCurrentAccountsPage"));
 const AdminPaymentsPage = lazy(() => import("./pages/admin/AdminPaymentsPage"));
@@ -192,6 +193,7 @@ const App = () => (
                   <Route path="/admin" element={<ProtectedRoute adminOnly><AdminDashboardLayout /></ProtectedRoute>}>
                     <Route index element={<AdminDashboardHome />} />
                     <Route path="customers" element={<AdminCustomersPage />} />
+                    <Route path="closed-accounts" element={<AdminClosedAccountsPage />} />
                     <Route path="accounts" element={<AdminAccountsPage />} />
                     <Route path="current-applications" element={<AdminCurrentAccountsPage />} />
                     <Route path="payments" element={<AdminPaymentsPage />} />

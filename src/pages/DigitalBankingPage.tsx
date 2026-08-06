@@ -6,6 +6,7 @@ import { PageHero } from "@/components/public/PageHero";
 import { FadeIn, SlideUp, StaggerContainer, StaggerItem } from "@/components/public/Motion";
 import { SectionHeader } from "@/components/public/SectionHeader";
 import heroDigital from "@/assets/hero-digital.jpg";
+import { useBrand } from "@/contexts/BrandContext";
 
 const features = [
   { icon: Globe, title: "Global Wires & ACH Routing", description: "Execute domestic ACH and international SWIFT transactions securely. Our platform provides real-time tracking, transparent FX conversion rates, and automated receipt generation.", highlighted: false },
@@ -35,6 +36,13 @@ const faqs = [
 
 const DigitalBankingPage = () => {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
+  const { identity } = useBrand();
+  const brandName = identity?.short_name || "TrustBank";
+
+  const replaceStr = (str: string) => str.replace(/TrustBank/g, brandName);
+  
+  const processedCapabilities = capabilities.map(p => ({ ...p, desc: replaceStr(p.desc) }));
+  const processedFaqs = faqs.map(f => ({ ...f, a: replaceStr(f.a), q: replaceStr(f.q) }));
 
   return (
     <>
@@ -119,7 +127,7 @@ const DigitalBankingPage = () => {
             description="We balance immediate global accessibility with uncompromising cryptographic security protocols."
           />
           <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 mt-8 sm:mt-12 max-w-7xl mx-auto">
-            {capabilities.map(({ icon: Icon, title, desc }, idx) => (
+            {processedCapabilities.map(({ icon: Icon, title, desc }, idx) => (
               <StaggerItem key={title}>
                 <div className="bg-background p-5 sm:p-8 rounded-2xl sm:rounded-3xl border border-border shadow-sm h-full flex flex-col items-center text-center hover:shadow-lg hover:border-primary/30 transition-all duration-300 group">
                   <div className="h-14 w-14 sm:h-20 sm:w-20 rounded-full bg-primary/5 flex items-center justify-center mb-5 sm:mb-8 group-hover:scale-105 group-hover:bg-primary/10 transition-all duration-300">
@@ -146,7 +154,7 @@ const DigitalBankingPage = () => {
           />
 
           <StaggerContainer className="space-y-6 mt-16">
-            {faqs.map(({ q, a }, i) => (
+            {processedFaqs.map(({ q, a }, i) => (
               <StaggerItem key={i}>
                 <div className="border border-border rounded-2xl overflow-hidden bg-card hover:border-primary/30 transition-all duration-300 shadow-sm hover:shadow-md">
                   <button
@@ -200,7 +208,7 @@ const DigitalBankingPage = () => {
       <section className="py-12 bg-card border-t border-border">
         <div className="container px-4 sm:px-6 lg:px-8">
           <p className="text-xs leading-relaxed text-muted-foreground max-w-5xl mx-auto text-justify font-sans">
-            Important Digital Banking Disclosures: Access to the TrustBank digital portal requires an active internet connection and a compatible browser or mobile device. Standard corporate security policies apply. TrustBank employs advanced security measures, but clients are responsible for maintaining the confidentiality of their login credentials, passkeys, and hardware tokens. Certain high-risk transactions, including international wire transfers and bulk ACH disbursements, may be subject to manual review, holding periods, or additional verification steps before final execution. Third-party mobile carrier data and message rates may apply to SMS alerts and mobile application usage. API integrations require execution of a separate master service agreement and compliance with TrustBank developer protocols.
+            Important Digital Banking Disclosures: Access to the {brandName} digital portal requires an active internet connection and a compatible browser or mobile device. Standard corporate security policies apply. {brandName} employs advanced security measures, but clients are responsible for maintaining the confidentiality of their login credentials, passkeys, and hardware tokens. Certain high-risk transactions, including international wire transfers and bulk ACH disbursements, may be subject to manual review, holding periods, or additional verification steps before final execution. Third-party mobile carrier data and message rates may apply to SMS alerts and mobile application usage. API integrations require execution of a separate master service agreement and compliance with {brandName} developer protocols.
           </p>
         </div>
       </section>

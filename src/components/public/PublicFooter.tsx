@@ -11,14 +11,6 @@ const bankingLinks = [
   { label: "Private Wealth Advisory", to: "/info/wealth-management" },
 ];
 
-const companyLinks = [
-  { label: "About TrustBank", to: "/about" },
-  { label: "Careers & Leadership", to: "/careers" },
-  { label: "Market News & Insights", to: "/news" },
-  { label: "Investor Relations", to: "/info/investor-relations" },
-  { label: "Sustainability", to: "/info/corporate-responsibility" },
-];
-
 const supportLinks = [
   { label: "Help & FAQ Center", to: "/faq" },
   { label: "Contact Private Office", to: "/contact" },
@@ -35,6 +27,16 @@ const legalLinks = [
 
 export function PublicFooter() {
   const { identity, corporate, visuals } = useBrand();
+  const brandName = identity?.short_name || "TrustBank";
+  const legalName = identity?.legal_name || "TrustBank Corporation";
+  
+  const companyLinks = [
+    { label: `About ${brandName}`, to: "/about" },
+    { label: "Careers & Leadership", to: "/careers" },
+    { label: "Market News & Insights", to: "/news" },
+    { label: "Investor Relations", to: "/info/investor-relations" },
+    { label: "Sustainability", to: "/info/corporate-responsibility" },
+  ];
 
   return (
     <footer className="bg-slate-100 dark:bg-slate-950 text-slate-600 dark:text-white/70 font-sans border-t border-slate-200 dark:border-white/5 relative z-10">
@@ -57,15 +59,18 @@ export function PublicFooter() {
                 </Button>
               </form>
             </div>
-            <div className="lg:text-right">
-              <h4 className="text-xl font-poppins font-bold text-slate-900 dark:text-white mb-4">Download the TrustBank App</h4>
-              <div className="flex flex-wrap lg:justify-end gap-4">
-                <a href="#" className="inline-block transition-transform hover:-translate-y-1">
-                  <img src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" alt="Download on the App Store" className="h-10" />
-                </a>
-                <a href="#" className="inline-block transition-transform hover:-translate-y-1">
-                  <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Get it on Google Play" className="h-10" />
-                </a>
+            <div className="lg:col-span-1">
+              <div className="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-6 border border-slate-100 dark:border-slate-800 shadow-sm relative overflow-hidden group">
+                <div className="absolute -right-10 -top-10 w-32 h-32 bg-primary/5 rounded-full blur-2xl group-hover:bg-primary/10 transition-colors duration-500"></div>
+                <h4 className="text-xl font-poppins font-bold text-slate-900 dark:text-white mb-4">Download the {brandName} App</h4>
+                <div className="flex flex-wrap lg:justify-end gap-4">
+                  <a href="#" className="inline-block transition-transform hover:-translate-y-1">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/3/3c/Download_on_the_App_Store_Badge.svg" alt="Download on the App Store" className="h-10" />
+                  </a>
+                  <a href="#" className="inline-block transition-transform hover:-translate-y-1">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Get it on Google Play" className="h-10" />
+                  </a>
+                </div>
               </div>
             </div>
           </div>
@@ -82,7 +87,7 @@ export function PublicFooter() {
               {visuals?.primary_logo ? (
                 <img 
                   src={visuals.primary_logo} 
-                  alt={identity?.short_name || "TrustBank"} 
+                  alt={brandName} 
                   className="h-8 w-auto max-w-[140px] object-contain shrink-0" 
                   loading="lazy"
                 />
@@ -90,25 +95,31 @@ export function PublicFooter() {
                 <span className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center font-bold text-white text-sm">T</span>
               )}
               <span className="font-poppins text-xl font-bold text-slate-900 dark:text-white tracking-tight">
-                {identity?.short_name || "TrustBank"}
+                {brandName}
               </span>
             </div>
             <p className="text-sm leading-relaxed text-slate-600 dark:text-white/60 mb-8 max-w-sm">
               Established in 1994, providing bespoke banking, commercial lending, and wealth management services to individuals, families, and global enterprises.
             </p>
             <div className="space-y-4 text-sm text-slate-600 dark:text-white/60">
-              <div className="flex items-start gap-3">
-                <MapPin className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                <span>{corporate?.headquarters || "100 Wall Street, New York, NY 10005"}</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <Phone className="h-5 w-5 text-primary shrink-0" />
-                <span>{corporate?.phone || "+1 (212) 555-0180"}</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <Mail className="h-5 w-5 text-primary shrink-0" />
-                <span>{corporate?.email || "advisory@trustbank.com"}</span>
-              </div>
+              {(corporate?.headquarters) && (
+                <div className="flex items-start gap-3">
+                  <MapPin className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                  <span>{corporate.headquarters}</span>
+                </div>
+              )}
+              {(corporate?.phone) && (
+                <div className="flex items-center gap-3">
+                  <Phone className="h-5 w-5 text-primary shrink-0" />
+                  <span>{corporate.phone}</span>
+                </div>
+              )}
+              {(corporate?.email) && (
+                <div className="flex items-center gap-3">
+                  <Mail className="h-5 w-5 text-primary shrink-0" />
+                  <span>{corporate.email}</span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -194,16 +205,16 @@ export function PublicFooter() {
           </div>
         </div>
 
-        <div className="container px-4 sm:px-6 lg:px-8 mt-8 text-[11px] leading-relaxed text-slate-500 dark:text-white/40 space-y-4 max-w-6xl">
+        <div className="container px-4 sm:px-6 lg:px-8 mt-8 flex flex-col gap-4 text-[10px] sm:text-xs text-slate-500 dark:text-slate-500 leading-relaxed max-w-6xl mx-auto font-sans text-justify sm:text-left">
           <p>
-            TrustBank is a member of the Federal Deposit Insurance Corporation (FDIC). Deposits are insured up to $250,000 per depositor for each account ownership category. Investment products, brokerage accounts, and wealth advisory plans offered through TrustBank Wealth Advisory are not FDIC insured, are not bank guaranteed, and may lose value.
+            {brandName} is a member of the Federal Deposit Insurance Corporation (FDIC). Deposits are insured up to $250,000 per depositor for each account ownership category. Investment products, brokerage accounts, and wealth advisory plans offered through {brandName} Wealth Advisory are not FDIC insured, are not bank guaranteed, and may lose value.
           </p>
           <p>
-            Lending products are subject to credit approval and underwriting standards. TrustBank is an Equal Housing Lender. NMLS ID #123456. Brokerage and investment services are provided by TrustBank Brokerage Services LLC, member FINRA and SIPC.
+            Lending products are subject to credit approval and underwriting standards. {brandName} is an Equal Housing Lender. NMLS ID #123456. Brokerage and investment services are provided by {brandName} Brokerage Services LLC, member FINRA and SIPC.
           </p>
-          <div className="flex flex-col md:flex-row justify-between items-center mt-6 pt-6 border-t border-slate-300 dark:border-white/5">
-            <p>&copy; {new Date().getFullYear()} {identity?.legal_name || "TrustBank Corporation"}. All rights reserved.</p>
-            <p className="mt-2 md:mt-0">Designed for Premium Banking Experiences.</p>
+          <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-4 mt-2">
+            <p>&copy; {new Date().getFullYear()} {legalName}. All rights reserved.</p>
+            <div className="flex items-center gap-4">Designed for Premium Banking Experiences.</div>
           </div>
         </div>
       </div>

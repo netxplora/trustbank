@@ -23,6 +23,9 @@ import {
   CheckCircle2,
   Download,
   Award,
+  Banknote,
+  CreditCard,
+  ShieldCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,10 +33,12 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useBrand } from "@/contexts/BrandContext";
 import { StaggerContainer, StaggerItem, FadeIn, SlideUp } from "@/components/public/Motion";
 import { generatePortfolioSummaryPDF } from "@/lib/pdf/domainDocuments";
 import { saveDocumentRecord } from "@/lib/pdf/documentService";
 import { fetchBrandPDFColors } from "@/lib/pdf/brandColorForPDF";
+import { PageLoader } from "@/components/ui/PageLoader";
 
 interface InvestmentAccount {
   id: string;
@@ -109,6 +114,8 @@ export default function InvestmentsPage() {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
   const { toast } = useToast();
+  const { identity } = useBrand();
+  const brandName = identity?.short_name || "TrustBank";
   
   const [dbStocks, setDbStocks] = useState<StockMeta[]>([]);
   const [livePrices, setLivePrices] = useState<Record<string, number>>({});
@@ -142,6 +149,7 @@ export default function InvestmentsPage() {
   const [fundAmount, setFundAmount] = useState("");
   const [checkingAccounts, setCheckingAccounts] = useState<any[]>([]);
   const [selectedCheckingId, setSelectedCheckingId] = useState("");
+  const [showDepositModal, setShowDepositModal] = useState(false);
 
   // PIN State
   const [pinDialogOpen, setPinDialogOpen] = useState(false);
@@ -836,9 +844,11 @@ export default function InvestmentsPage() {
                             costBasis,
                             brandColors
                           );
-                          result.pdf.save(`TrustBank_Portfolio_${new Date().toISOString().slice(0, 10)}.pdf`);
-                          await saveDocumentRecord({ userId: user.id, documentType: "portfolio_summary", documentCategory: "investments", referenceNumber: result.referenceNumber, verificationCode: result.verificationCode, title: "Investment Portfolio Summary", metadata: { total_value: holdingsVal, holdings_count: holdings.length } });
-                          toast({ title: "Report Downloaded", description: "Your portfolio report has been saved." });
+                          if (result) {
+                            result.pdf.save(`${brandName}_Portfolio_${new Date().toISOString().slice(0, 10)}.pdf`);
+                            await saveDocumentRecord({ userId: user.id, documentType: "portfolio_summary", documentCategory: "investments", referenceNumber: result.referenceNumber, verificationCode: result.verificationCode, title: "Investment Portfolio Summary", metadata: { total_value: holdingsVal, holdings_count: holdings.length } });
+                            toast({ title: "Portfolio Report Downloaded", description: "Your investment portfolio report has been generated successfully." });
+                          }
                         } catch (err: any) {
                           console.error("PDF generation error:", err);
                           toast({ title: "Download Failed", description: err?.message || "Could not generate the report. Please try again.", variant: "destructive" });

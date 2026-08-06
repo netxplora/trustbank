@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useBrand } from "@/contexts/BrandContext";
 import logo from "@/assets/logo.png";
 
 const ResetPasswordPage = () => {
@@ -13,6 +14,9 @@ const ResetPasswordPage = () => {
   const [valid, setValid] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { identity, visuals } = useBrand();
+  const siteName = identity?.platform_name || "TrustBank";
+  const logoUrl = visuals?.primary_logo;
 
   useEffect(() => {
     const hash = window.location.hash;
@@ -58,7 +62,7 @@ const ResetPasswordPage = () => {
         </div>
         <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-background">
           <div className="w-full max-w-md text-center">
-            <img src={logo} alt="TrustBank" className="h-16 w-16 mx-auto mb-6 rounded-2xl bg-white p-2 shadow-sm" />
+            <img src={logoUrl || logo} alt={siteName} className="h-16 w-16 mx-auto mb-6 rounded-2xl bg-white p-2 shadow-sm object-contain" />
             <h1 className="text-2xl font-poppins font-bold text-foreground mb-3">Link Expired</h1>
             <p className="text-muted-foreground font-sans mb-8">The password reset link is invalid or has expired. Please request a new link.</p>
             <Button className="w-full h-14 rounded-xl text-base font-bold shadow-lg" onClick={() => navigate("/login")}>Back to Login</Button>
@@ -81,7 +85,7 @@ const ResetPasswordPage = () => {
           <div className="absolute inset-0 bg-primary/20 mix-blend-color" />
         </div>
         <div className="max-w-md text-center relative z-10">
-          <img src={logo} alt="TrustBank" className="h-20 w-20 mx-auto mb-6 rounded-2xl bg-white p-2 object-contain" />
+          <img src={logoUrl || logo} alt={siteName} className="h-20 w-20 mx-auto mb-6 rounded-2xl bg-white p-2 object-contain" />
           <h2 className="text-3xl font-poppins font-bold text-white mb-4">Reset Password</h2>
           <p className="text-white/70 font-sans">Create a new password to access your account.</p>
         </div>
@@ -90,7 +94,7 @@ const ResetPasswordPage = () => {
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-background">
         <div className="w-full max-w-md">
           <div className="mb-10">
-            <img src={logo} alt="TrustBank" className="h-12 w-12 mb-6 rounded-xl bg-white p-1.5 shadow-sm lg:hidden" />
+            <img src={logoUrl || logo} alt={siteName} className="h-12 w-12 mb-6 rounded-xl bg-white p-1.5 shadow-sm lg:hidden object-contain" />
             <h1 className="text-2xl font-poppins font-bold text-foreground">Create New Password</h1>
             <p className="text-sm text-muted-foreground mt-2 font-sans">Choose a secure password.</p>
           </div>

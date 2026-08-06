@@ -9,6 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { ShieldAlert, ShieldCheck, KeyRound, Loader2 } from "lucide-react";
+import { useBrand } from "@/contexts/BrandContext";
 
 interface TransactionPinDialogProps {
   isOpen: boolean;
@@ -32,6 +33,8 @@ export function TransactionPinDialog({
   isLoading = false,
 }: TransactionPinDialogProps) {
   const [pin, setPin] = useState("");
+  const { identity } = useBrand();
+  const brandName = identity?.short_name || "TrustBank";
 
   // Reset PIN when dialog opens/closes
   useEffect(() => {
@@ -123,7 +126,7 @@ export function TransactionPinDialog({
 
         <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
           <ShieldCheck className="w-3 h-3 text-emerald-500" />
-          <span>Secured by TrustBank Zero-Trust Infrastructure</span>
+          <span>Secured by {brandName} Zero-Trust Infrastructure</span>
         </div>
       </DialogContent>
     </Dialog>

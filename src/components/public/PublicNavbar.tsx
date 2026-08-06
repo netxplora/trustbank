@@ -19,92 +19,92 @@ interface NavCategory {
   items: DropdownItem[];
 }
 
-const navCategories: NavCategory[] = [
-  {
-    label: "Personal",
-    key: "personal",
-    items: [
-      { label: "Personal Overview", to: "/info/personal-banking" },
-      { label: "Checking Accounts", to: "/checking" },
-      { label: "Savings Accounts", to: "/savings" },
-      { label: "Fixed Deposits", to: "/info/fixed-deposits" },
-      { label: "Youth Banking", to: "/info/youth-banking" },
-      { label: "Student Checking", to: "/info/student-banking" },
-      { label: "Debit Cards", to: "/info/debit-cards" }
-    ]
-  },
-  {
-    label: "Business",
-    key: "business",
-    items: [
-      { label: "Business Overview", to: "/info/business-banking" },
-      { label: "SME Accounts", to: "/info/sme-banking" },
-      { label: "Corporate Banking", to: "/info/corporate-banking" },
-      { label: "Merchant Services", to: "/info/merchant-services" },
-      { label: "Payroll Solutions", to: "/info/payroll-solutions" },
-      { label: "Cash Management", to: "/info/cash-management" },
-      { label: "Trade Finance", to: "/info/trade-finance" },
-      { label: "Business Loans", to: "/info/business-loans" }
-    ]
-  },
-  {
-    label: "Lending",
-    key: "lending",
-    items: [
-      { label: "Lending Overview", to: "/loans" },
-      { label: "Personal Loans", to: "/info/personal-loans" },
-      { label: "Mortgage Loans", to: "/info/mortgage-loans" },
-      { label: "Asset Financing", to: "/info/asset-financing" },
-      { label: "Loan Calculator", to: "/info/loan-calculator" }
-    ]
-  },
-  {
-    label: "Wealth & Investment",
-    key: "wealth",
-    items: [
-      { label: "Investment Overview", to: "/info/investments" },
-      { label: "Wealth Management", to: "/info/wealth-management" },
-      { label: "Retirement Planning", to: "/info/retirement-planning" },
-      { label: "Fixed Income Yields", to: "/info/fixed-income" },
-      { label: "Mutual Funds", to: "/info/mutual-funds" },
-      { label: "Investment Education", to: "/info/investment-education" }
-    ]
-  },
-  {
-    label: "Digital Suite",
-    key: "digital",
-    items: [
-      { label: "Digital Overview", to: "/digital-banking" },
-      { label: "Mobile Banking App", to: "/info/mobile-banking" },
-      { label: "Online Control Portal", to: "/info/online-banking" },
-      { label: "Digital Wallets", to: "/info/digital-wallet" },
-      { label: "Payment Solutions", to: "/info/payment-solutions" },
-      { label: "Security Features", to: "/info/security-features" }
-    ]
-  },
-  {
-    label: "Company",
-    key: "company",
-    items: [
-      { label: "About TrustBank", to: "/about" },
-      { label: "Leadership Board", to: "/info/leadership" },
-      { label: "Corporate Governance", to: "/info/governance" },
-      { label: "Careers & Jobs", to: "/careers" },
-      { label: "Investor Relations", to: "/info/investor-relations" },
-      { label: "Social Responsibility", to: "/info/corporate-responsibility" }
-    ]
-  }
-];
-
 export function PublicNavbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [mobileExpanded, setMobileExpanded] = useState<Record<string, boolean>>({});
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const location = useLocation();
-  const { identity, visuals } = useBrand();
+  const { identity, visuals, corporate } = useBrand();
   const { user } = useAuth();
   const { toast } = useToast();
+
+  const navCategories: NavCategory[] = [
+    {
+      label: "Personal",
+      key: "personal",
+      items: [
+        { label: "Personal Overview", to: "/info/personal-banking" },
+        { label: "Checking Accounts", to: "/checking" },
+        { label: "Savings Accounts", to: "/savings" },
+        { label: "Fixed Deposits", to: "/info/fixed-deposits" },
+        { label: "Youth Banking", to: "/info/youth-banking" },
+        { label: "Student Checking", to: "/info/student-banking" },
+        { label: "Debit Cards", to: "/info/debit-cards" }
+      ]
+    },
+    {
+      label: "Business",
+      key: "business",
+      items: [
+        { label: "Business Overview", to: "/info/business-banking" },
+        { label: "SME Accounts", to: "/info/sme-banking" },
+        { label: "Corporate Banking", to: "/info/corporate-banking" },
+        { label: "Merchant Services", to: "/info/merchant-services" },
+        { label: "Payroll Solutions", to: "/info/payroll-solutions" },
+        { label: "Cash Management", to: "/info/cash-management" },
+        { label: "Trade Finance", to: "/info/trade-finance" },
+        { label: "Business Loans", to: "/info/business-loans" }
+      ]
+    },
+    {
+      label: "Lending",
+      key: "lending",
+      items: [
+        { label: "Lending Overview", to: "/loans" },
+        { label: "Personal Loans", to: "/info/personal-loans" },
+        { label: "Mortgage Loans", to: "/info/mortgage-loans" },
+        { label: "Asset Financing", to: "/info/asset-financing" },
+        { label: "Loan Calculator", to: "/info/loan-calculator" }
+      ]
+    },
+    {
+      label: "Wealth & Investment",
+      key: "wealth",
+      items: [
+        { label: "Investment Overview", to: "/info/investments" },
+        { label: "Wealth Management", to: "/info/wealth-management" },
+        { label: "Retirement Planning", to: "/info/retirement-planning" },
+        { label: "Fixed Income Yields", to: "/info/fixed-income" },
+        { label: "Mutual Funds", to: "/info/mutual-funds" },
+        { label: "Investment Education", to: "/info/investment-education" }
+      ]
+    },
+    {
+      label: "Digital Suite",
+      key: "digital",
+      items: [
+        { label: "Digital Overview", to: "/digital-banking" },
+        { label: "Mobile Banking App", to: "/info/mobile-banking" },
+        { label: "Online Control Portal", to: "/info/online-banking" },
+        { label: "Digital Wallets", to: "/info/digital-wallet" },
+        { label: "Payment Solutions", to: "/info/payment-solutions" },
+        { label: "Security Features", to: "/info/security-features" }
+      ]
+    },
+    {
+      label: "Company",
+      key: "company",
+      items: [
+        { label: `About ${identity?.short_name || "Us"}`, to: "/about" },
+        { label: "Leadership Board", to: "/info/leadership" },
+        { label: "Corporate Governance", to: "/info/governance" },
+        { label: "Careers & Jobs", to: "/careers" },
+        { label: "Investor Relations", to: "/info/investor-relations" },
+        { label: "Social Responsibility", to: "/info/corporate-responsibility" }
+      ]
+    }
+  ];
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -400,7 +400,7 @@ export function PublicNavbar() {
               <div className="mt-10 flex items-center justify-between px-2 text-sm text-muted-foreground">
                 <div className="text-xs">
                   <p className="font-semibold">{identity?.platform_name || "TrustBank"}</p>
-                  <p className="mt-0.5">1-800-TRUST-BK</p>
+                  {corporate?.phone && <p className="mt-0.5">{corporate.phone}</p>}
                 </div>
               </div>
 

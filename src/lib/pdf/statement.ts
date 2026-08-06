@@ -34,10 +34,13 @@ export async function generateStatementPDF(
   account: StatementAccount,
   transactions: StatementTransaction[],
   periodName: string,
-  brandColors?: PDFBrandColors
+  brandColors?: PDFBrandColors,
+  brandContext?: { identity?: any; corporate?: any; visuals?: any },
+  existingDoc?: { refNum: string; verCode: string; date?: Date }
 ) {
-  const refNum = generateReferenceNumber("account_statement");
-  const verCode = generateVerificationCode();
+  const refNum = existingDoc?.refNum || generateReferenceNumber("account_statement");
+  const verCode = existingDoc?.verCode || generateVerificationCode();
+  const docDate = existingDoc?.date || new Date();
 
   const isCredit = (t: StatementTransaction) =>
     t.type === "credit" || t.type === "deposit" || t.type === "loan_disbursement";
@@ -150,7 +153,7 @@ export async function generateStatementPDF(
       category: "accounts",
       referenceNumber: refNum,
       verificationCode: verCode,
-      date: new Date(),
+      date: docDate,
     },
     customer: {
       name: customer.name,
@@ -159,6 +162,9 @@ export async function generateStatementPDF(
       phone: customer.phone,
     },
     content,
+    identity: brandContext?.identity,
+    corporate: brandContext?.corporate,
+    visuals: brandContext?.visuals,
     brandColors,
     additionalDisclaimer:
       "This statement is provided for your records. Please review all transactions and report any discrepancies within 30 days of the statement date.",

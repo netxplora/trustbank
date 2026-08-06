@@ -6,6 +6,7 @@ import { SectionHeader } from "@/components/public/SectionHeader";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import heroFaq from "@/assets/hero-faq.jpg";
+import { useBrand } from "@/contexts/BrandContext";
 
 type FaqCategory = "Account & Profile" | "Commercial & Lending" | "Security & Fraud" | "Wealth Management";
 
@@ -59,6 +60,12 @@ const faqs: FAQ[] = [
 
 const FAQPage = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const { identity } = useBrand();
+  const brandName = identity?.short_name || "TrustBank";
+
+  const replaceStr = (str: string) => str.replace(/TrustBank/g, brandName);
+  const processedFaqs = faqs.map(f => ({ ...f, a: replaceStr(f.a), q: replaceStr(f.q) }));
+
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<FaqCategory | "All">("All");
 
@@ -70,7 +77,7 @@ const FAQPage = () => {
     { name: "Wealth Management", icon: Briefcase },
   ];
 
-  const filteredFaqs = faqs.filter(faq => {
+  const filteredFaqs = processedFaqs.filter(faq => {
     const matchesSearch = faq.q.toLowerCase().includes(searchQuery.toLowerCase()) || faq.a.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = activeCategory === "All" || faq.category === activeCategory;
     return matchesSearch && matchesCategory;

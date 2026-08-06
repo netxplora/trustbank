@@ -8,6 +8,9 @@ interface BrandIdentity {
   slogan: string;
   description: string;
   company_overview: string;
+  website_url?: string;
+  document_issuer_name?: string;
+  document_disclaimer?: string;
 }
 
 interface DesignSystem {
@@ -68,6 +71,10 @@ interface DesignSystem {
 
 interface VisualAssets {
   primary_logo: string;
+  light_theme_logo?: string;
+  dark_theme_logo?: string;
+  document_logo?: string;
+  email_logo?: string;
   favicon: string;
   hero_image: string;
 }
@@ -75,8 +82,28 @@ interface VisualAssets {
 interface CorporateInfo {
   phone: string;
   email: string;
+  support_email?: string;
   headquarters: string;
+  mailing_address?: string;
   support_hours: string;
+  social_facebook?: string;
+  social_twitter?: string;
+  social_linkedin?: string;
+  social_instagram?: string;
+}
+
+interface SeoInfo {
+  meta_title: string;
+  meta_description: string;
+  og_image: string;
+}
+
+interface ComplianceInfo {
+  terms_url: string;
+  privacy_url: string;
+  cookie_url: string;
+  legal_disclaimer: string;
+  copyright_text?: string;
 }
 
 interface BrandContextType {
@@ -84,6 +111,8 @@ interface BrandContextType {
   design: DesignSystem | null;
   visuals: VisualAssets | null;
   corporate: CorporateInfo | null;
+  seo: SeoInfo | null;
+  compliance: ComplianceInfo | null;
   loading: boolean;
   refreshBrandSettings: () => Promise<void>;
 }
@@ -94,9 +123,13 @@ const BrandContext = createContext<BrandContextType | undefined>(undefined);
 const defaultIdentity: BrandIdentity = {
   platform_name: "TrustBank Global",
   short_name: "TrustBank",
+  legal_name: "TrustBank NA",
   slogan: "Secure Institutional Wealth Management",
   description: "Enterprise-grade digital banking and asset management.",
   company_overview: "TrustBank provides tier-1 banking facilities.",
+  website_url: "https://trustbank.com",
+  document_issuer_name: "TrustBank NA",
+  document_disclaimer: "This document is issued by TrustBank and is intended solely for the named recipient. TrustBank is a member of the Federal Deposit Insurance Corporation (FDIC). Deposits are insured up to applicable limits.",
 };
 
 const defaultDesign: DesignSystem = {
@@ -157,6 +190,10 @@ const defaultDesign: DesignSystem = {
 
 const defaultVisuals: VisualAssets = {
   primary_logo: "/assets/logo-B22.png",
+  light_theme_logo: "/assets/logo-B22.png",
+  dark_theme_logo: "/assets/logo-B22.png",
+  document_logo: "/assets/logo-B22.png",
+  email_logo: "/assets/logo-B22.png",
   favicon: "/favicon.ico",
   hero_image: "/assets/hero-home.jpg",
 };
@@ -164,8 +201,28 @@ const defaultVisuals: VisualAssets = {
 const defaultCorporate: CorporateInfo = {
   phone: "+1 (800) 555-0199",
   email: "support@trustbank.com",
+  support_email: "support@trustbank.com",
   headquarters: "100 Wall Street, New York, NY",
+  mailing_address: "100 Wall Street, New York, NY",
   support_hours: "24/7 Global Support",
+  social_facebook: "",
+  social_twitter: "",
+  social_linkedin: "",
+  social_instagram: "",
+};
+
+const defaultSeo: SeoInfo = {
+  meta_title: "TrustBank | Premium Banking & Wealth Management",
+  meta_description: "Secure digital banking and asset management for individuals, families, and businesses.",
+  og_image: "/logo.png"
+};
+
+const defaultCompliance: ComplianceInfo = {
+  terms_url: "/terms",
+  privacy_url: "/privacy",
+  cookie_url: "/cookies",
+  legal_disclaimer: "TrustBank is a financial technology company, not a bank. Banking services provided by partner banks.",
+  copyright_text: "© 2026 TrustBank. All rights reserved."
 };
 
 export const BrandProvider = ({ children }: { children: React.ReactNode }) => {
@@ -180,6 +237,8 @@ export const BrandProvider = ({ children }: { children: React.ReactNode }) => {
   });
   const [visuals, setVisuals] = useState<VisualAssets>(defaultVisuals);
   const [corporate, setCorporate] = useState<CorporateInfo>(defaultCorporate);
+  const [seo, setSeo] = useState<SeoInfo>(defaultSeo);
+  const [compliance, setCompliance] = useState<ComplianceInfo>(defaultCompliance);
   const [loading, setLoading] = useState(true);
 
   // Helper to convert HEX to Space-Separated HSL for Tailwind CSS variable injection
@@ -214,19 +273,24 @@ export const BrandProvider = ({ children }: { children: React.ReactNode }) => {
       const { data, error } = await supabase
         .from("cms_site_settings")
         .select("key, value")
-        .in("key", ["brand_identity", "design_system", "visual_assets", "corporate_info"]);
+        .in("key", ["brand_identity", "design_system", "visual_assets", "corporate_info", "seo", "compliance"]);
 
       if (error) throw error;
 
       if (data) {
         data.forEach((setting) => {
-          if (setting.key === "brand_identity" && setting.value) setIdentity(setting.value as any);
+          if (setting.key === "brand_identity" && setting.value) setIdentity({...defaultIdentity, ...(setting.value as any)});
           if (setting.key === "design_system" && setting.value) {
             setDesign(setting.value as any);
             localStorage.setItem("brand_design_system", JSON.stringify(setting.value));
           }
-          if (setting.key === "visual_assets" && setting.value) setVisuals(setting.value as any);
-          if (setting.key === "corporate_info" && setting.value) setCorporate(setting.value as any);
+          if (setting.key === "visual_assets" && setting.value) setVisuals({...defaultVisuals, ...(setting.value as any)});
+          if (setting.key === "corporate_info" && setting.value) setCorporate({...defaultCorporate, ...(setting.value as any)});
+          if (setting.key === "seo" && setting.value) {
+            setSeo({...defaultSeo, ...(setting.value as any)});
+            localStorage.setItem("brand_seo_system", JSON.stringify(setting.value));
+          }
+          if (setting.key === "compliance" && setting.value) setCompliance({...defaultCompliance, ...(setting.value as any)});
         });
       }
     } catch (err) {
@@ -318,8 +382,33 @@ export const BrandProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [design]);
 
+  // Dynamic SEO Injection
+  useEffect(() => {
+    if (seo && identity) {
+      document.title = seo.meta_title || identity.platform_name || "TrustBank";
+      
+      const setMeta = (name: string, content: string, property = false) => {
+        let el = document.querySelector(property ? `meta[property="${name}"]` : `meta[name="${name}"]`);
+        if (!el) {
+          el = document.createElement("meta");
+          if (property) el.setAttribute("property", name);
+          else el.setAttribute("name", name);
+          document.head.appendChild(el);
+        }
+        el.setAttribute("content", content);
+      };
+
+      setMeta("description", seo.meta_description || identity.description);
+      setMeta("author", identity.short_name);
+      setMeta("og:title", seo.meta_title || identity.platform_name, true);
+      setMeta("og:description", seo.meta_description || identity.description, true);
+      if (seo.og_image) setMeta("og:image", seo.og_image, true);
+      setMeta("twitter:site", corporate?.social_twitter ? `@${corporate.social_twitter.split('/').pop()}` : `@${identity.short_name}`);
+    }
+  }, [seo, identity, corporate]);
+
   return (
-    <BrandContext.Provider value={{ identity, design, visuals, corporate, loading, refreshBrandSettings: fetchSettings }}>
+    <BrandContext.Provider value={{ identity, design, visuals, corporate, seo, compliance, loading, refreshBrandSettings: fetchSettings }}>
       {children}
     </BrandContext.Provider>
   );

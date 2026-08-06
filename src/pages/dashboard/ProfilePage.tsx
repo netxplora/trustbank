@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { User, Camera, Save, Upload, X, Loader2, ShieldCheck, Mail, MapPin, Briefcase, Settings, Lock, LogOut } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { CloseAccountTab } from "@/components/dashboard/profile/CloseAccountTab";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -159,7 +161,7 @@ const ProfilePage = () => {
       const updates: any = {};
       if (!isFieldLocked(profile?.first_name)) updates.first_name = form.firstName;
       if (!isFieldLocked(profile?.last_name)) updates.last_name = form.lastName;
-      if (!isFieldLocked(profile?.date_of_birth)) updates.date_of_birth = form.dateOfBirth;
+      if (!isFieldLocked(profile?.date_of_birth)) updates.date_of_birth = form.dateOfBirth || null;
       if (!isFieldLocked(profile?.gender)) updates.gender = form.gender;
       if (!isFieldLocked(profile?.nationality)) updates.nationality = form.nationality;
       if (!isFieldLocked(profile?.phone)) updates.phone = form.phone;
@@ -252,7 +254,7 @@ const ProfilePage = () => {
                 <DropdownMenuItem onClick={startWebcam} className="text-xs"><Camera className="h-3.5 w-3.5 mr-1.5" /> Camera</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <input type="file" ref={fileInputRef} className="hidden" accept="image/*" />
+            <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
           </div>
           
           <div className="text-center md:text-left flex-1">
@@ -486,7 +488,7 @@ const ProfilePage = () => {
               </TabsContent>
               
               <TabsContent value="security" className="mt-0">
-                <div className="mb-4">
+                <div className="mb-8">
                   <h3 className="text-sm font-semibold font-poppins mb-3">Update Password</h3>
                   <div className="max-w-sm">
                     <form onSubmit={handlePasswordChange} className="space-y-3">
@@ -501,6 +503,10 @@ const ProfilePage = () => {
                       <Button type="submit" variant="secondary" size="sm" className="w-full text-xs font-bold h-8 rounded-lg">Change Password</Button>
                     </form>
                   </div>
+                </div>
+
+                <div className="pt-6 border-t border-border">
+                  <CloseAccountTab />
                 </div>
               </TabsContent>
 

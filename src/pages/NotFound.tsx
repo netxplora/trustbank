@@ -2,15 +2,17 @@ import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
 import { HelpCircle, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useBrand } from "@/contexts/BrandContext";
 
 const NotFound = () => {
   const location = useLocation();
+  const { identity } = useBrand();
 
   useEffect(() => {
     console.error("404 Error: User attempted to access non-existent route:", location.pathname);
   }, [location.pathname]);
 
-  document.title = "Page Not Found | TrustBank Premium";
+  document.title = `Page Not Found | ${identity?.platform_name || 'Premium Banking'}`;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background text-foreground font-sans relative overflow-hidden">
