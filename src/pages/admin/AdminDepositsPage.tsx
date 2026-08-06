@@ -32,6 +32,7 @@ interface UnifiedDeposit {
   deposit_type: "fiat" | "crypto";
   wallet_id: string | null;
   account_id: string | null;
+  source_table: "payment_sessions" | "transactions" | "crypto_deposits";
 }
 
 const PAGE_SIZE = 20;
@@ -57,16 +58,52 @@ export default function AdminDepositsPage() {
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [showInfoDialog, setShowInfoDialog] = useState(false);
 
-  // ── Fetch ───────────────────────────────────────────────────────
-  useEffect(() => { fetchDeposits(); }, []);
+  // ── Fetch & Realtime Sync ───────────────────────────────────────
+  useEffect(() => {
+    fetchDeposits();
+
+    const fiatChannel = supabase
+      .channel('admin-fiat-sync')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'payment_sessions' }, () => {
+        fetchDeposits();
+      })
+      .subscribe();
+
+    const cryptoChannel = supabase
+      .channel('admin-crypto-sync')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'crypto_deposits' }, () => {
+        fetchDeposits();
+      })
+      .subscribe();
+
+    const txChannel = supabase
+      .channel('admin-tx-sync')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions' }, () => {
+        fetchDeposits();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(fiatChannel);
+      supabase.removeChannel(cryptoChannel);
+      supabase.removeChannel(txChannel);
+    };
+  }, []);
 
   const fetchDeposits = async () => {
     setLoading(true);
     try {
-      // Fetch fiat deposits
+      // Fetch fiat deposits from payment_sessions
       const { data: fiatData, error: fiatErr } = await supabase
         .from("payment_sessions")
         .select("id, user_id, amount, method, reference, status, proof_url, created_at, account_id, transaction_hash")
+        .order("created_at", { ascending: false });
+
+      // Fetch fiat deposits from transactions table (legacy path)
+      const { data: txData, error: txErr } = await supabase
+        .from("transactions")
+        .select("id, user_id, account_id, amount, reference, status, created_at, description")
+        .eq("type", "deposit")
         .order("created_at", { ascending: false });
 
       // Fetch crypto deposits
@@ -76,17 +113,34 @@ export default function AdminDepositsPage() {
         .order("created_at", { ascending: false });
 
       // Fetch profiles for customer info
-      const { data: profilesData } = await supabase.from("profiles").select("id, display_name, email");
+      const { data: profilesData, error: profilesErr } = await supabase.from("profiles").select("user_id, display_name, email");
 
-      if (fiatErr) console.error("Error fetching fiat deposits:", fiatErr);
-      if (cryptoErr) console.error("Error fetching crypto deposits:", cryptoErr);
+      if (fiatErr) {
+        console.error("Error fetching fiat deposits:", fiatErr);
+        toast({ title: "Error fetching fiat deposits", description: fiatErr.message, variant: "destructive" });
+      }
+      if (txErr) {
+        console.error("Error fetching transaction deposits:", txErr);
+        toast({ title: "Error fetching transaction deposits", description: txErr.message, variant: "destructive" });
+      }
+      if (cryptoErr) {
+        console.error("Error fetching crypto deposits:", cryptoErr);
+        toast({ title: "Error fetching crypto deposits", description: cryptoErr.message, variant: "destructive" });
+      }
+      if (profilesErr) {
+        console.error("Error fetching profiles:", profilesErr);
+      }
 
       const profileMap = new Map<string, { display_name: string | null; email: string | null }>();
-      profilesData?.forEach((p: any) => profileMap.set(p.id, { display_name: p.display_name, email: p.email }));
+      profilesData?.forEach((p: any) => profileMap.set(p.user_id, { display_name: p.display_name, email: p.email }));
+
+      // Collect all payment_sessions references to deduplicate against transactions
+      const sessionRefs = new Set<string>();
+      fiatData?.forEach((f: any) => { if (f.reference) sessionRefs.add(f.reference); });
 
       const unified: UnifiedDeposit[] = [];
 
-      // Map fiat deposits
+      // Map payment_sessions deposits
       fiatData?.forEach((f: any) => {
         const profile = profileMap.get(f.user_id);
         unified.push({
@@ -104,7 +158,32 @@ export default function AdminDepositsPage() {
           created_at: f.created_at,
           deposit_type: "fiat",
           wallet_id: null,
-          account_id: f.account_id
+          account_id: f.account_id,
+          source_table: "payment_sessions"
+        });
+      });
+
+      // Map transactions deposits (skip if already in payment_sessions by reference)
+      txData?.forEach((t: any) => {
+        if (t.reference && sessionRefs.has(t.reference)) return; // already covered
+        const profile = profileMap.get(t.user_id);
+        unified.push({
+          id: t.id,
+          user_id: t.user_id,
+          customer_name: profile?.display_name || null,
+          customer_email: profile?.email || null,
+          amount: t.amount,
+          currency: "USD",
+          method: "bank_transfer",
+          reference: t.reference,
+          network: null,
+          status: t.status,
+          proof_url: null,
+          created_at: t.created_at,
+          deposit_type: "fiat",
+          wallet_id: null,
+          account_id: t.account_id,
+          source_table: "transactions"
         });
       });
 
@@ -126,7 +205,8 @@ export default function AdminDepositsPage() {
           created_at: c.created_at,
           deposit_type: "crypto",
           wallet_id: c.wallet_id,
-          account_id: null
+          account_id: null,
+          source_table: "crypto_deposits"
         });
       });
 
@@ -174,13 +254,38 @@ export default function AdminDepositsPage() {
       return;
     }
     try {
-      if (deposit.deposit_type === "fiat") {
+      if (deposit.source_table === "payment_sessions") {
+        // Use the RPC which handles crediting balance + creating transaction
         const { error } = await (supabase.rpc as any)("admin_approve_deposit", {
           p_admin_id: user?.id,
           p_session_id: deposit.id
         });
         if (error) throw error;
+      } else if (deposit.source_table === "transactions") {
+        // Deposit was recorded directly in transactions — update status to completed
+        const { error } = await supabase.from("transactions").update({
+          status: "completed"
+        }).eq("id", deposit.id);
+        if (error) throw error;
+
+        // Log the admin action
+        await supabase.from("audit_logs").insert({
+          user_id: user?.id,
+          action: "admin_approved_fiat_deposit",
+          entity_type: "transactions",
+          entity_id: deposit.id,
+          details: { amount: deposit.amount, reference: deposit.reference }
+        });
+
+        // Notify the user
+        await supabase.from("notifications").insert({
+          user_id: deposit.user_id,
+          title: "Deposit Approved",
+          message: `Your deposit of $${Number(deposit.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })} has been approved and credited to your account.`,
+          type: "success"
+        });
       } else {
+        // Crypto deposit
         const { error } = await (supabase.rpc as any)("admin_approve_crypto_deposit", {
           p_admin_id: user?.id,
           p_deposit_id: deposit.id,
@@ -206,7 +311,7 @@ export default function AdminDepositsPage() {
   const handleReject = async () => {
     if (!selected) return;
     try {
-      if (selected.deposit_type === "fiat") {
+      if (selected.source_table === "payment_sessions") {
         const { error } = await supabase.from("payment_sessions").update({
           status: "rejected", notes: rejectReason || null, updated_at: new Date().toISOString()
         }).eq("id", selected.id);
@@ -219,6 +324,19 @@ export default function AdminDepositsPage() {
           previous_status: selected.status,
           new_status: "rejected",
           notes: rejectReason || null
+        });
+      } else if (selected.source_table === "transactions") {
+        const { error } = await supabase.from("transactions").update({
+          status: "rejected"
+        }).eq("id", selected.id);
+        if (error) throw error;
+
+        await supabase.from("audit_logs").insert({
+          user_id: user?.id,
+          action: "admin_rejected_fiat_deposit",
+          entity_type: "transactions",
+          entity_id: selected.id,
+          details: { amount: selected.amount, reference: selected.reference, reason: rejectReason }
         });
       } else {
         const { error } = await supabase.from("crypto_deposits").update({
@@ -577,7 +695,7 @@ export default function AdminDepositsPage() {
                   </div>
                   <div className="flex gap-2">
                     <Button
-                      className="flex-1 font-bold bg-success/10 hover:bg-success/10 text-white"
+                      className="flex-1 font-bold bg-green-600 hover:bg-green-700 text-white"
                       onClick={() => handleApprove(selected)}
                     >
                       <CheckCircle className="h-4 w-4 mr-1.5" /> Approve & Credit
@@ -630,7 +748,7 @@ export default function AdminDepositsPage() {
           </div>
           <DialogFooter className="mt-4">
             <Button variant="outline" onClick={() => setShowRejectDialog(false)}>Cancel</Button>
-            <Button className="bg-destructive/10 hover:bg-destructive/10 text-white font-bold" onClick={handleReject}>
+            <Button className="bg-red-600 hover:bg-red-700 text-white font-bold" onClick={handleReject}>
               Confirm Rejection
             </Button>
           </DialogFooter>
@@ -661,7 +779,7 @@ export default function AdminDepositsPage() {
           </div>
           <DialogFooter className="mt-4">
             <Button variant="outline" onClick={() => setShowInfoDialog(false)}>Cancel</Button>
-            <Button className="bg-primary/10 hover:bg-primary/10 text-white font-bold" onClick={handleRequestInfo} disabled={!infoMessage.trim()}>
+            <Button className="bg-blue-600 hover:bg-blue-700 text-white font-bold" onClick={handleRequestInfo} disabled={!infoMessage.trim()}>
               Send Request
             </Button>
           </DialogFooter>

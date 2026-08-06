@@ -181,15 +181,14 @@ export default function DepositPage() {
     if (!user || !selectedAccount) return;
     setSubmittingDeposit(true);
     try {
-      const { error } = await supabase.from("transactions").insert({
+      // Insert into payment_sessions so the admin deposits page can see and approve it.
+      // The admin_approve_deposit RPC will create the actual transaction and credit the balance.
+      const { error } = await supabase.from("payment_sessions").insert({
         user_id: user.id,
         account_id: selectedAccount.id,
-        type: "deposit",
         amount: Number(amount),
-        description: `Fiat deposit via bank transfer – Ref: ${depositReference}`,
+        method: "bank_transfer",
         reference: depositReference,
-        recipient_name: accountHolderName,
-        recipient_bank: platformName,
         status: "pending",
       });
 
