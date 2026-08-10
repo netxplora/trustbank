@@ -1,21 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useBrand } from '@/contexts/BrandContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { AlertTriangle, AlertCircle, Loader2 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { AlertTriangle, AlertCircle, Loader2, Clock, CheckCircle2, XCircle } from 'lucide-react';
 
 export const CloseAccountTab = () => {
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
-  const navigate = useNavigate();
+  const { identity } = useBrand();
+  const platformName = identity?.platform_name || 'the platform';
 
   const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [loading, setLoading] = useState(false);
+  const [checkingStatus, setCheckingStatus] = useState(true);
   const [eligibility, setEligibility] = useState<{ eligible: boolean; blockers: string[] } | null>(null);
+
+  // Existing request tracking
+  const [existingRequest, setExistingRequest] = useState<any>(null);
 
   const [reason, setReason] = useState('');
   const [couldDoBetter, setCouldDoBetter] = useState('');
@@ -31,6 +36,35 @@ export const CloseAccountTab = () => {
     'Technical or usability issues',
     'Other',
   ];
+
+  // On mount, check if user already has a pending or rejected request
+  useEffect(() => {
+    if (user) {
+      fetchExistingRequest();
+    }
+  }, [user]);
+
+  const fetchExistingRequest = async () => {
+    setCheckingStatus(true);
+    try {
+      const { data, error } = await supabase
+        .from('account_closure_requests')
+        .select('*')
+        .eq('user_id', user?.id)
+        .in('status', ['pending', 'rejected'])
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (error) throw error;
+      if (data && data.length > 0) {
+        setExistingRequest(data[0]);
+      }
+    } catch (err: any) {
+      console.error('Error checking closure status:', err.message);
+    } finally {
+      setCheckingStatus(false);
+    }
+  };
 
   const checkEligibility = async () => {
     setLoading(true);
@@ -76,16 +110,15 @@ export const CloseAccountTab = () => {
     }
   };
 
-  const confirmClosure = async () => {
+  const submitClosureRequest = async () => {
     setLoading(true);
     try {
-      // Combine reason with "could do better" response into comments
       const fullComments = [
         comments,
         couldDoBetter ? `Could have served me better by: ${couldDoBetter}` : '',
       ].filter(Boolean).join('\n\n');
 
-      const { error } = await supabase.rpc('execute_account_closure', {
+      const { data, error } = await (supabase.rpc as any)('request_account_closure', {
         p_reason: reason,
         p_comments: fullComments || null,
       });
@@ -93,19 +126,134 @@ export const CloseAccountTab = () => {
       if (error) throw error;
 
       toast({
-        title: 'Account Closed',
-        description: 'Your account has been closed. You will now be signed out.',
+        title: 'Request Submitted',
+        description: 'Your account closure request has been submitted and is now under review.',
       });
 
-      await signOut();
-      navigate('/login');
+      // Refresh to show the pending state
+      await fetchExistingRequest();
+      setStep(1);
     } catch (err: any) {
-      toast({ title: 'Closure Failed', description: err.message, variant: 'destructive' });
+      toast({ title: 'Submission Failed', description: err.message, variant: 'destructive' });
     } finally {
       setLoading(false);
     }
   };
 
+  if (checkingStatus) {
+    return (
+      <div className="flex items-center gap-2 py-6 text-muted-foreground text-sm">
+        <Loader2 className="h-4 w-4 animate-spin" />
+        Checking account status...
+      </div>
+    );
+  }
+
+  // ── PENDING REQUEST STATE ──
+  if (existingRequest?.status === 'pending') {
+    return (
+      <div className="space-y-5 max-w-2xl">
+        <div>
+          <h2 className="text-lg font-semibold font-poppins text-foreground flex items-center gap-2">
+            <Clock className="h-5 w-5 text-amber-500" />
+            Account Closure Under Review
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Your account closure request has been submitted and is being reviewed by our team.
+          </p>
+        </div>
+
+        <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-5 space-y-3">
+          <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 font-semibold text-sm">
+            <Clock className="h-4 w-4" />
+            Request Pending Review
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+            <div>
+              <span className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Reason</span>
+              <span className="text-foreground">{existingRequest.reason}</span>
+            </div>
+            <div>
+              <span className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Submitted</span>
+              <span className="text-foreground">
+                {new Date(existingRequest.created_at || existingRequest.closure_date).toLocaleDateString('en-US', {
+                  year: 'numeric', month: 'long', day: 'numeric'
+                })}
+              </span>
+            </div>
+          </div>
+
+          {existingRequest.comments && (
+            <div>
+              <span className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Your Comments</span>
+              <p className="text-sm text-foreground/80">{existingRequest.comments}</p>
+            </div>
+          )}
+        </div>
+
+        <p className="text-xs text-muted-foreground">
+          You will receive a notification once a decision has been made. If you have questions, please contact support.
+        </p>
+      </div>
+    );
+  }
+
+  // ── REJECTED REQUEST STATE ──
+  if (existingRequest?.status === 'rejected') {
+    return (
+      <div className="space-y-5 max-w-2xl">
+        <div>
+          <h2 className="text-lg font-semibold font-poppins text-foreground flex items-center gap-2">
+            <XCircle className="h-5 w-5 text-destructive" />
+            Closure Request Declined
+          </h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Your previous account closure request was reviewed and declined.
+          </p>
+        </div>
+
+        <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-5 space-y-3">
+          <div className="flex items-center gap-2 text-destructive font-semibold text-sm">
+            <XCircle className="h-4 w-4" />
+            Request Declined
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+            <div>
+              <span className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Original Reason</span>
+              <span className="text-foreground">{existingRequest.reason}</span>
+            </div>
+            <div>
+              <span className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Reviewed On</span>
+              <span className="text-foreground">
+                {existingRequest.reviewed_at
+                  ? new Date(existingRequest.reviewed_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+                  : '—'}
+              </span>
+            </div>
+          </div>
+
+          {existingRequest.admin_notes && (
+            <div>
+              <span className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Admin Notes</span>
+              <p className="text-sm text-foreground/80">{existingRequest.admin_notes}</p>
+            </div>
+          )}
+        </div>
+
+        <Button
+          variant="destructive"
+          onClick={() => { setExistingRequest(null); setStep(1); setReason(''); setComments(''); setCouldDoBetter(''); setPassword(''); }}
+          className="bg-red-600 hover:bg-red-700 text-white font-semibold"
+        >
+          Submit a New Request
+        </Button>
+      </div>
+    );
+  }
+
+  // ── NORMAL FLOW (no pending/rejected request) ──
   return (
     <div className="space-y-6 max-w-2xl">
       <div>
@@ -114,7 +262,7 @@ export const CloseAccountTab = () => {
           Close Account
         </h2>
         <p className="text-sm text-muted-foreground mt-1">
-          Once your account is closed, you will not be able to sign back in. Please read carefully before continuing.
+          Once your closure request is approved, you will not be able to sign back in. Please read carefully before continuing.
         </p>
       </div>
 
@@ -123,8 +271,8 @@ export const CloseAccountTab = () => {
         <div className="space-y-5 animate-in fade-in">
           <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-4 text-sm text-foreground space-y-2">
             <p className="font-semibold text-destructive">Before you close your account</p>
-            <p>Closing your account means you will immediately lose access to all TrustBank services, including your accounts, transactions, cards, and any active products.</p>
-            <p>Make sure you have withdrawn any remaining funds and resolved all pending activity before proceeding.</p>
+            <p>Closing your account means you will lose access to all {platformName} services, including your accounts, transactions, cards, and any active products.</p>
+            <p>Your request will be reviewed by our team before it takes effect. Make sure you have withdrawn any remaining funds and resolved all pending activity before proceeding.</p>
           </div>
 
           {/* Blockers from eligibility check */}
@@ -158,7 +306,6 @@ export const CloseAccountTab = () => {
       {/* STEP 2: REASON + FEEDBACK */}
       {step === 2 && (
         <div className="space-y-6 pt-2 animate-in fade-in slide-in-from-bottom-2">
-          {/* Reason selection */}
           <div className="space-y-3">
             <label className="text-sm font-semibold text-foreground">
               Why are you closing your account? <span className="text-destructive">*</span>
@@ -187,7 +334,6 @@ export const CloseAccountTab = () => {
             </div>
           </div>
 
-          {/* Is there a way we could serve you better? */}
           <div className="space-y-2">
             <label className="text-sm font-semibold text-foreground">
               Is there anything we could have done better? <span className="text-muted-foreground font-normal">(optional)</span>
@@ -204,7 +350,6 @@ export const CloseAccountTab = () => {
             />
           </div>
 
-          {/* Additional comments */}
           <div className="space-y-2">
             <label className="text-sm font-semibold text-foreground">
               Any other comments? <span className="text-muted-foreground font-normal">(optional)</span>
@@ -267,10 +412,10 @@ export const CloseAccountTab = () => {
       {step === 4 && (
         <div className="space-y-4 pt-2 animate-in fade-in slide-in-from-bottom-2">
           <div className="bg-destructive/5 border border-destructive/30 rounded-lg p-5 space-y-4">
-            <h3 className="text-base font-bold text-destructive text-center">Confirm Account Closure</h3>
+            <h3 className="text-base font-bold text-destructive text-center">Submit Closure Request</h3>
 
             <div className="text-sm text-center text-muted-foreground">
-              You are about to permanently close your account. You will be signed out immediately and will not be able to sign back in.
+              Your closure request will be submitted for review. If approved, your account will be permanently closed and you will no longer be able to sign in.
             </div>
 
             <div className="bg-background border border-border rounded p-3 text-sm space-y-1">
@@ -283,12 +428,12 @@ export const CloseAccountTab = () => {
                 Cancel
               </Button>
               <Button
-                onClick={confirmClosure}
+                onClick={submitClosureRequest}
                 disabled={loading}
                 className="bg-red-600 hover:bg-red-700 text-white font-semibold"
               >
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Permanently Close My Account
+                Submit Closure Request
               </Button>
             </div>
           </div>
