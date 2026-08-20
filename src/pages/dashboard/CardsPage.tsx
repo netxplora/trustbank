@@ -636,7 +636,7 @@ const CardsPage = () => {
       is_frozen: false,
       is_physical: !isVirtual,
       delivery_address: deliveryAddress,
-      daily_limit: isVirtual ? 1000 : 5000,
+      spending_limit: isVirtual ? 1000 : 5000,
     }).select().single();
 
     if (error) {
@@ -668,7 +668,7 @@ const CardsPage = () => {
   }
 
   const kycTier = profile?.kyc_tier || 0;
-  if (kycTier < 2) {
+  if (kycTier < 1) {
     return (
       <div className="space-y-6 max-w-6xl mx-auto px-1 sm:px-4 py-2 font-sans">
         <div>
@@ -678,8 +678,8 @@ const CardsPage = () => {
         <div className="bg-amber-50 dark:bg-amber-950/80 rounded-xl border-2 border-amber-400/60 dark:border-amber-500/40 p-8 text-center shadow-sm font-sans max-w-2xl mx-auto mt-10">
           <Lock className="h-12 w-12 text-amber-500 mx-auto mb-4" />
           <h2 className="text-xl font-bold font-poppins mb-2 text-amber-900 dark:text-amber-100">Verification Required</h2>
-          <p className="text-amber-800/80 dark:text-amber-200/80 mb-6">Complete KYC Tier 2 (Standard Verification) to access physical and virtual card issuing features.</p>
-          <Button onClick={() => window.location.href = "/dashboard/kyc"}>Upgrade KYC Tier</Button>
+          <p className="text-amber-800/80 dark:text-amber-200/80 mb-6">Complete KYC Tier 1 (Basic Verification) to access physical and virtual card issuing features.</p>
+          <Button onClick={() => window.location.href = "/dashboard/kyc"}>Complete KYC</Button>
         </div>
       </div>
     );

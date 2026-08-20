@@ -23,13 +23,13 @@ export default function CurrentAccountApplicationPage() {
     return (
     <div className="max-w-2xl mx-auto space-y-4 py-2 px-1 sm:px-4 font-sans">
         <div>
-          <h1 className="text-lg sm:text-xl font-bold font-poppins text-foreground mb-0.5">Current Account</h1>
-          <p className="text-xs text-muted-foreground">Apply for a current account</p>
+          <h1 className="text-lg sm:text-xl font-bold font-poppins text-foreground mb-0.5">Checking Account</h1>
+          <p className="text-xs text-muted-foreground">Apply for a checking account</p>
         </div>
         <div className="bg-card rounded-xl border border-border/60 p-4 text-center shadow-sm font-sans">
           <Lock className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
           <h2 className="text-sm font-bold font-poppins mb-1">Feature Locked</h2>
-          <p className="text-xs text-muted-foreground mb-3">You need to complete KYC Tier 2 (Standard Verification) to apply for a Current Account. Please submit your identity documents to access this feature.</p>
+          <p className="text-xs text-muted-foreground mb-3">You need to complete KYC Tier 2 (Standard Verification) to apply for a Checking Account. Please submit your identity documents to access this feature.</p>
           <Button size="sm" className="h-8 text-xs rounded-lg" onClick={() => window.location.href = "/dashboard/kyc"}>Upgrade KYC Tier</Button>
         </div>
       </div>
@@ -114,7 +114,7 @@ export default function CurrentAccountApplicationPage() {
       await supabase.from("notifications").insert({
         user_id: user.id,
         title: "Application Submitted",
-        message: "Your current account application is under review.",
+        message: "Your checking account application is under review.",
         type: "info"
       });
 
@@ -133,7 +133,7 @@ export default function CurrentAccountApplicationPage() {
         <div className="mx-auto h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center mb-2">
           <CreditCard className="h-5 w-5 text-primary" />
         </div>
-        <h1 className="text-lg sm:text-xl font-bold text-foreground font-poppins">Current Account Application</h1>
+        <h1 className="text-lg sm:text-xl font-bold text-foreground font-poppins">Checking Account Application</h1>
         <p className="text-xs text-muted-foreground mt-1">Access higher limits and business tools by upgrading your account.</p>
       </div>
 

@@ -20,6 +20,8 @@ const KYCPage = () => {
   const [kycTier, setKycTier] = useState<number>(0);
   const [kycStatus, setKycStatus] = useState<string>("not_started");
   const [loading, setLoading] = useState(false);
+  const [isSavingDraft, setIsSavingDraft] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
   
   // Tier 1 Form
   const [formT1, setFormT1] = useState({ fullName: "", dob: "", address: "", city: "", zip: "" });
@@ -53,8 +55,49 @@ const KYCPage = () => {
         occupation: profile.occupation || "",
         sourceOfFunds: profile.source_of_funds || ""
       });
+      });
     }
   }, [profile]);
+
+  // Auto-save draft functionality
+  useEffect(() => {
+    if (!user || kycStatus.startsWith("pending") || kycTier >= 3) return;
+
+    const saveDraft = async () => {
+      setIsSavingDraft(true);
+      try {
+        const updates: any = {};
+        if (kycTier === 0) {
+          updates.display_name = formT1.fullName;
+          updates.date_of_birth = formT1.dob;
+          updates.mailing_address = formT1.address;
+          updates.city = formT1.city;
+          updates.postal_code = formT1.zip;
+        } else if (kycTier === 1) {
+          updates.occupation = formT2.occupation;
+          updates.source_of_funds = formT2.sourceOfFunds;
+        } else if (kycTier === 2) {
+          updates.annual_income_range = formT3.annualIncome;
+        }
+        
+        await supabase.from("profiles").update(updates).eq("user_id", user.id);
+        setLastSaved(new Date());
+      } catch (e) {
+        console.error("Failed to auto-save draft", e);
+      } finally {
+        setIsSavingDraft(false);
+      }
+    };
+
+    const timeoutId = setTimeout(() => {
+      // Only save if some form has data
+      if (formT1.fullName || formT2.occupation || formT3.annualIncome) {
+        saveDraft();
+      }
+    }, 1500);
+
+    return () => clearTimeout(timeoutId);
+  }, [formT1, formT2, formT3, user, kycTier, kycStatus]);
 
   const handleFileUpload = (tier: number, index: number, file: File | undefined) => {
     if (!file) return;
@@ -265,9 +308,15 @@ const KYCPage = () => {
                 <div className="space-y-1"><Label className="text-xs">City</Label><Input required className="h-8 text-xs rounded-lg" value={formT1.city} onChange={e => setFormT1(p => ({...p, city: e.target.value}))} /></div>
                 <div className="space-y-1"><Label className="text-xs">Zip / Postal Code</Label><Input required className="h-8 text-xs rounded-lg" value={formT1.zip} onChange={e => setFormT1(p => ({...p, zip: e.target.value}))} /></div>
               </div>
-              <Button type="submit" size="sm" disabled={loading} className="w-full md:w-auto mt-3 text-xs h-8 rounded-lg font-bold">
-                {loading ? "Verifying..." : "Complete Tier 1 Verification"} <ChevronRight className="w-3.5 h-3.5 ml-1" />
-              </Button>
+              <div className="flex flex-col md:flex-row items-center justify-between mt-4 gap-3">
+                <div className="text-[10px] text-muted-foreground flex items-center gap-1.5">
+                  {isSavingDraft ? <Clock className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3 h-3" />}
+                  {isSavingDraft ? "Saving draft..." : lastSaved ? `Draft saved at ${lastSaved.toLocaleTimeString()}` : ""}
+                </div>
+                <Button type="submit" size="sm" disabled={loading} className="w-full md:w-auto text-xs h-8 rounded-lg font-bold">
+                  {loading ? "Verifying..." : "Complete Tier 1 Verification"} <ChevronRight className="w-3.5 h-3.5 ml-1" />
+                </Button>
+              </div>
             </form>
           </div>
         </StaggerItem>
@@ -304,9 +353,15 @@ const KYCPage = () => {
                 </div>
               </div>
               
-              <Button type="submit" disabled={loading} className="w-full md:w-auto font-bold">
-                {loading ? "Uploading..." : "Submit for Tier 2 Review"} <ChevronRight className="w-4 h-4 ml-1" />
-              </Button>
+              <div className="flex flex-col md:flex-row items-center justify-between mt-4 gap-3">
+                <div className="text-[10px] text-muted-foreground flex items-center gap-1.5">
+                  {isSavingDraft ? <Clock className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3 h-3" />}
+                  {isSavingDraft ? "Saving draft..." : lastSaved ? `Draft saved at ${lastSaved.toLocaleTimeString()}` : ""}
+                </div>
+                <Button type="submit" disabled={loading} className="w-full md:w-auto font-bold">
+                  {loading ? "Uploading..." : "Submit for Tier 2 Review"} <ChevronRight className="w-4 h-4 ml-1" />
+                </Button>
+              </div>
             </form>
           </div>
         </StaggerItem>
@@ -349,9 +404,15 @@ const KYCPage = () => {
                 </div>
               </div>
               
-              <Button type="submit" disabled={loading} className="w-full md:w-auto font-bold bg-primary hover:bg-primary/90 text-primary-foreground">
-                {loading ? "Submitting..." : "Submit for Premium Review"} <ShieldCheck className="w-4 h-4 ml-1" />
-              </Button>
+              <div className="flex flex-col md:flex-row items-center justify-between mt-4 gap-3">
+                <div className="text-[10px] text-muted-foreground flex items-center gap-1.5">
+                  {isSavingDraft ? <Clock className="w-3 h-3 animate-spin" /> : <CheckCircle className="w-3 h-3" />}
+                  {isSavingDraft ? "Saving draft..." : lastSaved ? `Draft saved at ${lastSaved.toLocaleTimeString()}` : ""}
+                </div>
+                <Button type="submit" disabled={loading} className="w-full md:w-auto font-bold bg-primary hover:bg-primary/90 text-primary-foreground">
+                  {loading ? "Submitting..." : "Submit for Premium Review"} <ShieldCheck className="w-4 h-4 ml-1" />
+                </Button>
+              </div>
             </form>
           </div>
         </StaggerItem>

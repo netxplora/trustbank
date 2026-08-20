@@ -95,8 +95,8 @@ export default function AdminCurrentAccountsPage() {
 
       await supabase.from("notifications").insert({
         user_id: app.user_id,
-        title: "Current Account Update",
-        message: `Your current account application was declined. Reason: ${rejectionReason}`,
+        title: "Checking Account Update",
+        message: `Your checking account application was declined. Reason: ${rejectionReason}`,
         type: "warning"
       });
 
@@ -125,8 +125,8 @@ export default function AdminCurrentAccountsPage() {
     <div className="space-y-4 max-w-6xl mx-auto px-1 sm:px-4 py-2 font-sans">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
         <div>
-          <h1 className="text-lg sm:text-xl font-bold font-poppins text-foreground mb-0.5">Current Account Applications</h1>
-          <p className="text-xs text-muted-foreground">Review and manage current account applications.</p>
+          <h1 className="text-lg sm:text-xl font-bold font-poppins text-foreground mb-0.5">Checking Account Applications</h1>
+          <p className="text-xs text-muted-foreground">Review and manage checking account applications.</p>
         </div>
         <div className="relative w-full sm:w-56">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
@@ -199,7 +199,7 @@ export default function AdminCurrentAccountsPage() {
             <div className="flex justify-between items-start pr-6">
               <div>
                 <DialogTitle className="font-poppins text-2xl font-bold text-foreground">Review Application</DialogTitle>
-                <DialogDescription className="text-sm mt-1">Current Account Application</DialogDescription>
+                <DialogDescription className="text-sm mt-1">Checking Account Application</DialogDescription>
               </div>
               {selectedApp && (
                 <span className={`text-[10px] font-bold px-3 py-1 rounded-full uppercase ${

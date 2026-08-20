@@ -317,37 +317,37 @@ const ProfilePage = () => {
             </TabsList>
             
             <div className="bg-card rounded-xl border border-border/60 p-3.5 sm:p-4 shadow-sm text-xs">
-              <TabsContent value="personal" className="mt-0 space-y-3">
-                <h3 className="text-sm font-semibold font-poppins mb-3">Personal Information</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">First Name</Label>
-                    <Input readOnly={true} className={`h-8 text-xs rounded-lg bg-muted/50 shadow-inner border-border/60 text-muted-foreground focus-visible:ring-0 cursor-not-allowed`} value={form.firstName} onChange={(e) => setForm({...form, firstName: e.target.value})} />
+              <TabsContent value="personal" className="mt-0 space-y-4">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+                  <div>
+                    <h3 className="text-sm font-semibold font-poppins">Personal Information</h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">Your identity information is managed through our secure KYC system.</p>
                   </div>
-                  <div className="space-y-1">
-                    <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Last Name</Label>
-                    <Input readOnly={true} className={`h-8 text-xs rounded-lg bg-muted/50 shadow-inner border-border/60 text-muted-foreground focus-visible:ring-0 cursor-not-allowed`} value={form.lastName} onChange={(e) => setForm({...form, lastName: e.target.value})} />
+                  <Button onClick={() => navigate("/dashboard/kyc")} size="sm" variant="outline" className="h-8 text-xs font-bold shrink-0">
+                    Manage KYC
+                  </Button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6 p-4 rounded-xl bg-muted/20 border border-border/50">
+                  <div>
+                    <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Full Name</Label>
+                    <p className="text-sm font-medium mt-1">{profile?.display_name || `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() || 'Not Provided'}</p>
                   </div>
-                  <div className="space-y-1">
+                  <div>
                     <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Date of Birth</Label>
-                    <Input readOnly={isFieldLocked(profile?.date_of_birth)} className={`h-8 text-xs rounded-lg ${isFieldLocked(profile?.date_of_birth) ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground focus-visible:ring-0 cursor-not-allowed" : ""}`} value={form.dateOfBirth} onChange={(e) => setForm({...form, dateOfBirth: e.target.value})} type="date" />
+                    <p className="text-sm font-medium mt-1">{profile?.date_of_birth || 'Not Provided'}</p>
                   </div>
-                  <div className="space-y-1">
+                  <div>
                     <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Gender</Label>
-                    <select disabled={isFieldLocked(profile?.gender)} className={`flex h-8 w-full rounded-lg border border-input bg-background px-2.5 text-xs focus:outline-none ${isFieldLocked(profile?.gender) ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground cursor-not-allowed" : "focus:ring-1 focus:ring-primary"}`} value={form.gender} onChange={(e) => setForm({...form, gender: e.target.value})}>
-                      <option value="">Select Gender</option>
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                      <option value="Other">Other</option>
-                    </select>
+                    <p className="text-sm font-medium mt-1">{profile?.gender || 'Not Provided'}</p>
                   </div>
-                  <div className="space-y-1 md:col-span-2">
+                  <div>
                     <Label className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Nationality</Label>
-                    <Input readOnly={isFieldLocked(profile?.nationality)} className={`h-8 text-xs rounded-lg ${isFieldLocked(profile?.nationality) ? "bg-muted/50 shadow-inner border-border/60 text-muted-foreground focus-visible:ring-0 cursor-not-allowed" : ""}`} value={form.nationality} onChange={(e) => setForm({...form, nationality: e.target.value})} placeholder="e.g. American, British, Canadian" />
+                    <p className="text-sm font-medium mt-1">{profile?.nationality || 'Not Provided'}</p>
                   </div>
                 </div>
 
-                <div className="pt-3 border-t border-border/40 mt-3">
+                <div className="pt-3 border-t border-border/40 mt-4">
                   <h3 className="text-sm font-semibold font-poppins mb-2 flex items-center gap-1.5"><ShieldCheck className="w-4 h-4 text-primary" /> Identity Verification Status</h3>
                   <div className={`rounded-xl border p-3 flex items-start gap-3 ${
                     (profile?.kyc_status || '').startsWith('approved') ? 'bg-success/5 border-success/20' :

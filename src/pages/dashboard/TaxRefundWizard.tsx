@@ -221,8 +221,8 @@ export default function TaxRefundWizard() {
   ];
   if (hasCurrentAccount) {
     refundMethodOptions.push({
-      value: "Deposit to Current Account",
-      label: `Deposit to Current Account (${currentAcc})`,
+      value: "Deposit to Checking Account",
+      label: `Deposit to Checking Account (${currentAcc})`,
     });
   }
 

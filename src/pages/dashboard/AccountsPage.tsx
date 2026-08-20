@@ -184,7 +184,7 @@ const AccountsPage = () => {
                   <CreditCard className="h-4 w-4 text-teal-600 dark:text-teal-400" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-foreground">Current Account</p>
+                  <p className="text-xs font-bold text-foreground">Checking Account</p>
                   <p className="text-[10px] text-muted-foreground font-mono">
                     {currentAcc ? `****${currentAcc.account_number.slice(-4)}` : "Not Active"}
                   </p>
@@ -204,7 +204,7 @@ const AccountsPage = () => {
             ) : (
               <div>
                 <p className="text-[11px] text-muted-foreground mb-3 leading-tight">
-                  {currentAppStatus === "Not Applied" ? "Apply for a current account to access higher limits and business tools." : "Your application is being reviewed."}
+                  {currentAppStatus === "Not Applied" ? "Apply for a checking account to access higher limits and business tools." : "Your application is being reviewed."}
                 </p>
                 {currentAppStatus === "Not Applied" && (
                   <Button size="sm" onClick={() => navigate("/dashboard/current-application")} className="w-full h-8 text-xs font-bold rounded-lg">
