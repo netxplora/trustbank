@@ -615,7 +615,8 @@ const CardsPage = () => {
         p_account_id: primaryAccountId,
         p_fee_amount: currentFee,
         p_reference: `FEE-${Date.now()}`,
-        p_pin: pin
+        p_pin: pin,
+        p_card_type: type
       });
       if (rpcError) {
         toast({ title: "Transaction Failed", description: rpcError.message, variant: "destructive" });

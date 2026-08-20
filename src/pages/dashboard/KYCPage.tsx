@@ -55,7 +55,6 @@ const KYCPage = () => {
         occupation: profile.occupation || "",
         sourceOfFunds: profile.source_of_funds || ""
       });
-      });
     }
   }, [profile]);
 
@@ -273,12 +272,12 @@ const KYCPage = () => {
               onClick={async () => {
                 if (!user || !profile) return;
                 const brandColors = await fetchBrandPDFColors();
-                const { pdf, referenceNumber, verificationCode } = generateKYCReceiptPDF(
+                const { pdf, referenceNumber, verificationCode } = await generateKYCReceiptPDF(
                   { name: profile.display_name || profile.first_name || "Valued Customer", accountNumber: profile.account_number || "", email: profile.email || "", phone: profile.phone || "" },
                   { id: user.id, status: kycStatus, tier: kycTier, created_at: new Date().toISOString() },
                   brandColors
                 );
-                pdf.save(`${identity?.short_name || 'TrustBank'}_KYC_Verification.pdf`);
+                pdf.save(`TrustBank_KYC_Verification.pdf`);
                 await saveDocumentRecord({ userId: user.id, documentType: "kyc_approval", documentCategory: "kyc", referenceNumber, verificationCode, title: `KYC Tier ${kycTier} Approval Letter`, metadata: { tier: kycTier, status: kycStatus } });
               }}
             >

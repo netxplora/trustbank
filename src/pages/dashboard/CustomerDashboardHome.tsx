@@ -258,7 +258,7 @@ export default function CustomerDashboardHome() {
             <div className="bg-black/10 dark:bg-black/20 backdrop-blur-md rounded-lg sm:rounded-xl p-2 sm:p-3.5 border border-white/20 hover:border-white/40 transition-all shadow-inner space-y-1 min-w-0">
               <div className="flex items-center justify-between text-foreground/80">
                 <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 truncate">
-                  <CreditCard className="h-3 w-3 shrink-0 text-foreground" /> <span className="truncate font-semibold text-foreground">Current</span>
+                  <CreditCard className="h-3 w-3 shrink-0 text-foreground" /> <span className="truncate font-semibold text-foreground">Checking</span>
                 </span>
                 <span className="hidden md:inline-block text-[9px] font-mono opacity-75">
                   {currentAccount?.account_number || "—"}

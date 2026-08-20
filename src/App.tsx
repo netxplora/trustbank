@@ -79,6 +79,7 @@ const AdminKYCPage = lazy(() => import("./pages/admin/AdminKYCPage"));
 const AdminNotificationsPage = lazy(() => import("./pages/admin/AdminNotificationsPage"));
 const AdminReportsPage = lazy(() => import("./pages/admin/AdminReportsPage"));
 const AdminSettingsPage = lazy(() => import("./pages/admin/AdminSettingsPage"));
+const AdminFeesPage = lazy(() => import("./pages/admin/AdminFeesPage"));
 const AdminDepositSettingsPage = lazy(() => import("./pages/admin/AdminDepositSettingsPage"));
 const AdminChatPage = lazy(() => import("./pages/admin/AdminChatPage"));
 const AdminInvestmentsPage = lazy(() => import("./pages/admin/AdminInvestmentsPage"));
@@ -208,6 +209,7 @@ const App = () => (
                     <Route path="notifications" element={<AdminNotificationsPage />} />
                     <Route path="reports" element={<AdminReportsPage />} />
                     <Route path="settings" element={<AdminSettingsPage />} />
+                    <Route path="fees" element={<AdminFeesPage />} />
                     <Route path="deposit-settings" element={<AdminDepositSettingsPage />} />
                     <Route path="chat" element={<AdminChatPage />} />
                     <Route path="investments" element={<AdminInvestmentsPage />} />

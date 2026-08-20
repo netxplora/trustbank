@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Users, UserX, Wallet, ArrowRightLeft, TrendingUp, CreditCard, Bell, FileText, Settings, LogOut, Menu, X, User, ShieldCheck, Bitcoin, MessageCircle, LineChart, FileSpreadsheet, Paintbrush, Globe, Box, Image, ScrollText, Briefcase, ArrowDownCircle, Award, ChevronLeft, Landmark, FolderOpen } from "lucide-react";
+import { LayoutDashboard, Users, UserX, Wallet, ArrowRightLeft, TrendingUp, CreditCard, Bell, FileText, Settings, LogOut, Menu, X, User, ShieldCheck, Bitcoin, MessageCircle, LineChart, FileSpreadsheet, Paintbrush, Globe, Box, Image, ScrollText, Briefcase, ArrowDownCircle, Award, ChevronLeft, Landmark, FolderOpen, DollarSign } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { NotificationPopover } from "./NotificationPopover";
@@ -45,6 +45,7 @@ const navGroups = [
     title: "Brand & CMS",
     items: [
       { icon: Paintbrush, label: "Brand Settings", to: "/admin/settings", tooltip: "Configure platform branding and layout." },
+      { icon: DollarSign, label: "Platform Fees", to: "/admin/fees", tooltip: "Manage centralized platform fees and limits." },
       { icon: Globe, label: "Pages Content", to: "/admin/cms-pages", tooltip: "Manage website pages and text." },
       { icon: Box, label: "Banking Products", to: "/admin/cms-products", tooltip: "Configure banking products and rates." },
       { icon: ScrollText, label: "News & Insights", to: "/admin/cms-news", tooltip: "Publish blog posts and news articles." },

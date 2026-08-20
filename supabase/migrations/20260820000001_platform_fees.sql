@@ -24,20 +24,8 @@ CREATE POLICY "Admins can manage platform_fees"
 ON public.platform_fees 
 FOR ALL 
 TO authenticated 
-USING (
-  EXISTS (
-    SELECT 1 FROM public.profiles 
-    WHERE profiles.user_id = auth.uid() 
-    AND profiles.role = 'admin'
-  )
-)
-WITH CHECK (
-  EXISTS (
-    SELECT 1 FROM public.profiles 
-    WHERE profiles.user_id = auth.uid() 
-    AND profiles.role = 'admin'
-  )
-);
+USING (public.is_admin(auth.uid()))
+WITH CHECK (public.is_admin(auth.uid()));
 
 -- Seed initial data
 INSERT INTO public.platform_fees (fee_name, fee_type, amount, description) VALUES

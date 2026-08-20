@@ -157,7 +157,7 @@ export function PublicNavbar() {
           ) : (
             <div className="h-9 w-9 rounded bg-primary flex items-center justify-center font-bold text-primary-foreground text-sm">T</div>
           )}
-          <span className="font-poppins text-lg font-bold text-foreground tracking-tight shrink-0">
+          <span className="font-poppins text-base font-bold text-foreground tracking-tight shrink-0">
             {identity?.short_name || "TrustBank"}
           </span>
         </Link>
@@ -225,17 +225,17 @@ export function PublicNavbar() {
           {user ? (
             <>
               <div className="relative" onMouseLeave={() => setProfileMenuOpen(false)}>
-                <Button
-                  variant="ghost"
-                  className="rounded-full bg-muted border border-border text-muted-foreground hover:text-foreground flex items-center gap-2 pl-3 pr-4"
-                  onMouseEnter={() => setProfileMenuOpen(true)}
-                  asChild
-                >
-                  <Link to="/dashboard">
-                    <UserIcon className="h-4 w-4" />
-                    <span className="text-xs font-semibold font-sans tracking-wide">Dashboard</span>
-                  </Link>
-                </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="rounded-full bg-muted border border-border text-muted-foreground hover:text-foreground h-9 w-9 p-0"
+                    onMouseEnter={() => setProfileMenuOpen(true)}
+                    asChild
+                  >
+                    <Link to="/dashboard">
+                      <UserIcon className="h-4 w-4" />
+                    </Link>
+                  </Button>
 
                 {profileMenuOpen && (
                   <div className="absolute top-[calc(100%+4px)] right-0 min-w-[200px] bg-surface border border-border rounded-lg shadow-xl py-2 z-50 animate-in fade-in slide-in-from-top-1 duration-200">
