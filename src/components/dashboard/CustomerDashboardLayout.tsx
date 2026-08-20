@@ -253,10 +253,10 @@ export default function CustomerDashboardLayout() {
           <span className="text-[9px] font-semibold tracking-wide absolute bottom-1 text-muted-foreground pointer-events-none">Transfer</span>
         </div>
 
-        <ActionTooltip content="View your transaction history." side="top">
-          <Link to="/dashboard/transactions" className={`flex flex-col items-center justify-center w-full h-full space-y-0.5 transition-colors ${location.pathname === "/dashboard/transactions" ? 'text-primary' : 'text-muted-foreground'}`}>
-            <Receipt className={`h-4.5 w-4.5 ${location.pathname === "/dashboard/transactions" ? 'fill-primary/20' : ''}`} strokeWidth={location.pathname === "/dashboard/transactions" ? 2.5 : 2} />
-            <span className="text-[9px] font-semibold tracking-wide">Transactions</span>
+        <ActionTooltip content="Manage your physical and virtual cards." side="top">
+          <Link to="/dashboard/cards" className={`flex flex-col items-center justify-center w-full h-full space-y-0.5 transition-colors ${location.pathname === "/dashboard/cards" ? 'text-primary' : 'text-muted-foreground'}`}>
+            <CreditCard className={`h-4.5 w-4.5 ${location.pathname === "/dashboard/cards" ? 'fill-primary/20' : ''}`} strokeWidth={location.pathname === "/dashboard/cards" ? 2.5 : 2} />
+            <span className="text-[9px] font-semibold tracking-wide">Card</span>
           </Link>
         </ActionTooltip>
 
