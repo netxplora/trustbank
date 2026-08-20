@@ -85,8 +85,8 @@ const AccountsPage = () => {
     const activeAccs = (accs as Account[]) || [];
     setAccounts(activeAccs);
 
-    const currentAcc = activeAccs.find(a => a.account_type === 'current');
-    if (!currentAcc) {
+    const checkingAcc = activeAccs.find(a => a.account_type === 'checking');
+    if (!checkingAcc) {
       const { data: apps } = await supabase.from("current_account_applications").select("status").eq("user_id", user.id).order('created_at', { ascending: false }).limit(1);
       if (apps && apps.length > 0) {
         setCurrentAppStatus(apps[0].status === 'submitted' ? 'Pending Approval' : apps[0].status === 'under_review' ? 'Pending Approval' : apps[0].status === 'rejected' ? 'Rejected' : 'Pending Approval');
@@ -105,8 +105,8 @@ const AccountsPage = () => {
   };
 
   const savingsAcc = accounts.find(a => a.account_type === 'savings');
-  const currentAcc = accounts.find(a => a.account_type === 'current');
-  const otherAccounts = accounts.filter(a => a.account_type !== 'savings' && a.account_type !== 'current');
+  const checkingAcc = accounts.find(a => a.account_type === 'checking');
+  const otherAccounts = accounts.filter(a => a.account_type !== 'savings' && a.account_type !== 'checking');
 
   const totalCryptoValue = wallets.reduce((sum, w) => {
     const rate = cryptoRates.find(r => r.symbol === w.asset_symbol);
@@ -172,11 +172,11 @@ const AccountsPage = () => {
           </div>
           </StaggerItem>
 
-          {/* Current Account */}
+          {/* Checking Account */}
           <StaggerItem>
           <div 
-            className={`bg-card rounded-xl p-3.5 border border-border/60 shadow-sm transition-all relative h-full border-l-4 border-l-teal-500 hover:border-teal-500/80 ${currentAcc ? "cursor-pointer" : ""} ${selectedAccountId === currentAcc?.id ? "ring-2 ring-primary" : ""}`}
-            onClick={() => currentAcc && setSelectedAccountId(selectedAccountId === currentAcc.id ? null : currentAcc.id)}
+            className={`bg-card rounded-xl p-3.5 border border-border/60 shadow-sm transition-all relative h-full border-l-4 border-l-teal-500 hover:border-teal-500/80 ${checkingAcc ? "cursor-pointer" : ""} ${selectedAccountId === checkingAcc?.id ? "ring-2 ring-primary" : ""}`}
+            onClick={() => checkingAcc && setSelectedAccountId(selectedAccountId === checkingAcc.id ? null : checkingAcc.id)}
           >
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2.5">
@@ -186,20 +186,20 @@ const AccountsPage = () => {
                 <div>
                   <p className="text-xs font-bold text-foreground">Checking Account</p>
                   <p className="text-[10px] text-muted-foreground font-mono">
-                    {currentAcc ? `****${currentAcc.account_number.slice(-4)}` : "Not Active"}
+                    {checkingAcc ? `****${checkingAcc.account_number.slice(-4)}` : "Not Active"}
                   </p>
                 </div>
               </div>
-              {currentAcc ? (
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full capitalize ${currentAcc.status === "active" ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"}`}>{currentAcc.status}</span>
+              {checkingAcc ? (
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full capitalize ${checkingAcc.status === "active" ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"}`}>{checkingAcc.status}</span>
               ) : (
                 <span className="text-[9px] font-bold px-2 py-0.5 rounded uppercase bg-warning/10 text-warning">{currentAppStatus}</span>
               )}
             </div>
             
-            {currentAcc ? (
+            {checkingAcc ? (
               <p className="text-base sm:text-lg font-bold font-poppins text-foreground tracking-tight">
-                {showBalance ? `$${Number(currentAcc.balance).toLocaleString("en-US", { minimumFractionDigits: 2 })}` : "$ •••••••"}
+                {showBalance ? `$${Number(checkingAcc.balance).toLocaleString("en-US", { minimumFractionDigits: 2 })}` : "$ •••••••"}
               </p>
             ) : (
               <div>

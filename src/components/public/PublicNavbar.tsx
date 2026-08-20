@@ -157,7 +157,7 @@ export function PublicNavbar() {
           ) : (
             <div className="h-9 w-9 rounded bg-primary flex items-center justify-center font-bold text-primary-foreground text-sm">T</div>
           )}
-          <span className="font-poppins text-base font-bold text-foreground tracking-tight shrink-0">
+          <span className="font-poppins text-sm font-bold text-foreground tracking-tight shrink-0">
             {identity?.short_name || "TrustBank"}
           </span>
         </Link>
@@ -233,7 +233,7 @@ export function PublicNavbar() {
                     asChild
                   >
                     <Link to="/dashboard">
-                      <UserIcon className="h-4 w-4" />
+                      <LayoutDashboard className="h-4 w-4" />
                     </Link>
                   </Button>
 
@@ -267,7 +267,7 @@ export function PublicNavbar() {
         <div className="flex lg:hidden items-center gap-2">
           {user ? (
             <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full bg-muted/50 text-muted-foreground" asChild>
-              <Link to="/dashboard"><UserIcon className="h-4 w-4" /></Link>
+              <Link to="/dashboard"><LayoutDashboard className="h-4 w-4" /></Link>
             </Button>
           ) : (
             <Button size="sm" className="bg-primary hover:bg-primary/90 border-none text-primary-foreground text-[10px] font-bold uppercase tracking-wider px-4 h-9" asChild>

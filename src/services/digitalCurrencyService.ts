@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { getLiveCryptoRates as fetchLiveRates } from "./cryptoRateService";
 
 export interface CryptoAsset {
   symbol: string;
@@ -18,64 +19,45 @@ export interface UserCryptoWallet {
   wallet_address?: string;
 }
 
+export interface CryptoQuote {
+  quote_id: string;
+  conversion_type: string;
+  from_asset: string;
+  to_asset: string;
+  from_amount: number;
+  to_amount: number;
+  rate_usd: number;
+  to_rate_usd: number | null;
+  fee_usd: number;
+  expires_at: string;
+  lock_seconds: number;
+}
+
+export const SUPPORTED_CRYPTO_ASSETS = ["BTC", "ETH", "USDT", "USDC", "SOL"];
+export const DEFAULT_SWAP_FEE = 0.5; // 0.5%
+
 export interface SwapFeeConfig {
   flat_fee: number;
   percentage_fee: number;
-  min_fee: number;
-  max_fee: number;
-  promotional_discount: number;
 }
 
-export const SUPPORTED_CRYPTO_ASSETS: CryptoAsset[] = [
-  { symbol: "BTC", name: "Bitcoin", priceUsd: 64250.00, change24h: 2.45 },
-  { symbol: "ETH", name: "Ethereum", priceUsd: 3480.50, change24h: 1.82 },
-  { symbol: "USDT", name: "Tether USD", priceUsd: 1.00, change24h: 0.01 },
-  { symbol: "USDC", name: "USD Coin", priceUsd: 1.00, change24h: 0.00 },
-  { symbol: "SOL", name: "Solana", priceUsd: 148.20, change24h: -0.65 },
-];
-
-export const DEFAULT_SWAP_FEE: SwapFeeConfig = {
-  flat_fee: 1.50,
-  percentage_fee: 0.50,
-  min_fee: 0.50,
-  max_fee: 50.00,
-  promotional_discount: 0,
-};
-
-/**
- * Fetch live prices from CoinGecko with fallback
- */
-export async function getLiveCryptoRates(): Promise<CryptoAsset[]> {
-  // Bypassing CoinGecko fetch due to strict CORS policies on client-side free tier.
-  // Using reliable fallback rates to prevent console errors and broken UI.
-  return SUPPORTED_CRYPTO_ASSETS;
-}
-
-/**
- * Calculate swap fees based on settings
- */
-export function calculateSwapFee(
-  amountUsd: number,
-  feeConfig: SwapFeeConfig = DEFAULT_SWAP_FEE
-): { feeUsd: number; feePercentage: number } {
-  const rawPercentageFee = (amountUsd * feeConfig.percentage_fee) / 100;
-  let fee = feeConfig.flat_fee + rawPercentageFee;
-
-  if (feeConfig.promotional_discount > 0) {
-    fee = fee * (1 - feeConfig.promotional_discount / 100);
-  }
-
-  fee = Math.max(feeConfig.min_fee, Math.min(feeConfig.max_fee, fee));
-  const effectivePercentage = amountUsd > 0 ? (fee / amountUsd) * 100 : 0;
-
+export function calculateSwapFee(amount: number, feeConfig: SwapFeeConfig) {
+  const percentageFeeAmount = (amount * feeConfig.percentage_fee) / 100;
   return {
-    feeUsd: parseFloat(fee.toFixed(2)),
-    feePercentage: parseFloat(effectivePercentage.toFixed(2)),
+    feeUsd: percentageFeeAmount + feeConfig.flat_fee,
+    feePercentage: feeConfig.percentage_fee
   };
 }
 
 /**
- * Get User Digital Currency Wallets with ZERO default balance for production readiness
+ * Fetch live prices (delegated to cryptoRateService)
+ */
+export async function getLiveCryptoRates(): Promise<CryptoAsset[]> {
+  return fetchLiveRates();
+}
+
+/**
+ * Get User Digital Currency Wallets
  */
 export async function getUserCryptoWallets(userId: string): Promise<UserCryptoWallet[]> {
   const defaultWallets: UserCryptoWallet[] = [
@@ -98,7 +80,6 @@ export async function getUserCryptoWallets(userId: string): Promise<UserCryptoWa
       return defaultWallets;
     }
 
-    // Merge fetched balances into asset array
     return defaultWallets.map((def) => {
       const found = data.find((d) => d.asset_symbol === def.asset_symbol);
       return {
@@ -112,5 +93,88 @@ export async function getUserCryptoWallets(userId: string): Promise<UserCryptoWa
   } catch (err) {
     console.error("Error fetching user crypto wallets:", err);
     return defaultWallets;
+  }
+}
+
+/**
+ * Get a locked quote for conversion
+ */
+export async function getCryptoQuote(params: {
+  userId: string;
+  conversionType: "fiat_to_crypto" | "crypto_to_fiat" | "crypto_to_crypto";
+  fromAsset: string;
+  toAsset: string;
+  fromAmount: number;
+  fromAccountId?: string;
+  toAccountId?: string;
+}): Promise<{ quote: CryptoQuote | null; error: string | null }> {
+  try {
+    const { data, error } = await supabase.rpc("get_crypto_quote", {
+      p_user_id: params.userId,
+      p_conversion_type: params.conversionType,
+      p_from_asset: params.fromAsset,
+      p_to_asset: params.toAsset,
+      p_from_amount: params.fromAmount,
+      p_from_account_id: params.fromAccountId || null,
+      p_to_account_id: params.toAccountId || null,
+    });
+
+    if (error) throw error;
+    return { quote: data as CryptoQuote, error: null };
+  } catch (err: any) {
+    console.error("Error getting quote:", err);
+    return { quote: null, error: err.message || "Failed to get quote" };
+  }
+}
+
+/**
+ * Execute a locked conversion quote
+ */
+export async function executeCryptoConversion(
+  userId: string,
+  quoteId: string,
+  pin: string
+): Promise<{ success: boolean; reference?: string; error?: string }> {
+  try {
+    const { data, error } = await supabase.rpc("execute_crypto_conversion", {
+      p_user_id: userId,
+      p_quote_id: quoteId,
+      p_pin: pin,
+    });
+
+    if (error) throw error;
+    return { success: true, reference: data.reference };
+  } catch (err: any) {
+    console.error("Error executing conversion:", err);
+    return { success: false, error: err.message || "Failed to execute conversion" };
+  }
+}
+
+/**
+ * Execute external crypto transfer
+ */
+export async function executeCryptoTransfer(params: {
+  userId: string;
+  assetSymbol: string;
+  network: string;
+  destinationAddress: string;
+  amount: number;
+  pin: string;
+}): Promise<{ success: boolean; reference?: string; error?: string }> {
+  try {
+    const { data, error } = await supabase.rpc("execute_crypto_transfer", {
+      p_user_id: params.userId,
+      p_asset_symbol: params.assetSymbol,
+      p_network: params.network,
+      p_destination_address: params.destinationAddress,
+      p_amount: params.amount,
+      p_pin: params.pin,
+    });
+
+    if (error) throw error;
+    return { success: true, reference: data.reference };
+  } catch (err: any) {
+    console.error("Error executing crypto transfer:", err);
+    return { success: false, error: err.message || "Failed to transfer crypto" };
   }
 }

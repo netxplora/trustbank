@@ -45,7 +45,7 @@ const navGroups = [
     title: "Brand & CMS",
     items: [
       { icon: Paintbrush, label: "Brand Settings", to: "/admin/settings", tooltip: "Configure platform branding and layout." },
-      { icon: DollarSign, label: "Platform Fees", to: "/admin/fees", tooltip: "Manage centralized platform fees and limits." },
+      { icon: DollarSign, label: "Platform Config", to: "/admin/fees", tooltip: "Manage global fees, crypto conversions, and account limits." },
       { icon: Globe, label: "Pages Content", to: "/admin/cms-pages", tooltip: "Manage website pages and text." },
       { icon: Box, label: "Banking Products", to: "/admin/cms-products", tooltip: "Configure banking products and rates." },
       { icon: ScrollText, label: "News & Insights", to: "/admin/cms-news", tooltip: "Publish blog posts and news articles." },

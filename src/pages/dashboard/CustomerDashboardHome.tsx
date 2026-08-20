@@ -24,7 +24,7 @@ const BalanceChart = lazy(() => import("@/components/dashboard/BalanceChart"));
 interface AccountData {
   id: string;
   account_number: string;
-  account_type: "savings" | "current" | "digital";
+  account_type: "savings" | "checking" | "digital";
   balance: number;
   ledger_balance: number;
   status: string;
@@ -155,7 +155,7 @@ export default function CustomerDashboardHome() {
 
   // Savings & Current balance calculations
   const savingsAccount = accounts.find(a => a.account_type === 'savings');
-  const currentAccount = accounts.find(a => a.account_type === 'current');
+  const currentAccount = accounts.find(a => a.account_type === 'checking');
   const savingsBal = savingsAccount?.balance || 0;
   const currentBal = currentAccount?.balance || 0;
 

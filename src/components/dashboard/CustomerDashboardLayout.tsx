@@ -91,7 +91,7 @@ export default function CustomerDashboardLayout() {
                 <img src={logo} alt="TrustBank" className="h-5 w-5" width={20} height={20} />
               )}
             </div>
-            <span className="font-poppins text-base font-bold text-foreground tracking-tight truncate">{identity?.short_name || "TrustBank"}</span>
+            <span className="font-poppins text-sm font-bold text-foreground tracking-tight truncate">{identity?.short_name || "TrustBank"}</span>
           </Link>
           <button className="lg:hidden ml-auto text-muted-foreground hover:text-foreground p-1" onClick={() => setSidebarOpen(false)}>
             <X className="h-4 w-4" />
