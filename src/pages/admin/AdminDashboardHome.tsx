@@ -26,7 +26,7 @@ const AdminDashboardHome = () => {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    const [profiles, activeProfiles, newProfiles, accounts, activeAccounts, transactions, loans, kycDocs, conversations, pages, products, posts, faqs, pendingCurrentAccounts, pendingCardsData, pendingFiat, pendingCrypto, bankPortfolio] = await Promise.all([
+    const [profiles, activeProfiles, newProfiles, accounts, activeAccounts, transactions, loans, kycDocs, conversations, pages, products, posts, faqs, pendingCheckingApplications, pendingCardsData, pendingFiat, pendingCrypto, bankPortfolio] = await Promise.all([
       (supabase as any).from("profiles").select("id", { count: "exact", head: true }),
       (supabase as any).from("profiles").select("id", { count: "exact", head: true }).eq("kyc_status", "approved"),
       (supabase as any).from("profiles").select("id", { count: "exact", head: true }).gte("created_at", thirtyDaysAgo.toISOString()),
@@ -50,7 +50,7 @@ const AdminDashboardHome = () => {
     const pendingKyc = kycDocs.data?.filter(d => d.status === "pending").length || 0;
     const pendingLoans = loans.data?.filter(l => l.status === "pending").length || 0;
     const openTickets = conversations.data?.filter(c => c.status === "open" || c.status === "pending").length || 0;
-    const pendingAccounts = pendingCurrentAccounts.count || 0;
+    const pendingAccounts = pendingCheckingApplications.count || 0;
     const pendingCards = pendingCardsData.count || 0;
     const pendingDeposits = (pendingFiat.count || 0) + (pendingCrypto.count || 0);
     const txVolume = transactions.data?.reduce((sum, t) => sum + Number(t.amount), 0) || 0;

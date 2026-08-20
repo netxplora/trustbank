@@ -19,7 +19,7 @@ const navGroups = [
       { icon: Users, label: "Customers", to: "/admin/customers", tooltip: "Manage registered users and profiles." },
       { icon: UserX, label: "Closed Accounts", to: "/admin/closed-accounts", tooltip: "View and manage closed user accounts and data retention." },
       { icon: Wallet, label: "Accounts", to: "/admin/accounts", tooltip: "Manage savings and checking accounts." },
-      { icon: Briefcase, label: "Current Apps", to: "/admin/current-applications", tooltip: "Review current account applications." },
+      { icon: Briefcase, label: "Checking Apps", to: "/admin/checking-applications", tooltip: "Review checking account applications." },
       { icon: ArrowRightLeft, label: "Transactions", to: "/admin/transactions", tooltip: "Monitor all platform transactions." },
       { icon: ArrowDownCircle, label: "Deposits", to: "/admin/deposits", tooltip: "Review and approve deposits." },
       { icon: Landmark, label: "Deposit Settings", to: "/admin/deposit-settings", tooltip: "Manage fiat bank accounts and crypto wallet addresses." },

@@ -25,7 +25,7 @@ interface Application {
   created_at: string;
 }
 
-export default function AdminCurrentAccountsPage() {
+export default function AdminCheckingApplicationsPage() {
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");

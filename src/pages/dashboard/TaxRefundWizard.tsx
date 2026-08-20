@@ -212,17 +212,17 @@ export default function TaxRefundWizard() {
   };
 
   const savingsAcc = accounts.find(a => a.account_type === 'savings')?.account_number || "N/A";
-  const currentAcc = accounts.find(a => a.account_type === 'current')?.account_number;
-  const hasCurrentAccount = !!currentAcc;
+  const checkingAcc = accounts.find(a => a.account_type === 'checking')?.account_number;
+  const hasCheckingAccount = !!checkingAcc;
 
   // Build refund method options dynamically
   const refundMethodOptions = [
     { value: "Deposit to Savings Account", label: `Deposit to Savings Account (${savingsAcc})` },
   ];
-  if (hasCurrentAccount) {
+  if (hasCheckingAccount) {
     refundMethodOptions.push({
       value: "Deposit to Checking Account",
-      label: `Deposit to Checking Account (${currentAcc})`,
+      label: `Deposit to Checking Account (${checkingAcc})`,
     });
   }
 

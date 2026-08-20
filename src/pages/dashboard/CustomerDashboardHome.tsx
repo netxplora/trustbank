@@ -54,6 +54,7 @@ export default function CustomerDashboardHome() {
   const [grantPrograms, setGrantPrograms] = useState<GrantProgram[]>([]);
   const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([]);
   const [, setLoading] = useState(true);
+  const [checkingAppStatus, setCheckingAppStatus] = useState<string | null>(null);
 
   useEffect(() => {
     fetchUserAccounts();
@@ -91,6 +92,13 @@ export default function CustomerDashboardHome() {
           fetchRecentTransactions();
         }
       )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "current_account_applications", filter: `user_id=eq.${user?.id}` },
+        () => {
+          fetchUserAccounts();
+        }
+      )
       .subscribe();
 
     return () => {
@@ -123,17 +131,35 @@ export default function CustomerDashboardHome() {
         .eq("user_id", user?.id || "")
         .eq("status", "active");
 
-      setAccounts(
-        (data || []).map((a) => ({
-          id: a.id,
-          account_number: a.account_number,
-          account_type: a.account_type as any,
-          balance: parseFloat(String(a.balance)),
-          ledger_balance: parseFloat(String((a as any).ledger_balance || a.balance)),
-          status: a.status,
-          currency: a.currency || "USD",
-        }))
-      );
+      const activeAccounts = (data || []).map((a) => ({
+        id: a.id,
+        account_number: a.account_number,
+        account_type: a.account_type as any,
+        balance: parseFloat(String(a.balance)),
+        ledger_balance: parseFloat(String((a as any).ledger_balance || a.balance)),
+        status: a.status,
+        currency: a.currency || "USD",
+      }));
+      
+      setAccounts(activeAccounts);
+
+      const checkingAcc = activeAccounts.find(a => a.account_type === 'checking' && a.status === 'active');
+      if (checkingAcc) {
+        setCheckingAppStatus("Approved");
+      } else {
+        const { data: apps } = await supabase
+          .from("current_account_applications")
+          .select("status")
+          .eq("user_id", user?.id || "")
+          .order('created_at', { ascending: false })
+          .limit(1);
+          
+        if (apps && apps.length > 0) {
+           setCheckingAppStatus(apps[0].status);
+        } else {
+           setCheckingAppStatus("Not Applied");
+        }
+      }
     } catch (e) {
       console.error(e);
     }
@@ -153,11 +179,11 @@ export default function CustomerDashboardHome() {
   const kycTier = profile?.kyc_tier || "Tier 2 Verified";
   const relationshipStatus = "Premier Private Wealth Member";
 
-  // Savings & Current balance calculations
+  // Savings & Checking balance calculations
   const savingsAccount = accounts.find(a => a.account_type === 'savings');
-  const currentAccount = accounts.find(a => a.account_type === 'checking');
+  const checkingAccount = accounts.find(a => a.account_type === 'checking');
   const savingsBal = savingsAccount?.balance || 0;
-  const currentBal = currentAccount?.balance || 0;
+  const checkingBal = checkingAccount?.balance || 0;
 
   // Calculate total digital currency portfolio value
   const totalCryptoValue = wallets.reduce((sum, w) => {
@@ -166,7 +192,7 @@ export default function CustomerDashboardHome() {
   }, 0);
   const walletSummary = wallets.filter(w => w.balance > 0).map(w => `${w.balance} ${w.asset_symbol}`).join(" | ") || "No holdings";
 
-  const totalCombinedBalance = savingsBal + currentBal + totalCryptoValue;
+  const totalCombinedBalance = savingsBal + checkingBal + totalCryptoValue;
 
   const dynamicChartData = totalCombinedBalance === 0 ? [
     { day: "Mon", balance: 0 }, { day: "Tue", balance: 0 }, { day: "Wed", balance: 0 },
@@ -261,16 +287,24 @@ export default function CustomerDashboardHome() {
                   <CreditCard className="h-3 w-3 shrink-0 text-foreground" /> <span className="truncate font-semibold text-foreground">Checking</span>
                 </span>
                 <span className="hidden md:inline-block text-[9px] font-mono opacity-75">
-                  {currentAccount?.account_number || "—"}
+                  {checkingAccount?.account_number || "—"}
                 </span>
               </div>
               <p className="font-poppins text-xs sm:text-lg font-bold leading-tight truncate text-foreground">
-                {showBalances ? `$${currentBal.toLocaleString(undefined, { minimumFractionDigits: 0 })}` : "••••"}
+                {showBalances ? `$${checkingBal.toLocaleString(undefined, { minimumFractionDigits: 0 })}` : "••••"}
               </p>
               <div className="flex justify-between items-center text-[8px] sm:text-[10px] text-foreground/80 pt-1 border-t border-white/15">
-                <span className="truncate opacity-75 hidden sm:inline">Ledger: {showBalances ? `$${(currentAccount?.ledger_balance || currentBal).toLocaleString(undefined, { minimumFractionDigits: 0 })}` : "••"}</span>
-                <span className="truncate opacity-75 sm:hidden">{showBalances ? `$${(currentAccount?.ledger_balance || currentBal).toLocaleString(undefined, { minimumFractionDigits: 0 })}` : "••"}</span>
-                <Link to="/dashboard/transfers" className="text-foreground hover:underline font-bold shrink-0 ml-0.5 bg-white/15 hover:bg-white/25 px-1.5 py-0.5 rounded text-[8px] sm:text-[9px] transition-colors">Pay</Link>
+                <span className="truncate opacity-75 hidden sm:inline">Ledger: {showBalances ? `$${(checkingAccount?.ledger_balance || checkingBal).toLocaleString(undefined, { minimumFractionDigits: 0 })}` : "••"}</span>
+                <span className="truncate opacity-75 sm:hidden">{showBalances ? `$${(checkingAccount?.ledger_balance || checkingBal).toLocaleString(undefined, { minimumFractionDigits: 0 })}` : "••"}</span>
+                {checkingAppStatus === "Approved" ? (
+                  <Link to="/dashboard/transfers" className="text-foreground hover:underline font-bold shrink-0 ml-0.5 bg-white/15 hover:bg-white/25 px-1.5 py-0.5 rounded text-[8px] sm:text-[9px] transition-colors">Pay</Link>
+                ) : checkingAppStatus === "submitted" || checkingAppStatus === "under_review" ? (
+                  <Link to="/dashboard/checking-application" className="text-foreground hover:underline font-bold shrink-0 ml-0.5 bg-white/15 hover:bg-white/25 px-1.5 py-0.5 rounded text-[8px] sm:text-[9px] transition-colors">Pending</Link>
+                ) : checkingAppStatus === "rejected" ? (
+                  <Link to="/dashboard/checking-application" className="text-foreground hover:underline font-bold shrink-0 ml-0.5 bg-white/15 hover:bg-white/25 px-1.5 py-0.5 rounded text-[8px] sm:text-[9px] transition-colors">Apply Again</Link>
+                ) : (
+                  <Link to="/dashboard/checking-application" className="text-foreground hover:underline font-bold shrink-0 ml-0.5 bg-primary hover:bg-primary/90 px-1.5 py-0.5 rounded text-[8px] sm:text-[9px] transition-colors shadow-sm">Apply</Link>
+                )}
               </div>
             </div>
 
@@ -463,14 +497,8 @@ export default function CustomerDashboardHome() {
           </CardContent>
         </Card>
       </SlideUp>
-      {/* Floating Action Button (Mobile) */}
-      <div className="md:hidden fixed bottom-6 right-4 z-40">
-        <Link to="/dashboard/transfers">
-          <Button size="icon" className="h-14 w-14 rounded-full shadow-xl bg-primary hover:bg-primary/90">
-            <ArrowRightLeft className="h-6 w-6 text-primary-foreground" />
-          </Button>
-        </Link>
-      </div>
+
+
 
       <TransactionDetailsModal />
     </div>

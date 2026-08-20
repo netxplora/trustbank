@@ -329,7 +329,7 @@ const KYCPage = () => {
               <div className="bg-primary text-primary-foreground h-8 w-8 rounded-full flex items-center justify-center font-bold">2</div>
               <div>
                 <h2 className="text-lg font-bold font-poppins">Tier 2: Standard Verification</h2>
-                <p className="text-xs text-muted-foreground">Unlocks Current accounts, physical cards, loans, and domestic transfers.</p>
+                <p className="text-xs text-muted-foreground">Unlocks Checking accounts, physical cards, loans, and domestic transfers.</p>
               </div>
             </div>
 

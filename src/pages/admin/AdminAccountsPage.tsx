@@ -175,11 +175,11 @@ const AdminAccountsPage = () => {
       return;
     }
     try {
-      const { data: currentAccounts } = await supabase.from("accounts").select("account_number").order("created_at", { ascending: false }).limit(1);
+      const { data: accountsList } = await supabase.from("accounts").select("account_number").order("created_at", { ascending: false }).limit(1);
       
       let nextNumber = "4000000000";
-      if (currentAccounts && currentAccounts.length > 0) {
-        nextNumber = (parseInt(currentAccounts[0].account_number) + 1).toString();
+      if (accountsList && accountsList.length > 0) {
+        nextNumber = (parseInt(accountsList[0].account_number) + 1).toString();
       }
 
       const { error } = await supabase.from("accounts").insert({

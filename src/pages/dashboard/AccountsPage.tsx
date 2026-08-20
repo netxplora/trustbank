@@ -46,7 +46,7 @@ const AccountsPage = () => {
   
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
-  const [currentAppStatus, setCurrentAppStatus] = useState<string>("Not Applied");
+  const [checkingAppStatus, setCheckingAppStatus] = useState<string>("Not Applied");
   const [wallets, setWallets] = useState<UserCryptoWallet[]>([]);
   const [cryptoRates, setCryptoRates] = useState<CryptoAsset[]>([]);
   
@@ -89,12 +89,12 @@ const AccountsPage = () => {
     if (!checkingAcc) {
       const { data: apps } = await supabase.from("current_account_applications").select("status").eq("user_id", user.id).order('created_at', { ascending: false }).limit(1);
       if (apps && apps.length > 0) {
-        setCurrentAppStatus(apps[0].status === 'submitted' ? 'Pending Approval' : apps[0].status === 'under_review' ? 'Pending Approval' : apps[0].status === 'rejected' ? 'Rejected' : 'Pending Approval');
+        setCheckingAppStatus(apps[0].status === 'submitted' ? 'Pending Approval' : apps[0].status === 'under_review' ? 'Pending Approval' : apps[0].status === 'rejected' ? 'Rejected' : 'Pending Approval');
       } else {
-        setCurrentAppStatus("Not Applied");
+        setCheckingAppStatus("Not Applied");
       }
     } else {
-      setCurrentAppStatus("Approved");
+      setCheckingAppStatus("Approved");
     }
   };
 
@@ -193,7 +193,7 @@ const AccountsPage = () => {
               {checkingAcc ? (
                 <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full capitalize ${checkingAcc.status === "active" ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"}`}>{checkingAcc.status}</span>
               ) : (
-                <span className="text-[9px] font-bold px-2 py-0.5 rounded uppercase bg-warning/10 text-warning">{currentAppStatus}</span>
+                <span className="text-[9px] font-bold px-2 py-0.5 rounded uppercase bg-warning/10 text-warning">{checkingAppStatus}</span>
               )}
             </div>
             
@@ -204,10 +204,10 @@ const AccountsPage = () => {
             ) : (
               <div>
                 <p className="text-[11px] text-muted-foreground mb-3 leading-tight">
-                  {currentAppStatus === "Not Applied" ? "Apply for a checking account to access higher limits and business tools." : "Your application is being reviewed."}
+                  {checkingAppStatus === "Not Applied" ? "Apply for a checking account to access higher limits and business tools." : "Your application is being reviewed."}
                 </p>
-                {currentAppStatus === "Not Applied" && (
-                  <Button size="sm" onClick={() => navigate("/dashboard/current-application")} className="w-full h-8 text-xs font-bold rounded-lg">
+                {checkingAppStatus === "Not Applied" && (
+                  <Button size="sm" onClick={() => navigate("/dashboard/checking-application")} className="w-full h-8 text-xs font-bold rounded-lg">
                     Apply for Account
                   </Button>
                 )}

@@ -10,7 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { FadeIn } from "@/components/public/Motion";
 import { sanitizeInput } from "@/utils/security";
 
-export default function CurrentAccountApplicationPage() {
+export default function CheckingApplicationPage() {
   const { user, profile } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();

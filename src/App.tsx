@@ -1,7 +1,7 @@
 import React, { Suspense, lazy } from "react";
 import { PageLoader } from "@/components/ui/PageLoader";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useLocation, Navigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -63,13 +63,13 @@ const VerifyCertificate = lazy(() => import("./pages/public/VerifyCertificate"))
 const StatementsPage = lazy(() => import("./pages/dashboard/StatementsPage"));
 const PayeesPage = lazy(() => import("./pages/dashboard/PayeesPage"));
 const PremiumDashboardHome = lazy(() => import("./pages/dashboard/PremiumDashboardHome"));
-const CurrentAccountApplicationPage = lazy(() => import("./pages/dashboard/CurrentAccountApplicationPage"));
+const CheckingApplicationPage = lazy(() => import("./pages/dashboard/CheckingApplicationPage"));
 const AdminDashboardLayout = lazy(() => import("@/components/dashboard/AdminDashboardLayout"));
 const AdminDashboardHome = lazy(() => import("./pages/admin/AdminDashboardHome"));
 const AdminCustomersPage = lazy(() => import("./pages/admin/AdminCustomersPage"));
 const AdminClosedAccountsPage = lazy(() => import("./pages/admin/AdminClosedAccountsPage").then(m => ({ default: m.AdminClosedAccountsPage })));
 const AdminAccountsPage = lazy(() => import("./pages/admin/AdminAccountsPage"));
-const AdminCurrentAccountsPage = lazy(() => import("./pages/admin/AdminCurrentAccountsPage"));
+const AdminCheckingApplicationsPage = lazy(() => import("./pages/admin/AdminCheckingApplicationsPage"));
 const AdminPaymentsPage = lazy(() => import("./pages/admin/AdminPaymentsPage"));
 const AdminDepositsPage = lazy(() => import("./pages/admin/AdminDepositsPage"));
 const AdminTransactionsPage = lazy(() => import("./pages/admin/AdminTransactionsPage"));
@@ -133,6 +133,8 @@ const App = () => (
             <AuthProvider>
               <Suspense fallback={<PageLoader />}>
                 <Routes>
+                  <Route path="/dashboard/current-application" element={<Navigate to="/dashboard/checking-application" replace />} />
+                  <Route path="/admin/current-applications" element={<Navigate to="/admin/checking-applications" replace />} />
                   <Route element={<PublicLayout />}>
                     <Route path="/" element={<Index />} />
                     <Route path="/about" element={<AboutPage />} />
@@ -185,7 +187,7 @@ const App = () => (
                     <Route path="documents" element={<DocumentCenterPage />} />
                     <Route path="payees" element={<PayeesPage />} />
                     <Route path="deposit" element={<DepositPage />} />
-                    <Route path="current-application" element={<CurrentAccountApplicationPage />} />
+                    <Route path="checking-application" element={<CheckingApplicationPage />} />
                     <Route path="services" element={<DashboardServicesPage />} />
                   </Route>
 
@@ -196,7 +198,7 @@ const App = () => (
                     <Route path="customers" element={<AdminCustomersPage />} />
                     <Route path="closed-accounts" element={<AdminClosedAccountsPage />} />
                     <Route path="accounts" element={<AdminAccountsPage />} />
-                    <Route path="current-applications" element={<AdminCurrentAccountsPage />} />
+                    <Route path="checking-applications" element={<AdminCheckingApplicationsPage />} />
                     <Route path="payments" element={<AdminPaymentsPage />} />
                     <Route path="deposits" element={<AdminDepositsPage />} />
                     <Route path="digital-currency" element={<AdminDigitalCurrencyPage />} />
