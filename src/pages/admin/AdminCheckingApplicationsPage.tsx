@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { CheckCircle, XCircle, FileText, Search, CreditCard, ExternalLink, Eye, Info } from "lucide-react";
+import { CheckCircle, XCircle, FileText, Search, CreditCard, ExternalLink, Eye, Info, UserCheck, Briefcase } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
@@ -215,32 +215,49 @@ export default function AdminCheckingApplicationsPage() {
 
           {selectedApp && (
             <div className="space-y-6 py-4">
-              {/* Applicant Info */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Applicant</p>
-                  <p className="font-semibold text-foreground text-sm">{selectedApp.full_name}</p>
+              {/* Applicant Info (KYC Verified) */}
+              <div className="bg-success/5 p-4 rounded-xl border border-success/20">
+                <div className="flex items-center gap-2 mb-3 border-b border-success/20 pb-2">
+                  <UserCheck className="h-4 w-4 text-success" />
+                  <h3 className="text-sm font-bold font-poppins text-success">Verified KYC Profile</h3>
                 </div>
-                <div className="space-y-1">
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Contact</p>
-                  <p className="font-semibold text-foreground text-sm">{selectedApp.email}</p>
-                  <p className="text-xs text-muted-foreground">{selectedApp.phone}</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-bold text-success/80 uppercase tracking-wider">Applicant Name</p>
+                    <p className="font-semibold text-foreground text-sm">{selectedApp.full_name}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-bold text-success/80 uppercase tracking-wider">Contact</p>
+                    <p className="font-semibold text-foreground text-sm">{selectedApp.email}</p>
+                    <p className="text-xs text-muted-foreground">{selectedApp.phone}</p>
+                  </div>
                 </div>
-                <div className="space-y-1">
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Employment</p>
-                  <p className="font-semibold text-foreground text-sm">{selectedApp.occupation}</p>
-                  <p className="text-xs text-muted-foreground">{selectedApp.employer}</p>
+              </div>
+
+              {/* Application Details */}
+              <div className="bg-muted/10 p-4 rounded-xl border border-border/50">
+                <div className="flex items-center gap-2 mb-3 border-b border-border/50 pb-2">
+                  <Briefcase className="h-4 w-4 text-primary" />
+                  <h3 className="text-sm font-bold font-poppins text-foreground">Application Details</h3>
                 </div>
-                <div className="space-y-1">
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Income & Biz</p>
-                  <p className="font-semibold text-foreground text-sm">{selectedApp.income_range}</p>
-                  {selectedApp.business_name && <p className="text-xs text-muted-foreground">{selectedApp.business_name}</p>}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Employment</p>
+                    <p className="font-semibold text-foreground text-sm">{selectedApp.occupation}</p>
+                    <p className="text-xs text-muted-foreground">{selectedApp.employer}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Income & Biz</p>
+                    <p className="font-semibold text-foreground text-sm">{selectedApp.income_range}</p>
+                    {selectedApp.business_name && <p className="text-xs text-muted-foreground">{selectedApp.business_name}</p>}
+                  </div>
                 </div>
               </div>
 
               {/* Documents */}
-              <div className="space-y-2 bg-muted/30 p-4 rounded-xl border border-border/50">
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Attached Documents</p>
+              {(selectedApp.id_document_url || selectedApp.utility_bill_url) && (
+                <div className="space-y-2 bg-muted/30 p-4 rounded-xl border border-border/50">
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">KYC Document Snapshot</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {selectedApp.id_document_url && (
                     <a href={selectedApp.id_document_url} target="_blank" rel="noreferrer" className="flex items-center gap-3 p-3 rounded-lg border border-border/50 bg-background hover:bg-muted/50 transition-colors group">
@@ -266,6 +283,7 @@ export default function AdminCheckingApplicationsPage() {
                   )}
                 </div>
               </div>
+              )}
 
               {/* Action Controls */}
               {selectedApp.status !== 'approved' && selectedApp.status !== 'rejected' && (

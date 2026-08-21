@@ -20,6 +20,7 @@ interface TransactionPinDialogProps {
   amount?: number;
   currency?: string;
   isLoading?: boolean;
+  error?: string;
 }
 
 export function TransactionPinDialog({
@@ -31,6 +32,7 @@ export function TransactionPinDialog({
   amount,
   currency = "$",
   isLoading = false,
+  error,
 }: TransactionPinDialogProps) {
   const [pin, setPin] = useState("");
   const { identity } = useBrand();
@@ -74,6 +76,12 @@ export function TransactionPinDialog({
           </div>
         )}
 
+        {error && (
+          <div className="bg-destructive/10 text-destructive text-sm font-semibold p-3 rounded-lg text-center mx-4">
+            {error}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="flex flex-col items-center space-y-8 py-4">
           <div className="relative group">
             <InputOTP 
@@ -90,7 +98,7 @@ export function TransactionPinDialog({
                     index={i} 
                     className="w-14 h-16 text-2xl font-bold border-2 rounded-xl transition-all
                                focus-visible:ring-primary focus-visible:border-primary bg-background" 
-                    style={{ WebkitTextSecurity: "disc" }}
+                    style={{ WebkitTextSecurity: "disc" } as React.CSSProperties}
                   />
                 ))}
               </InputOTPGroup>

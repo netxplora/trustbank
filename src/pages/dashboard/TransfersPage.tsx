@@ -43,6 +43,7 @@ export default function TransfersPage() {
   const [intlForm, setIntlForm] = useState({ fromAccountId: "", toName: "", toAccount: "", swiftCode: "", iban: "", bankName: "", targetCurrency: "EUR", amountUsd: "", narration: "", saveBeneficiary: false });
   
   const [pinDialogOpen, setPinDialogOpen] = useState(false);
+  const [pinError, setPinError] = useState<string | undefined>();
   const [pendingTransfer, setPendingTransfer] = useState<"internal" | "local" | "intl" | null>(null);
 
   useEffect(() => {
@@ -180,6 +181,7 @@ export default function TransfersPage() {
 
   const executeInternal = async (pin: string) => {
     setLoading(true);
+    setPinError(undefined);
     const amount = parseFloat(internalForm.amount);
     const res = await processInternalTransfer({
       userId: user!.id,
@@ -190,19 +192,25 @@ export default function TransfersPage() {
     });
 
     if (!res.success) {
-      toast({ title: "Transfer Failed", description: res.error, variant: "destructive" });
+      if (res.error?.toLowerCase().includes("pin")) {
+        setPinError(res.error);
+      } else {
+        toast({ title: "Transfer Failed", description: res.error, variant: "destructive" });
+        setPinDialogOpen(false);
+      }
     } else {
       toast({ title: "Transfer Successful!", description: `$${amount.toLocaleString()} moved between accounts.` });
       setInternalForm(f => ({ ...f, amount: "" }));
       fetchAccounts();
+      setPinDialogOpen(false);
     }
     
     setLoading(false);
-    setPinDialogOpen(false);
   };
 
   const executeLocal = async (pin: string) => {
     setLoading(true);
+    setPinError(undefined);
     const amount = parseFloat(form.amount);
     const { data, error } = await (supabase.rpc as any)("process_transfer", {
       p_user_id: user?.id,
@@ -215,7 +223,16 @@ export default function TransfersPage() {
       p_pin: pin
     });
 
-    if (error) { toast({ title: "Transfer Failed", description: error.message, variant: "destructive" }); setLoading(false); setPinDialogOpen(false); return; }
+    if (error) { 
+      if (error.message?.toLowerCase().includes("pin")) {
+        setPinError(error.message);
+      } else {
+        toast({ title: "Transfer Failed", description: error.message, variant: "destructive" }); 
+        setPinDialogOpen(false); 
+      }
+      setLoading(false); 
+      return; 
+    }
 
     toast({ title: "Transfer Successful!", description: `$${amount.toLocaleString()} sent successfully.` });
     
@@ -239,8 +256,9 @@ export default function TransfersPage() {
     fetchAccounts();
   };
 
-  const executeIntl = async (pin: string) => {
+    const executeIntl = async (pin: string) => {
     setLoading(true);
+    setPinError(undefined);
     const amountUsd = parseFloat(intlForm.amountUsd);
     const selectedCurrency = CURRENCIES.find(c => c.code === intlForm.targetCurrency) || CURRENCIES[0];
     const destinationAmount = amountUsd * selectedCurrency.rate;
@@ -252,7 +270,16 @@ export default function TransfersPage() {
       p_pin: pin
     });
 
-    if (error) { toast({ title: "Wire Failed", description: error.message, variant: "destructive" }); setLoading(false); setPinDialogOpen(false); return; }
+    if (error) { 
+      if (error.message?.toLowerCase().includes("pin")) {
+        setPinError(error.message);
+      } else {
+        toast({ title: "Wire Failed", description: error.message, variant: "destructive" }); 
+        setPinDialogOpen(false); 
+      }
+      setLoading(false); 
+      return; 
+    }
 
     toast({ title: "SWIFT Wire Initiated!", description: `$${amountUsd.toLocaleString()} sent successfully. Reference: ${data?.reference}` });
     
@@ -586,15 +613,17 @@ export default function TransfersPage() {
       
       <TransactionPinDialog
         isOpen={pinDialogOpen}
-        onClose={() => { setPinDialogOpen(false); setPendingTransfer(null); }}
+        onClose={() => { setPinDialogOpen(false); setPinError(undefined); setPendingTransfer(null); }}
         onConfirm={executeTransfer}
         amount={pendingTransfer === "internal" ? parseFloat(internalForm.amount) : (pendingTransfer === "local" ? parseFloat(form.amount) : parseFloat(intlForm.amountUsd))}
-        isLoading={loading}
+        title="Confirm Transfer"
         description={
           pendingTransfer === "internal" 
             ? "You are about to transfer funds between your own accounts."
             : `You are about to transfer funds to ${pendingTransfer === "local" ? (form.toName || form.toAccount) : intlForm.toName}.`
         }
+        error={pinError}
+        isLoading={loading}
       />
     </div>
   );

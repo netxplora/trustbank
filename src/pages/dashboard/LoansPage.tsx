@@ -64,6 +64,7 @@ const LoansPage = () => {
 
   // PIN State
   const [pinDialogOpen, setPinDialogOpen] = useState(false);
+  const [pinError, setPinError] = useState<string | undefined>();
   const [pendingAction, setPendingAction] = useState<"repay" | "payAll" | null>(null);
 
   const calculateAmortization = (principal: number, months: number, annualRate: number) => {
@@ -200,6 +201,7 @@ const LoansPage = () => {
 
   const executeRepayment = async (pin: string) => {
     setRepayLoading(true);
+    setPinError(undefined);
     const amount = parseFloat(repayAmount);
     try {
       const { data, error } = await supabase.rpc('process_loan_repayment', {
@@ -224,8 +226,12 @@ const LoansPage = () => {
       setPendingAction(null);
       fetchLoans();
     } catch (err: any) {
-      toast({ title: "Repayment Failed", description: err?.message || "Could not process repayment.", variant: "destructive" });
-      setPinDialogOpen(false);
+      if (err?.message?.toLowerCase().includes("pin")) {
+        setPinError(err.message);
+      } else {
+        toast({ title: "Repayment Failed", description: err?.message || "Could not process repayment.", variant: "destructive" });
+        setPinDialogOpen(false);
+      }
     } finally {
       setRepayLoading(false);
     }
@@ -233,6 +239,7 @@ const LoansPage = () => {
 
   const executePayAllDebt = async (pin: string) => {
     setPayAllLoading(true);
+    setPinError(undefined);
     try {
       const { data, error } = await supabase.rpc('clear_all_debt', { p_pin: pin });
 
@@ -247,8 +254,12 @@ const LoansPage = () => {
       setPendingAction(null);
       fetchLoans();
     } catch (err: any) {
-      toast({ title: "Clearance Failed", description: err?.message || "Could not process full debt clearance.", variant: "destructive" });
-      setPinDialogOpen(false);
+      if (err?.message?.toLowerCase().includes("pin")) {
+        setPinError(err.message);
+      } else {
+        toast({ title: "Clearance Failed", description: err?.message || "Could not process full debt clearance.", variant: "destructive" });
+        setPinDialogOpen(false);
+      }
     } finally {
       setPayAllLoading(false);
     }
@@ -655,7 +666,7 @@ const LoansPage = () => {
 
       <TransactionPinDialog
         isOpen={pinDialogOpen}
-        onClose={() => { setPinDialogOpen(false); setPendingAction(null); }}
+        onClose={() => { setPinDialogOpen(false); setPinError(undefined); setPendingAction(null); }}
         onConfirm={executeAction}
         amount={pendingAction === "repay" ? parseFloat(repayAmount) : totalOutstanding}
         isLoading={repayLoading || payAllLoading}

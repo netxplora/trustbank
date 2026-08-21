@@ -387,6 +387,7 @@ const CardsPage = () => {
   
   // PIN State
   const [pinDialogOpen, setPinDialogOpen] = useState(false);
+  const [pinError, setPinError] = useState<string | undefined>();
   const [pendingRequest, setPendingRequest] = useState<any>(null);
   const [baseFee, setBaseFee] = useState<number>(15);
   const [cardCategory, setCardCategory] = useState<"physical" | "virtual">("physical");
@@ -595,6 +596,8 @@ const CardsPage = () => {
 
   const executeRequestCard = async (pin: string) => {
     if (!user || !pendingRequest) return;
+    setLoading(true);
+    setPinError(undefined);
     const { isVirtual, isInfinite, currentFee, deliveryAddress, holderName, primaryAccountId, type } = pendingRequest;
 
     const provisionResult = await provisionCard({
@@ -619,8 +622,13 @@ const CardsPage = () => {
         p_card_type: type
       });
       if (rpcError) {
-        toast({ title: "Transaction Failed", description: rpcError.message, variant: "destructive" });
-        setPinDialogOpen(false);
+        if (rpcError.message?.toLowerCase().includes("pin")) {
+          setPinError(rpcError.message);
+        } else {
+          toast({ title: "Transaction Failed", description: rpcError.message, variant: "destructive" });
+          setPinDialogOpen(false);
+        }
+        setLoading(false);
         return;
       }
     }
@@ -643,6 +651,7 @@ const CardsPage = () => {
     if (error) {
       toast({ title: "Card Creation Failed", description: error.message, variant: "destructive" });
       setPinDialogOpen(false);
+      setLoading(false);
       return;
     }
 
@@ -650,6 +659,7 @@ const CardsPage = () => {
     setShowRequest(false);
     setPinDialogOpen(false);
     setPendingRequest(null);
+    setLoading(false);
     fetchCards();
   };
 
@@ -953,10 +963,12 @@ const CardsPage = () => {
       
       <TransactionPinDialog
         isOpen={pinDialogOpen}
-        onClose={() => { setPinDialogOpen(false); setPendingRequest(null); }}
+        onClose={() => { setPinDialogOpen(false); setPinError(undefined); setPendingRequest(null); }}
         onConfirm={executeRequestCard}
         amount={pendingRequest?.currentFee || undefined}
-        description={`You are about to authorize a new card issuance.`}
+        description="Enter your 4-digit PIN to securely authorize this card request."
+        error={pinError}
+        isLoading={loading}
       />
     </div>
   );

@@ -153,6 +153,7 @@ export default function InvestmentsPage() {
 
   // PIN State
   const [pinDialogOpen, setPinDialogOpen] = useState(false);
+  const [pinError, setPinError] = useState<string | undefined>();
   const [pendingAction, setPendingAction] = useState<"trade" | "fund" | null>(null);
   const [downloadingPdf, setDownloadingPdf] = useState(false);
 
@@ -356,6 +357,8 @@ export default function InvestmentsPage() {
 
   const executeTrade = async (pin: string) => {
     if (!user || !selectedAccount || !orderStock) return;
+    setLoading(true);
+    setPinError(undefined);
     const qty = parseFloat(orderQty);
     const price = livePrices[orderStock.symbol] || orderStock.current_price;
 
@@ -382,8 +385,14 @@ export default function InvestmentsPage() {
       fetchAccountData(selectedAccount.id);
       fetchData();
     } catch (e: any) {
-      toast({ title: "Order Failed", description: e.message, variant: "destructive" });
-      setPinDialogOpen(false);
+      if (e?.message?.toLowerCase().includes("pin")) {
+        setPinError(e.message);
+      } else {
+        toast({ title: "Order Failed", description: e.message, variant: "destructive" });
+        setPinDialogOpen(false);
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -415,6 +424,8 @@ export default function InvestmentsPage() {
 
   const executeFundAccount = async (pin: string) => {
     if (!user || !selectedAccount || !selectedCheckingId) return;
+    setLoading(true);
+    setPinError(undefined);
     const amount = parseFloat(fundAmount);
 
     try {
@@ -434,8 +445,14 @@ export default function InvestmentsPage() {
       fetchData();
       if (selectedAccount) fetchAccountData(selectedAccount.id);
     } catch (e: any) {
-      toast({ title: "Funding Error", description: e.message, variant: "destructive" });
-      setPinDialogOpen(false);
+      if (e?.message?.toLowerCase().includes("pin")) {
+        setPinError(e.message);
+      } else {
+        toast({ title: "Funding Error", description: e.message, variant: "destructive" });
+        setPinDialogOpen(false);
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -1335,14 +1352,16 @@ export default function InvestmentsPage() {
       
       <TransactionPinDialog
         isOpen={pinDialogOpen}
-        onClose={() => { setPinDialogOpen(false); setPendingAction(null); }}
+        onClose={() => { setPinDialogOpen(false); setPinError(undefined); setPendingAction(null); }}
         onConfirm={executeAction}
         amount={pendingAction === "fund" ? parseFloat(fundAmount) : (orderStock ? (livePrices[orderStock.symbol] || orderStock.current_price) * parseFloat(orderQty) : 0)}
         description={
-          pendingAction === "fund" 
-            ? "You are about to fund your brokerage account."
-            : `You are about to execute a ${orderSide?.toUpperCase()} order for ${orderQty} shares of ${orderStock?.symbol}.`
+          pendingAction === "trade"
+            ? `You are about to authorize a trade for ${orderQty || 0} shares of ${orderStock?.symbol}.`
+            : "You are about to transfer funds into your brokerage account."
         }
+        error={pinError}
+        isLoading={loading}
       />
     </div>
   );
